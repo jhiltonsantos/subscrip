@@ -1,65 +1,128 @@
-import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CreditCard, DollarSign, TrendingUp, CalendarDays } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
-export default function Home() {
+// Helper para formatar moeda
+const formatCurrency = (value: number, currency: string) => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: currency,
+  }).format(value);
+};
+
+export const revalidate = 0; // Desabilita cache estático para dados real-time (Dynamic Rendering)
+
+export default async function Home() {
+  // 1. Fetch de dados direto no servidor (Server Component)
+  // Isso roda no Node.js, não no Browser.
+  const subscriptions = await prisma.subscription.findMany({
+    orderBy: { nextBillingDate: 'asc' }
+  });
+
+  // 2. Cálculos simples (Business Logic no Server)
+  // Num cenário real, isso poderia vir de um Service ou Query raw
+  const totalMonthlySpend = subscriptions.reduce((acc, sub) => {
+    // Simplificação: Convertendo USD fixo x6 para MVP. 
+    // Na entrevista, mencione que aqui entraria o serviço de câmbio.
+    const multiplier = sub.currency === 'USD' ? 6 : 1; 
+    const price = Number(sub.price) * multiplier;
+    
+    // Se for anual, divide por 12 para achar o mensal
+    return acc + (sub.billingCycle === 'YEARLY' ? price / 12 : price);
+  }, 0);
+
+  const activeCount = subscriptions.filter(s => s.active).length;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex-1 space-y-4 p-8 pt-6">
+      <div className="flex items-center justify-between space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <div className="flex items-center space-x-2">
+          {/* Este botão abrirá nosso modal com Redux amanhã */}
+          <Button>Nova Assinatura</Button>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </div>
+      
+      {/* Cards de Métricas */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Gasto Mensal (Est.)</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(totalMonthlySpend, 'BRL')}</div>
+            <p className="text-xs text-muted-foreground">Conversão base: USD 1 = R$ 6</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Assinaturas Ativas</CardTitle>
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{activeCount}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Próxima Fatura</CardTitle>
+            <CalendarDays className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {subscriptions[0] 
+                ? format(subscriptions[0].nextBillingDate, 'dd/MM') 
+                : '--'}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {subscriptions[0]?.name || 'Nenhuma'}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Tabela de Assinaturas */}
+      <div className="grid gap-4 md:grid-cols-1">
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle>Suas Assinaturas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {subscriptions.map((sub) => (
+                <div key={sub.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                  <div className="flex flex-col">
+                    <span className="font-medium">{sub.name}</span>
+                    <span className="text-xs text-muted-foreground capitalize">
+                      {sub.category.toLowerCase()} • {sub.billingCycle.toLowerCase()}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="font-bold">
+                        {formatCurrency(Number(sub.price), sub.currency)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Vence: {format(sub.nextBillingDate, "dd 'de' MMMM", { locale: ptBR })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {subscriptions.length === 0 && (
+                <p className="text-sm text-muted-foreground">Nenhuma assinatura encontrada.</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
