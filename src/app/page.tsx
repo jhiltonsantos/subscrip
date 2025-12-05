@@ -4,33 +4,19 @@ import { CreditCard, DollarSign, TrendingUp, CalendarDays } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { formatCurrency } from "@/utils/currency";
 
-// Helper para formatar moeda
-const formatCurrency = (value: number, currency: string) => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: currency,
-  }).format(value);
-};
-
-export const revalidate = 0; // Desabilita cache estático para dados real-time (Dynamic Rendering)
+export const revalidate = 0; // Disable static caching for real-time data (Dynamic Rendering)
 
 export default async function Home() {
-  // 1. Fetch de dados direto no servidor (Server Component)
-  // Isso roda no Node.js, não no Browser.
   const subscriptions = await prisma.subscription.findMany({
     orderBy: { nextBillingDate: 'asc' }
   });
 
-  // 2. Cálculos simples (Business Logic no Server)
-  // Num cenário real, isso poderia vir de um Service ou Query raw
   const totalMonthlySpend = subscriptions.reduce((acc, sub) => {
-    // Simplificação: Convertendo USD fixo x6 para MVP. 
-    // Na entrevista, mencione que aqui entraria o serviço de câmbio.
     const multiplier = sub.currency === 'USD' ? 6 : 1; 
     const price = Number(sub.price) * multiplier;
     
-    // Se for anual, divide por 12 para achar o mensal
     return acc + (sub.billingCycle === 'YEARLY' ? price / 12 : price);
   }, 0);
 
@@ -41,12 +27,10 @@ export default async function Home() {
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         <div className="flex items-center space-x-2">
-          {/* Este botão abrirá nosso modal com Redux amanhã */}
           <Button>Nova Assinatura</Button>
         </div>
       </div>
       
-      {/* Cards de Métricas */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -87,7 +71,6 @@ export default async function Home() {
         </Card>
       </div>
 
-      {/* Tabela de Assinaturas */}
       <div className="grid gap-4 md:grid-cols-1">
         <Card className="col-span-1">
           <CardHeader>
