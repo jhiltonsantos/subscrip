@@ -1,1 +1,22 @@
+# Next dev/build outputs
+.output
+dist
+
+# Node dependencies
 node_modules
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+.idea
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+
+/src/generated/prisma

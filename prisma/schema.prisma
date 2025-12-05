@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Currency {
+  BRL
+  USD
+  EUR
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+  WEEKLY
+}
+
+enum Category {
+  INFRASTRUCTURE 
+  ENTERTAINMENT 
+  EDUCATION      
+  TOOLS          
+}
+
+model Subscription {
+  id              String       @id @default(uuid())
+  name            String
+  
+  price           Decimal      @db.Decimal(10, 2)
+  currency        Currency     @default(BRL)
+  
+  billingCycle    BillingCycle
+  category        Category
+  
+  startDate       DateTime
+  nextBillingDate DateTime
+  
+  active          Boolean      @default(true)
+  
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  @@index([nextBillingDate])
+  @@index([active])
+}
