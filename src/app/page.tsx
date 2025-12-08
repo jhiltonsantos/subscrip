@@ -1,111 +1,32 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CreditCard, DollarSign, TrendingUp, CalendarDays } from "lucide-react";
-import { prisma } from "@/lib/prisma";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { formatCurrency } from "@/utils/currency";
+import Link from "next/link";
 
-export const revalidate = 0; // Disable static caching for real-time data (Dynamic Rendering)
-
-export default async function Home() {
-  const subscriptions = await prisma.subscription.findMany({
-    orderBy: { nextBillingDate: 'asc' }
-  });
-
-  const totalMonthlySpend = subscriptions.reduce((acc, sub) => {
-    const multiplier = sub.currency === 'USD' ? 6 : 1; 
-    const price = Number(sub.price) * multiplier;
-    
-    return acc + (sub.billingCycle === 'YEARLY' ? price / 12 : price);
-  }, 0);
-
-  const activeCount = subscriptions.filter(s => s.active).length;
-
+export default function LandingPage() {
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <div className="flex items-center space-x-2">
-          <Button>Nova Assinatura</Button>
+    <div className="flex flex-col min-h-screen">
+      <header className="flex items-center justify-between px-6 py-4 border-b">
+        <h1 className="text-xl font-bold">Subscrip</h1>
+        <div className="flex gap-4">
+            <Button asChild variant="ghost">
+              <Link href="/login">Entrar</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/login">Começar Agora</Link>
+            </Button>
         </div>
-      </div>
-      
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Gasto Mensal (Est.)</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalMonthlySpend, 'BRL')}</div>
-            <p className="text-xs text-muted-foreground">Conversão base: USD 1 = R$ 6</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Assinaturas Ativas</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{activeCount}</div>
-          </CardContent>
-        </Card>
+      </header>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Próxima Fatura</CardTitle>
-            <CalendarDays className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {subscriptions[0] 
-                ? format(subscriptions[0].nextBillingDate, 'dd/MM') 
-                : '--'}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {subscriptions[0]?.name || 'Nenhuma'}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-1">
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Suas Assinaturas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {subscriptions.map((sub) => (
-                <div key={sub.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                  <div className="flex flex-col">
-                    <span className="font-medium">{sub.name}</span>
-                    <span className="text-xs text-muted-foreground capitalize">
-                      {sub.category.toLowerCase()} • {sub.billingCycle.toLowerCase()}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <div className="font-bold">
-                        {formatCurrency(Number(sub.price), sub.currency)}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Vence: {format(sub.nextBillingDate, "dd 'de' MMMM", { locale: ptBR })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              
-              {subscriptions.length === 0 && (
-                <p className="text-sm text-muted-foreground">Nenhuma assinatura encontrada.</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <main className="flex-1 flex flex-col items-center justify-center space-y-8 p-8 text-center bg-gray-50">
+        <h2 className="text-5xl font-bold tracking-tight text-gray-900">
+          Controle suas assinaturas <br/> em um só lugar.
+        </h2>
+        <p className="text-lg text-muted-foreground max-w-2xl">
+          Pare de perder dinheiro com renovações esquecidas. O Subscrip te avisa antes da fatura chegar.
+        </p>
+        <Button asChild size="lg" className="h-12 px-8 text-lg">
+          <Link href="/login">Criar Conta Grátis</Link>
+        </Button>
+      </main>
     </div>
   );
 }
