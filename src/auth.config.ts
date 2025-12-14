@@ -2,14 +2,14 @@ import type { NextAuthConfig } from "next-auth"
 
 export const authConfig = {
   pages: {
-    signIn: '/login',
-    verifyRequest: '/login/verify',
+    signIn: '/auth/login',
+    verifyRequest: '/auth/login/verify',
     error: '/error'
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user
-      const isAuthRoute = nextUrl.pathname.startsWith('/login')
+      const isAuthRoute = nextUrl.pathname.startsWith('/auth/login')
       const isApiAuthRoute = nextUrl.pathname.startsWith('/api/auth')
       const isDashboardRoute = nextUrl.pathname.startsWith('/dashboard')
       const isPublicRoute = nextUrl.pathname === '/'
@@ -29,13 +29,13 @@ export const authConfig = {
           callbackUrl += nextUrl.search
         }
         const encodedCallbackUrl = encodeURIComponent(callbackUrl)
-        return Response.redirect(new URL(`/login?callbackUrl=${encodedCallbackUrl}`, nextUrl))
+        return Response.redirect(new URL(`/auth/login?callbackUrl=${encodedCallbackUrl}`, nextUrl))
       }
 
       if (isPublicRoute) return true
 
       if (!isLoggedIn) {
-        return Response.redirect(new URL('/login', nextUrl))
+        return Response.redirect(new URL('/auth/login', nextUrl))
       }
 
       return true

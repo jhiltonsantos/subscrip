@@ -8,10 +8,10 @@ export default function LandingPage() {
         <h1 className="text-xl font-bold">Subscrip</h1>
         <div className="flex gap-4">
             <Button asChild variant="ghost">
-              <Link href="/login">Entrar</Link>
+              <Link href="/auth/login">Entrar</Link>
             </Button>
             <Button asChild>
-              <Link href="/login">Começar Agora</Link>
+              <Link href="/auth/register">Começar Agora</Link>
             </Button>
         </div>
       </header>
@@ -24,7 +24,7 @@ export default function LandingPage() {
           Pare de perder dinheiro com renovações esquecidas. O Subscrip te avisa antes da fatura chegar.
         </p>
         <Button asChild size="lg" className="h-12 px-8 text-lg">
-          <Link href="/login">Criar Conta Grátis</Link>
+          <Link href="/auth/register">Criar Conta Grátis</Link>
         </Button>
       </main>
     </div>

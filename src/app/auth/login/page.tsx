@@ -4,7 +4,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { login } from "@/server/actions/auth" 
 import { Mail } from "lucide-react"
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams
+}: {
+  searchParams?: { error?: string; email?: string }
+}) {
+  const [searchParamsData] = await Promise.all([searchParams])
+  const error = searchParamsData?.error ? searchParamsData.error : ""
+  const email = searchParamsData?.email ? searchParamsData.email : ""
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-[380px] shadow-lg">
@@ -14,10 +22,15 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-2xl font-bold">Acessar Subscrip</CardTitle>
           <CardDescription>
-            Digite seu email para receber um Magic Link de acesso imediato.
+            Faça login com seu email. Se você ainda não tem conta, crie uma em /auth/register.
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {error === "user_not_found" && (
+            <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              Usuário não encontrado. Crie sua conta antes de tentar fazer login.
+            </div>
+          )}
           <form action={login} className="space-y-4">
             <div className="space-y-2">
               <Input 
@@ -25,6 +38,7 @@ export default function LoginPage() {
                 type="email" 
                 placeholder="exemplo@email.com" 
                 required 
+                defaultValue={email}
                 className="h-11"
               />
             </div>
