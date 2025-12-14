@@ -46,10 +46,6 @@ export default async function LoginPage({
             <Button className="w-full h-11 text-base font-medium" type="submit">
               Enviar Link de Acesso
             </Button>
-            
-            <p className="text-xs text-center text-muted-foreground px-4">
-              Ao continuar, você concorda com nossos Termos de Serviço e Política de Privacidade.
-            </p>
           </form>
         </CardContent>
       </Card>
