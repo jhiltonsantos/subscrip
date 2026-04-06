@@ -2,10 +2,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Neon PostgreSQL (via Vercel Marketplace)
 datasource db {
   provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  url       = env("DATABASE_URL")  // Pooled connection
+  directUrl = env("DIRECT_URL")    // Direct connection (migrations)
 }
 
 enum Currency {
