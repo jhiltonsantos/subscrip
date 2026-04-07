@@ -1,15 +1,28 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CreditCard, DollarSign, CalendarDays } from "lucide-react"
+import { CreditCard, DollarSign, CalendarDays, LogOut } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { formatCurrency } from "@/lib/utils/formatters"
+import { auth } from "@/lib/auth"
+import { headers } from "next/headers"
+import { redirect } from "next/navigation"
+import { signOut } from "@/server/actions/auth"
 
 export const revalidate = 0
 
 export default async function Dashboard() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
+
+  if (!session) {
+    redirect("/auth/login")
+  }
+
   const subscriptions = await prisma.subscription.findMany({
+    where: { userId: session.user.id },
     orderBy: { nextBillingDate: 'asc' }
   });
 
@@ -25,9 +38,17 @@ export default async function Dashboard() {
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          <p className="text-muted-foreground">Olá, {session.user.name || session.user.email}</p>
+        </div>
         <div className="flex items-center space-x-2">
           <Button>Nova Assinatura</Button>
+          <form action={signOut}>
+            <Button variant="outline" size="icon" type="submit">
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </form>
         </div>
       </div>
       
