@@ -219,7 +219,128 @@ The design uses an **Emerald green** palette, conveying **financial control**, *
 
 ---
 
-## 📄 License
+## � Project Structure
+
+```
+src/
+├── app/                                    # App Router (Next.js 16)
+│   ├── layout.tsx                          # Root Layout (providers, fonts)
+│   ├── globals.css                         # Global styles
+│   │
+│   ├── (landing)/                          # Route Group: Landing pages
+│   │   ├── layout.tsx                      # → LandingLayout
+│   │   └── page.tsx                        # → URL: /
+│   │
+│   ├── (auth)/                             # Route Group: Authentication
+│   │   ├── layout.tsx                      # → AuthLayout
+│   │   └── auth/
+│   │       ├── login/page.tsx              # → URL: /auth/login
+│   │       └── register/page.tsx           # → URL: /auth/register
+│   │
+│   ├── (platform)/                         # Route Group: Authenticated platform
+│   │   ├── layout.tsx                      # Server: session check
+│   │   ├── layout-client.tsx               # Client: PlatformLayout wrapper
+│   │   └── dashboard/page.tsx              # → URL: /dashboard
+│   │
+│   └── api/auth/[...all]/route.ts          # Better Auth API handler
+│
+├── components/
+│   ├── layouts/                            # Reusable layout components
+│   │   ├── index.ts                        # Exports
+│   │   ├── landing-layout.tsx              # Public header + children
+│   │   ├── auth-layout.tsx                 # Minimal header + background
+│   │   └── platform-layout.tsx             # Authenticated header + sidebar
+│   ├── ui/                                 # shadcn/ui components
+│   ├── locale-link.tsx                     # Link with locale support
+│   └── locale-switcher.tsx                 # Language selector
+│
+├── lib/
+│   ├── proxy/                              # Modular proxy logic
+│   │   ├── index.ts                        # Exports
+│   │   ├── auth.ts                         # Authentication logic
+│   │   └── i18n.ts                         # Internationalization logic
+│   │
+│   ├── i18n/                               # next-intl configuration
+│   │   ├── config.ts                       # Locales config (en, pt)
+│   │   ├── request.ts                      # getRequestConfig
+│   │   └── server-translations.ts          # Server-side translation helper
+│   │
+│   ├── utils/
+│   │   ├── helpers.ts                      # cn(), etc.
+│   │   └── formatters.ts                   # formatCurrency(), etc.
+│   │
+│   ├── auth.ts                             # Better Auth server config
+│   ├── auth-client.ts                      # Better Auth client
+│   └── prisma.ts                           # Prisma client
+│
+├── server/
+│   └── actions/
+│       └── auth.ts                         # Server actions (signOut, getSession)
+│
+├── translations/
+│   ├── client/                             # UI translations (next-intl)
+│   │   ├── en.json
+│   │   └── pt.json
+│   └── server/                             # Server-only translations (emails)
+│       ├── en.json
+│       └── pt.json
+│
+└── proxy.ts                                # Proxy entry point
+```
+
+### Route Groups
+
+Next.js App Router uses **Route Groups** `(name)` to organize routes without affecting URLs:
+
+| Route Group | Purpose | Layout |
+|---|---|---|
+| `(landing)` | Public landing pages | `LandingLayout` |
+| `(auth)` | Authentication pages (login, register) | `AuthLayout` |
+| `(platform)` | Authenticated platform pages | `PlatformLayout` |
+
+### Proxy vs Middleware
+
+This project uses `proxy.ts` instead of `middleware.ts`:
+
+| Aspect | `middleware.ts` | `proxy.ts` |
+|---|---|---|
+| **Runtime** | Edge Runtime (limited) | Node.js Runtime (full) |
+| **Location** | `src/middleware.ts` | `src/proxy.ts` (Next.js 16+) |
+| **API Access** | Limited (no fs, prisma) | Full (any Node.js lib) |
+| **Recommended for** | Simple redirects | Complex auth, i18n |
+
+### Proxy Flow
+
+```
+Request → proxy.ts
+              │
+              ├─→ 1. stripLocalePrefix()     [lib/proxy/i18n.ts]
+              │       Extract locale from URL (/pt/dashboard → pt)
+              │
+              ├─→ 2. Skip /api/*
+              │
+              ├─→ 3. checkAuth()             [lib/proxy/auth.ts]
+              │       Check session and return action
+              │       → redirect to /dashboard (if logged in on /auth/*)
+              │       → redirect to /auth/login (if not logged in on protected route)
+              │       → next (continue)
+              │
+              └─→ 4. handleLocaleRewrite()   [lib/proxy/i18n.ts]
+                      Rewrite /pt/* → /* with x-locale header
+                      Set NEXT_LOCALE cookie
+```
+
+### Internationalization (i18n)
+
+URLs follow the pattern:
+- **English (default):** `/dashboard`, `/auth/login`
+- **Portuguese:** `/pt/dashboard`, `/pt/auth/login`
+
+The proxy rewrites `/pt/*` routes internally while setting the locale via cookie and header.
+
+---
+
+## �📄 License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
