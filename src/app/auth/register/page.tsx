@@ -78,19 +78,19 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-[420px] shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-emerald-50 via-background to-emerald-100/50 dark:from-emerald-950/30 dark:via-background dark:to-emerald-900/20 p-4">
+      <Card className="w-full max-w-[420px]">
         <CardHeader className="text-center space-y-2">
-          <div className="mx-auto bg-primary/10 w-12 h-12 flex items-center justify-center rounded-full mb-2">
-            <UserPlus className="w-6 h-6 text-primary" />
+          <div className="mx-auto bg-emerald-100 dark:bg-emerald-900/50 w-14 h-14 flex items-center justify-center rounded-full mb-2">
+            <UserPlus className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
           </div>
           <CardTitle className="text-2xl font-bold">
-            {step === "form" ? "Criar conta" : "Digite o código"}
+            {step === "form" ? "Create account" : "Enter the code"}
           </CardTitle>
           <CardDescription>
             {step === "form"
-              ? "Preencha seus dados para criar seu acesso."
-              : `Enviamos um código de 6 dígitos para ${email}`
+              ? "Fill in your details to create your account."
+              : `We sent a 6-digit code to ${email}`
             }
           </CardDescription>
         </CardHeader>
@@ -105,7 +105,7 @@ export default function RegisterPage() {
             <form onSubmit={handleSendOTP} className="space-y-4">
               <Input
                 type="text"
-                placeholder="Seu nome"
+                placeholder="Your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isLoading}
@@ -114,7 +114,7 @@ export default function RegisterPage() {
 
               <Input
                 type="email"
-                placeholder="exemplo@email.com"
+                placeholder="example@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -130,21 +130,21 @@ export default function RegisterPage() {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Enviando...
+                    Sending...
                   </>
                 ) : (
-                  "Criar conta"
+                  "Create account"
                 )}
               </Button>
 
               <p className="text-xs text-center text-muted-foreground px-4">
-                Ao continuar, você concorda com nossos Termos de Serviço e Política de Privacidade.
+                By continuing, you agree to our Terms of Service and Privacy Policy.
               </p>
 
               <p className="text-sm text-center text-muted-foreground">
-                Já tem conta?{" "}
+                Already have an account?{" "}
                 <Link href="/auth/login" className="text-primary hover:underline">
-                  Fazer login
+                  Sign in
                 </Link>
               </p>
             </form>
@@ -165,10 +165,10 @@ export default function RegisterPage() {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Verificando...
+                    Verifying...
                   </>
                 ) : (
-                  "Verificar e criar conta"
+                  "Verify and create account"
                 )}
               </Button>
 
@@ -179,7 +179,7 @@ export default function RegisterPage() {
                   className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center justify-center gap-1"
                 >
                   <ArrowLeft className="h-3 w-3" />
-                  Voltar e editar dados
+                  Back and edit details
                 </button>
                 <button
                   type="button"
@@ -187,7 +187,7 @@ export default function RegisterPage() {
                   disabled={isLoading}
                   className="text-sm text-primary hover:underline disabled:opacity-50"
                 >
-                  Reenviar código
+                  Resend code
                 </button>
               </div>
             </form>

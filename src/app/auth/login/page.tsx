@@ -76,11 +76,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-[400px] shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-emerald-50 via-background to-emerald-100/50 dark:from-emerald-950/30 dark:via-background dark:to-emerald-900/20 p-4">
+      <Card className="w-full max-w-[400px]">
         <CardHeader className="text-center space-y-2">
-          <div className="mx-auto bg-primary/10 w-12 h-12 flex items-center justify-center rounded-full mb-2">
-            <Mail className="w-6 h-6 text-primary" />
+          <div className="mx-auto bg-emerald-100 dark:bg-emerald-900/50 w-14 h-14 flex items-center justify-center rounded-full mb-2">
+            <Mail className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
           </div>
           <CardTitle className="text-2xl font-bold">
             {step === "email" ? "Access Subscrip" : "Enter the code"}
@@ -103,7 +103,7 @@ export default function LoginPage() {
             <form onSubmit={handleSendOTP} className="space-y-4">
               <Input
                 type="email"
-                placeholder="exemplo@email.com"
+                placeholder="example@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

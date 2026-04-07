@@ -36,71 +36,87 @@ export default async function Dashboard() {
   const activeCount = subscriptions.filter(s => s.active).length
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-          <p className="text-muted-foreground">Olá, {session.user.name || session.user.email}</p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button>Nova Assinatura</Button>
-          <form action={signOut}>
-            <Button variant="outline" size="icon" type="submit">
-              <LogOut className="h-4 w-4" />
+    <div className="min-h-screen bg-linear-to-br from-emerald-50/50 via-background to-emerald-100/30 dark:from-emerald-950/20 dark:via-background dark:to-emerald-900/10">
+      <div className="flex-1 space-y-6 p-8 pt-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+            <p className="text-muted-foreground">Hello, {session.user.name || session.user.email}</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button className="bg-gradient-primary hover:opacity-90 transition-opacity">
+              New Subscription
             </Button>
-          </form>
+            <form action={signOut}>
+              <Button variant="outline" size="icon" type="submit" className="glass-subtle">
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </form>
+          </div>
         </div>
-      </div>
-      
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Gasto Mensal (Est.)</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalMonthlySpend, 'BRL')}</div>
-            <p className="text-xs text-muted-foreground">Conversão base: USD 1 = R$ 6</p>
-          </CardContent>
-        </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Assinaturas Ativas</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{activeCount}</div>
-          </CardContent>
-        </Card>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Monthly Spend (Est.)</CardTitle>
+              <div className="h-8 w-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                {formatCurrency(totalMonthlySpend, 'BRL')}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Base: USD 1 = R$ 6</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Subscriptions</CardTitle>
+              <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                <CreditCard className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{activeCount}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {activeCount === 1 ? 'subscription' : 'subscriptions'} active
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Next Payment</CardTitle>
+              <div className="h-8 w-8 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
+                <CalendarDays className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {subscriptions[0] 
+                  ? format(subscriptions[0].nextBillingDate, 'dd/MM') 
+                  : '--'}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {subscriptions[0]?.name || 'No upcoming'}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Próxima Fatura</CardTitle>
-            <CalendarDays className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {subscriptions[0] 
-                ? format(subscriptions[0].nextBillingDate, 'dd/MM') 
-                : '--'}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {subscriptions[0]?.name || 'Nenhuma'}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-1">
-        <Card className="col-span-1">
           <CardHeader>
-            <CardTitle>Suas Assinaturas</CardTitle>
+            <CardTitle>Your Subscriptions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {subscriptions.map((sub) => (
-                <div key={sub.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                <div 
+                  key={sub.id} 
+                  className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+                >
                   <div className="flex flex-col">
                     <span className="font-medium">{sub.name}</span>
                     <span className="text-xs text-muted-foreground capitalize">
@@ -109,11 +125,11 @@ export default async function Dashboard() {
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <div className="font-bold">
+                      <div className="font-bold text-emerald-600 dark:text-emerald-400">
                         {formatCurrency(Number(sub.price), sub.currency)}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Vence: {format(sub.nextBillingDate, "dd 'de' MMMM", { locale: ptBR })}
+                        Due: {format(sub.nextBillingDate, "dd 'de' MMMM", { locale: ptBR })}
                       </div>
                     </div>
                   </div>
@@ -121,7 +137,12 @@ export default async function Dashboard() {
               ))}
               
               {subscriptions.length === 0 && (
-                <p className="text-sm text-muted-foreground">Nenhuma assinatura encontrada.</p>
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No subscriptions found.</p>
+                  <Button variant="link" className="text-primary mt-2">
+                    Add your first subscription
+                  </Button>
+                </div>
               )}
             </div>
           </CardContent>
