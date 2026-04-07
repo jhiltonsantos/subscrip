@@ -7,14 +7,17 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { InputOTP } from "@/components/ui/input-otp"
 import { authClient } from "@/lib/auth-client"
-import { Mail, Loader2, ArrowLeft } from "lucide-react"
-import Link from "next/link"
+import { UserPlus, Loader2, ArrowLeft } from "lucide-react"
+import { LocaleLink } from "@/components/locale-link"
+import { useTranslations } from "next-intl"
 
-type Step = "email" | "otp"
+type Step = "form" | "otp"
 
-export default function LoginPage() {
+export default function RegisterPage() {
+  const t = useTranslations("auth.register")
   const router = useRouter()
-  const [step, setStep] = useState<Step>("email")
+  const [step, setStep] = useState<Step>("form")
+  const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [otp, setOtp] = useState("")
   const [error, setError] = useState("")
@@ -32,13 +35,13 @@ export default function LoginPage() {
       })
 
       if (error) {
-        setError(error.message || "Error sending code")
+        setError(error.message || t("errorSendCode"))
         return
       }
 
       setStep("otp")
     } catch {
-      setError("Error sending code. Please try again.")
+      setError(t("errorSendCodeRetry"))
     } finally {
       setIsLoading(false)
     }
@@ -53,42 +56,43 @@ export default function LoginPage() {
       const { error } = await authClient.signIn.emailOtp({
         email,
         otp,
+        name: name || undefined,
       })
 
       if (error) {
-        setError(error.message || "Invalid code")
+        setError(error.message || t("errorInvalidCode"))
         return
       }
 
       router.push("/dashboard")
       router.refresh()
     } catch {
-      setError("Error verifying code. Please try again.")
+      setError(t("errorVerifyCode"))
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleBack = () => {
-    setStep("email")
+    setStep("form")
     setOtp("")
     setError("")
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-emerald-50 via-background to-emerald-100/50 dark:from-emerald-950/30 dark:via-background dark:to-emerald-900/20 p-4">
-      <Card className="w-full max-w-[400px]">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-50 via-background to-emerald-100/50 dark:from-emerald-950/30 dark:via-background dark:to-emerald-900/20 p-4">
+      <Card className="w-full max-w-[420px]">
         <CardHeader className="text-center space-y-2">
           <div className="mx-auto bg-emerald-100 dark:bg-emerald-900/50 w-14 h-14 flex items-center justify-center rounded-full mb-2">
-            <Mail className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
+            <UserPlus className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
           </div>
           <CardTitle className="text-2xl font-bold">
-            {step === "email" ? "Access Subscrip" : "Enter the code"}
+            {step === "form" ? t("title") : t("titleOtp")}
           </CardTitle>
           <CardDescription>
-            {step === "email" 
-              ? "Enter your email to receive an access code."
-              : `We sent a 6-digit code to ${email}`
+            {step === "form"
+              ? t("description")
+              : t("descriptionOtp", { email })
             }
           </CardDescription>
         </CardHeader>
@@ -99,38 +103,51 @@ export default function LoginPage() {
             </div>
           )}
 
-          {step === "email" ? (
+          {step === "form" ? (
             <form onSubmit={handleSendOTP} className="space-y-4">
               <Input
+                type="text"
+                placeholder={t("namePlaceholder")}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={isLoading}
+                className="h-11"
+              />
+
+              <Input
                 type="email"
-                placeholder="example@email.com"
+                placeholder={t("emailPlaceholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
                 className="h-11"
               />
-              
-              <Button 
-                className="w-full h-11 text-base font-medium" 
+
+              <Button
+                className="w-full h-11 text-base font-medium"
                 type="submit"
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
+                    {t("sending")}
                   </>
                 ) : (
-                  "Send code"
+                  t("createAccount")
                 )}
               </Button>
 
+              <p className="text-xs text-center text-muted-foreground px-4">
+                {t("terms")}
+              </p>
+
               <p className="text-sm text-center text-muted-foreground">
-                Don&apos;t have an account?&nbsp;
-                <Link href="/auth/register" className="text-primary hover:underline">
-                  Create account
-                </Link>
+                {t("hasAccount")}{" "}
+                <LocaleLink href="/auth/login" className="text-primary hover:underline">
+                  {t("signIn")}
+                </LocaleLink>
               </p>
             </form>
           ) : (
@@ -141,19 +158,19 @@ export default function LoginPage() {
                 onChange={setOtp}
                 disabled={isLoading}
               />
-              
-              <Button 
-                className="w-full h-11 text-base font-medium" 
+
+              <Button
+                className="w-full h-11 text-base font-medium"
                 type="submit"
                 disabled={isLoading || otp.length !== 6}
               >
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Verifying...
+                    {t("verifying")}
                   </>
                 ) : (
-                  "Verify code"
+                  t("verifyCreate")
                 )}
               </Button>
 
@@ -164,7 +181,7 @@ export default function LoginPage() {
                   className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center justify-center gap-1"
                 >
                   <ArrowLeft className="h-3 w-3" />
-                  Back and use another email
+                  {t("backEdit")}
                 </button>
                 <button
                   type="button"
@@ -172,7 +189,7 @@ export default function LoginPage() {
                   disabled={isLoading}
                   className="text-sm text-primary hover:underline disabled:opacity-50"
                 >
-                  Resend code
+                  {t("resendCode")}
                 </button>
               </div>
             </form>

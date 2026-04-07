@@ -1,0 +1,94 @@
+{
+  "common": {
+    "appName": "Subscrip",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "or": "or"
+  },
+  "metadata": {
+    "title": "Subscrip | Subscription Management",
+    "description": "Control your recurring expenses and avoid surprises."
+  },
+  "landing": {
+    "signIn": "Sign In",
+    "getStarted": "Get Started",
+    "hero": {
+      "title": "Control your subscriptions\nin one place.",
+      "description": "Stop losing money on forgotten renewals. Subscrip alerts you before the bill arrives.",
+      "cta": "Create Free Account"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Access Subscrip",
+      "titleOtp": "Enter the code",
+      "description": "Enter your email to receive an access code.",
+      "descriptionOtp": "We sent a 6-digit code to {email}",
+      "emailPlaceholder": "example@email.com",
+      "sendCode": "Send code",
+      "sending": "Sending...",
+      "verifyCode": "Verify code",
+      "verifying": "Verifying...",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create account",
+      "backEmail": "Back and use another email",
+      "resendCode": "Resend code",
+      "errorSendCode": "Error sending code",
+      "errorSendCodeRetry": "Error sending code. Please try again.",
+      "errorInvalidCode": "Invalid code",
+      "errorVerifyCode": "Error verifying code. Please try again."
+    },
+    "register": {
+      "title": "Create account",
+      "titleOtp": "Enter the code",
+      "description": "Fill in your details to create your account.",
+      "descriptionOtp": "We sent a 6-digit code to {email}",
+      "namePlaceholder": "Your name",
+      "emailPlaceholder": "example@email.com",
+      "createAccount": "Create account",
+      "sending": "Sending...",
+      "verifyCreate": "Verify and create account",
+      "verifying": "Verifying...",
+      "terms": "By continuing, you agree to our Terms of Service and Privacy Policy.",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "backEdit": "Back and edit details",
+      "resendCode": "Resend code",
+      "errorSendCode": "Error sending code",
+      "errorSendCodeRetry": "Error sending code. Please try again.",
+      "errorInvalidCode": "Invalid code",
+      "errorVerifyCode": "Error verifying code. Please try again."
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "greeting": "Hello, {name}",
+    "newSubscription": "New Subscription",
+    "cards": {
+      "monthlySpend": "Monthly Spend (Est.)",
+      "conversionBase": "Base: USD 1 = R$ 6",
+      "activeSubscriptions": "Active Subscriptions",
+      "subscriptionCount": "{count, plural, one {# subscription} other {# subscriptions}} active",
+      "nextPayment": "Next Payment",
+      "noUpcoming": "No upcoming"
+    },
+    "subscriptions": {
+      "title": "Your Subscriptions",
+      "due": "Due: {date}",
+      "empty": "No subscriptions found.",
+      "addFirst": "Add your first subscription"
+    }
+  },
+  "locale": {
+    "en": "English",
+    "pt": "Português"
+  }
+}
