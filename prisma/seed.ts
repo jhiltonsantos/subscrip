@@ -20,7 +20,7 @@ async function main() {
     data: {
       name: 'Test User',
       email: 'test@subscrip.dev',
-      emailVerified: new Date(),
+      emailVerified: true,
     },
   })
   console.log(`👤 Created test user: ${testUser.email}`)

@@ -2,7 +2,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// Neon PostgreSQL (via Vercel Marketplace)
+// PostgreSQL
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")  // Pooled connection
@@ -43,10 +43,10 @@ enum Theme {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String   @id @default(cuid())
   name          String?
-  email         String    @unique
-  emailVerified DateTime?
+  email         String   @unique
+  emailVerified Boolean  @default(false)
   image         String?
 
   // Preferences
