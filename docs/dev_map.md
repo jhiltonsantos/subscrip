@@ -539,7 +539,7 @@ Cada etapa contém suas tarefas com status de conclusão. O checkbox `[x]` indic
 - [x] Remover página de verificação antiga (`/auth/login/verify`)
 - [x] Configurar envio de OTP via Resend (com fallback para console em dev)
 - [x] Atualizar Dashboard para usar Better Auth session e filtrar por `userId`
-- [ ] Testar fluxo completo: registro → OTP → dashboard → logout → login → OTP → dashboard
+- [x] Testar fluxo completo: registro → OTP → dashboard → logout → login → OTP → dashboard
 
 **Status: ✅ COMPLETA (pendente teste manual)**
 

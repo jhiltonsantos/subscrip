@@ -8,23 +8,14 @@ export function middleware(request: NextRequest) {
 
   const isAuthRoute = pathname.startsWith("/auth")
   const isApiAuthRoute = pathname.startsWith("/api/auth")
-  const isDashboardRoute = pathname.startsWith("/dashboard")
   const isPublicRoute = pathname === "/"
 
   if (isApiAuthRoute) {
     return NextResponse.next()
   }
 
-  if (isAuthRoute && isLoggedIn) {
+  if ((isPublicRoute || isAuthRoute) && isLoggedIn) {
     return NextResponse.redirect(new URL("/dashboard", request.url))
-  }
-
-  if (isDashboardRoute && !isLoggedIn) {
-    const callbackUrl = pathname + (request.nextUrl.search || "")
-    const encodedCallbackUrl = encodeURIComponent(callbackUrl)
-    return NextResponse.redirect(
-      new URL(`/auth/login?callbackUrl=${encodedCallbackUrl}`, request.url)
-    )
   }
 
   if (isPublicRoute || isAuthRoute) {
@@ -32,7 +23,11 @@ export function middleware(request: NextRequest) {
   }
 
   if (!isLoggedIn) {
-    return NextResponse.redirect(new URL("/auth/login", request.url))
+    const callbackUrl = pathname + (request.nextUrl.search || "")
+    const encodedCallbackUrl = encodeURIComponent(callbackUrl)
+    return NextResponse.redirect(
+      new URL(`/auth/login?callbackUrl=${encodedCallbackUrl}`, request.url)
+    )
   }
 
   return NextResponse.next()
