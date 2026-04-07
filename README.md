@@ -245,14 +245,17 @@ src/
 │   └── api/auth/[...all]/route.ts          # Better Auth API handler
 │
 ├── components/
-│   ├── layouts/                            # Reusable layout components
+│   ├── global/                             # Global reusable components
 │   │   ├── index.ts                        # Exports
-│   │   ├── landing-layout.tsx              # Public header + children
-│   │   ├── auth-layout.tsx                 # Minimal header + background
-│   │   └── platform-layout.tsx             # Authenticated header + sidebar
-│   ├── ui/                                 # shadcn/ui components
-│   ├── locale-link.tsx                     # Link with locale support
-│   └── locale-switcher.tsx                 # Language selector
+│   │   ├── LocaleLink.tsx                  # Link with locale support
+│   │   └── LocaleSwitcher.tsx              # Language selector
+│   ├── layout/                             # Layout components
+│   │   ├── index.ts                        # Exports
+│   │   ├── Header.tsx                      # Header with variants (landing, auth, platform)
+│   │   ├── LandingLayout.tsx               # Public layout
+│   │   ├── AuthLayout.tsx                  # Auth pages layout
+│   │   └── PlatformLayout.tsx              # Authenticated platform layout
+│   └── ui/                                 # shadcn/ui components
 │
 ├── lib/
 │   ├── proxy/                              # Modular proxy logic

@@ -32,9 +32,7 @@ export default async function RootLayout({
         )}
       >
         <NextIntlClientProvider messages={messages}>
-          <main className="relative flex min-h-screen flex-col">
-            {children}
-          </main>
+          {children}
         </NextIntlClientProvider>
       </body>
     </html>

@@ -40,14 +40,17 @@ src/
 │   └── api/auth/[...all]/route.ts          # Better Auth API handler
 │
 ├── components/
-│   ├── layouts/                            # Reusable layout components
+│   ├── global/                             # Global reusable components
 │   │   ├── index.ts                        # Exports
-│   │   ├── landing-layout.tsx              # Public header + children
-│   │   ├── auth-layout.tsx                 # Minimal header + background
-│   │   └── platform-layout.tsx             # Authenticated header + sidebar
-│   ├── ui/                                 # shadcn/ui components
-│   ├── locale-link.tsx                     # Link with locale support
-│   └── locale-switcher.tsx                 # Language selector
+│   │   ├── LocaleLink.tsx                  # Link with locale support
+│   │   └── LocaleSwitcher.tsx              # Language selector
+│   ├── layout/                             # Layout components
+│   │   ├── index.ts                        # Exports
+│   │   ├── Header.tsx                      # Header with variants (landing, auth, platform)
+│   │   ├── LandingLayout.tsx               # Public layout
+│   │   ├── AuthLayout.tsx                  # Auth pages layout
+│   │   └── PlatformLayout.tsx              # Authenticated platform layout
+│   └── ui/                                 # shadcn/ui components
 │
 ├── lib/
 │   ├── proxy/                              # Modular proxy logic
@@ -130,24 +133,44 @@ RootLayout (app/layout.tsx)
 
 ### Layout Components
 
-Located in `src/components/layouts/`:
+Located in `src/components/layout/`:
 
-#### `LandingLayout`
+#### `Header.tsx`
+- Unified header component with `variant` prop
+- Variants: `landing`, `auth`, `platform`
+- Handles different header styles based on context
+
+#### `LandingLayout.tsx`
+- Uses `Header` with `variant="landing"`
 - Public header with logo, navigation, and auth buttons
 - LocaleSwitcher for language selection
 - Used for marketing/landing pages
 
-#### `AuthLayout`
+#### `AuthLayout.tsx`
+- Uses `Header` with `variant="auth"`
 - Minimal header with logo only
 - Gradient background
 - Centered content area
 - Used for login/register pages
 
-#### `PlatformLayout`
+#### `PlatformLayout.tsx`
+- Uses `Header` with `variant="platform"`
 - Authenticated header with user info and logout
 - LocaleSwitcher
 - Main content area with padding
 - Used for all authenticated pages
+
+### Global Components
+
+Located in `src/components/global/`:
+
+#### `LocaleLink.tsx`
+- Link component that automatically prepends `/pt/` for Portuguese locale
+- Drop-in replacement for Next.js `Link`
+
+#### `LocaleSwitcher.tsx`
+- Language selector dropdown
+- Triggers full page reload with new locale prefix
 
 ### Server vs Client Layouts
 
