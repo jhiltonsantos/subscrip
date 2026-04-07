@@ -22,10 +22,24 @@ enum BillingCycle {
 }
 
 enum Category {
-  INFRASTRUCTURE 
-  ENTERTAINMENT 
-  EDUCATION      
-  TOOLS          
+  INFRASTRUCTURE
+  ENTERTAINMENT
+  EDUCATION
+  TOOLS
+  FITNESS
+  OTHER
+}
+
+enum ReminderChannel {
+  EMAIL
+  PUSH
+  BOTH
+}
+
+enum Theme {
+  LIGHT
+  DARK
+  SYSTEM
 }
 
 model User {
@@ -34,10 +48,17 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
-  
+
+  // Preferences
+  preferredCurrency   Currency         @default(BRL)
+  theme               Theme            @default(SYSTEM)
+  defaultReminderDays Int              @default(3)
+  defaultReminderChannel ReminderChannel @default(EMAIL)
+
   accounts      Account[]
   sessions      Session[]
   subscriptions Subscription[]
+  reminders     Reminder[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -86,25 +107,70 @@ model VerificationToken {
 
 model Subscription {
   id              String       @id @default(uuid())
-  name            String       
-  
+  name            String
+
   price           Decimal      @db.Decimal(10, 2)
   currency        Currency     @default(BRL)
-  
+
   billingCycle    BillingCycle
   category        Category
-  
+
   startDate       DateTime
   nextBillingDate DateTime
-  
+
   active          Boolean      @default(true)
-  
+
+  // Optional link to service template
+  serviceTemplateId String?
+  serviceTemplate   ServiceTemplate? @relation(fields: [serviceTemplateId], references: [id])
+
   userId          String
   user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
+  reminders       Reminder[]
+
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
   @@index([userId])
   @@index([nextBillingDate])
+  @@index([serviceTemplateId])
+}
+
+// Pre-populated service templates (Netflix, Spotify, AWS, etc.)
+model ServiceTemplate {
+  id              String       @id @default(uuid())
+  name            String
+  slug            String       @unique
+  logoUrl         String?
+  category        Category
+  defaultCurrency Currency     @default(USD)
+  pricingUrl      String?
+  cancelUrl       String?
+
+  subscriptions   Subscription[]
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model Reminder {
+  id              String          @id @default(uuid())
+  daysBefore      Int             @default(3)
+  channel         ReminderChannel @default(EMAIL)
+  preferredTime   String          @default("morning") // morning, afternoon, evening
+  enabled         Boolean         @default(true)
+  lastSentAt      DateTime?
+
+  subscriptionId  String
+  subscription    Subscription    @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([subscriptionId])
+  @@index([userId])
 }
