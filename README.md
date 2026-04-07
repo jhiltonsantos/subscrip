@@ -116,8 +116,7 @@ Subscrip provides a unified dashboard to track, manage, and get alerts for all y
 
 - **Node.js** 20+
 - **pnpm** (recommended) or npm/yarn
-- PostgreSQL database
-- Email service credentials
+- **Docker** (for local PostgreSQL)
 
 ### Installation
 
@@ -136,23 +135,50 @@ Subscrip provides a unified dashboard to track, manage, and get alerts for all y
    ```bash
    cp .env.example .env
    ```
-   Fill in your database and service credentials.
+   The default `.env.example` is pre-configured for Docker local development.
 
-4. **Set up the database**
+4. **Start PostgreSQL with Docker**
    ```bash
-   pnpm db:generate
-   pnpm db:push
-   pnpm db:seed  # Optional: seed with sample data
+   pnpm docker:up
+   ```
+   This starts a PostgreSQL 16 container on `localhost:5432`.
+
+5. **Set up the database**
+   ```bash
+   pnpm db:generate   # Generate Prisma Client
+   pnpm db:push       # Sync schema to database
+   pnpm db:seed       # Seed with sample data
+   ```
+   
+   Or run all at once:
+   ```bash
+   pnpm setup
    ```
 
-5. **Start the development server**
+6. **Start the development server**
    ```bash
    pnpm dev
    ```
 
-6. **Open your browser**
+7. **Open your browser**
    
    Navigate to [http://localhost:3000](http://localhost:3000)
+
+### Available Scripts
+
+| Command | Description |
+|---|---|
+| `pnpm dev` | Start development server |
+| `pnpm docker:up` | Start PostgreSQL container |
+| `pnpm docker:down` | Stop PostgreSQL container |
+| `pnpm db:studio` | Open Prisma Studio (database GUI) |
+| `pnpm db:seed` | Seed database with sample data |
+| `pnpm setup` | Full setup (docker + generate + push + seed) |
+
+### Test User
+
+After seeding, you can use:
+- **Email:** `test@subscrip.dev`
 
 ---
 
