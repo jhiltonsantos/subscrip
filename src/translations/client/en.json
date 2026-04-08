@@ -72,6 +72,12 @@
     "title": "Dashboard",
     "greeting": "Hello, {name}",
     "newSubscription": "New Subscription",
+    "nav": {
+      "dashboard": "Dashboard",
+      "subscriptions": "Subscriptions",
+      "settings": "Settings",
+      "profile": "Profile"
+    },
     "cards": {
       "monthlySpend": "Monthly Spend (Est.)",
       "conversionBase": "Base: USD 1 = R$ 6",

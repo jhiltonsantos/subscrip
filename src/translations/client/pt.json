@@ -72,6 +72,12 @@
     "title": "Dashboard",
     "greeting": "Olá, {name}",
     "newSubscription": "Nova Assinatura",
+    "nav": {
+      "dashboard": "Dashboard",
+      "subscriptions": "Assinaturas",
+      "settings": "Configurações",
+      "profile": "Perfil"
+    },
     "cards": {
       "monthlySpend": "Gasto Mensal (Est.)",
       "conversionBase": "Conversão base: USD 1 = R$ 6",

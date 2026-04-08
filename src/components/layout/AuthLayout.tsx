@@ -1,6 +1,6 @@
 "use client"
 
-import { Header } from "./Header"
+import { Header } from "./header"
 
 interface AuthLayoutProps {
   children: React.ReactNode

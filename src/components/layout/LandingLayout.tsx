@@ -1,6 +1,6 @@
 "use client"
 
-import { Header } from "./Header"
+import { Header } from "./header"
 
 interface LandingLayoutProps {
   children: React.ReactNode

@@ -1,4 +1,5 @@
-export { Header } from "./Header"
+export { Header } from "./header"
+export { Sidebar } from "./sidebar"
 export { LandingLayout } from "./LandingLayout"
 export { AuthLayout } from "./AuthLayout"
 export { PlatformLayout } from "./PlatformLayout"
