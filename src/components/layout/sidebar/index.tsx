@@ -1,19 +1,20 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { usePathname } from "next/navigation"
 import { LocaleLink } from "@/components/global"
-import { Button } from "@/components/ui/button"
+import { useTranslations } from "next-intl"
 import { 
   LayoutDashboard, 
   CreditCard, 
-  Settings, 
+  Settings,
   ChevronLeft,
   LogOut
 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { signOut } from "@/server/actions/auth"
-import { useTranslations } from "next-intl"
-import { gsap } from "gsap"
+import { useSidebar } from "@/contexts/SidebarContext"
+import gsap from "gsap"
 
 interface SidebarProps {
   user?: {
@@ -25,12 +26,7 @@ interface SidebarProps {
 export function Sidebar({ user }: SidebarProps) {
   const t = useTranslations()
   const pathname = usePathname()
-  const [isCollapsed, setIsCollapsed] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return window.innerWidth < 1024
-    }
-    return true
-  })
+  const { isCollapsed, setIsCollapsed } = useSidebar()
   const sidebarRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -92,9 +88,11 @@ export function Sidebar({ user }: SidebarProps) {
       
       if (isCollapsed && contentRef.current) {
         gsap.set(contentRef.current, { opacity: 0 })
+      } else if (!isCollapsed && contentRef.current) {
+        gsap.set(contentRef.current, { opacity: 1 })
       }
     }
-  }, [])
+  }, [isCollapsed])
 
   return (
     <aside
@@ -149,12 +147,29 @@ export function Sidebar({ user }: SidebarProps) {
       {/* User Section */}
       <div className="p-4 border-t border-gray-200/30 dark:border-gray-800/30">
         {user && (
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-linear-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
-              {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
-            </div>
-            {!isCollapsed && (
-              <>
+          <>
+            {isCollapsed ? (
+              <div className="flex flex-col items-center gap-2">
+                <form action={signOut}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    type="submit"
+                    className="h-8 w-8 text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20"
+                    title="Sign out"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </form>
+                <div className="h-10 w-10 rounded-full bg-linear-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                  {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-linear-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                  {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                     {user.name || user.email.split('@')[0]}
@@ -174,22 +189,9 @@ export function Sidebar({ user }: SidebarProps) {
                     <LogOut className="h-4 w-4" />
                   </Button>
                 </form>
-              </>
+              </div>
             )}
-            {isCollapsed && (
-              <form action={signOut} className="flex justify-center mt-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  type="submit"
-                  className="h-8 w-8 text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20"
-                  title="Sign out"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </form>
-            )}
-          </div>
+          </>
         )}
       </div>
     </aside>
