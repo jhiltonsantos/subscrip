@@ -17,7 +17,7 @@ export function PlatformLayout({ children, user }: PlatformLayoutProps) {
       <Sidebar user={user} />
       <div className="flex flex-col flex-1 ml-[296px]">
         <Header variant="platform" />
-        <main className="flex-1 p-6">
+        <main className="flex-1">
           {children}
         </main>
       </div>

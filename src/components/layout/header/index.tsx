@@ -26,13 +26,11 @@ export function Header({ variant }: HeaderProps) {
 
   if (variant === "platform") {
     return (
-      <header className="border-b border-gray-200/50 dark:border-gray-800/50 bg-background/50 py-2">
-        <HeaderDock showBreadcrumb={true} />
-      </header>
+      <HeaderDock showBreadcrumb={true} />
     )
   }
 
-  // Landing variant - dock sem breadcrumb, com botões de auth
+  // Landing variant
   return (
     <header className="border-b border-gray-200/50 dark:border-gray-800/50 bg-background/50 py-2">
       <div className="w-full max-w-5xl mx-auto px-6 py-3">

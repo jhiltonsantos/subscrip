@@ -12,7 +12,6 @@ export function NotificationButton() {
       title="Notifications"
     >
       <Bell className="h-4 w-4" />
-      {/* Badge para notificações não lidas */}
       <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-gray-950" />
     </Button>
   )

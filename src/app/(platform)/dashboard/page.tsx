@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Container } from "@/components/ui/container"
 import { CreditCard, DollarSign, CalendarDays } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { format } from "date-fns"
@@ -39,18 +40,19 @@ export default async function DashboardPage() {
   const dateLocale = locale === "pt" ? ptBR : enUS
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-          <p className="text-muted-foreground">
-            {t("greeting", { name: session.user.name || session.user.email })}
-          </p>
+    <Container>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+            <p className="text-muted-foreground">
+              {t("greeting", { name: session.user.name || session.user.email })}
+            </p>
+          </div>
+          <Button className="bg-gradient-primary hover:opacity-90 transition-opacity">
+            {t("newSubscription")}
+          </Button>
         </div>
-        <Button className="bg-gradient-primary hover:opacity-90 transition-opacity">
-          {t("newSubscription")}
-        </Button>
-      </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
@@ -146,6 +148,7 @@ export default async function DashboardPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </Container>
   )
 }
