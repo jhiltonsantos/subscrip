@@ -1,0 +1,15 @@
+{
+  "email": {
+    "otp": {
+      "signIn": "Seu código de acesso - Subscrip",
+      "emailVerification": "Verifique seu email - Subscrip",
+      "forgetPassword": "Redefinir senha - Subscrip",
+      "fallback": "Código de verificação - Subscrip",
+      "signInBody": "Use o código abaixo para acessar sua conta:",
+      "emailVerificationBody": "Use o código abaixo para verificar seu email:",
+      "forgetPasswordBody": "Use o código abaixo para redefinir sua senha:",
+      "expires": "Este código expira em 5 minutos.",
+      "ignore": "Se você não solicitou este código, ignore este email."
+    }
+  }
+}
