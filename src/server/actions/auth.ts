@@ -1,49 +1,22 @@
 "use server"
 
-import { signIn } from "@/auth"
-import { prisma } from "@/lib/prisma"
+import { auth } from "@/lib/auth"
+import { headers, cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
-export async function login(formData: FormData) {
-  const email = String(formData.get("email") || "").trim().toLowerCase()
-  if (!email) {
-    redirect("/auth/login")
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { email },
-    select: { id: true }
+export async function getSession() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
   })
-
-  if (!user) {
-    redirect(`/auth/login?error=user_not_found&email=${encodeURIComponent(email)}`)
-  }
-
-  return signIn("nodemailer", formData)
+  return session
 }
 
-export async function register(formData: FormData) {
-  const email = String(formData.get("email") || "").trim().toLowerCase()
-  const nameRaw = formData.get("name")
-  const name = typeof nameRaw === "string" ? nameRaw.trim() : ""
-
-  if (!email) {
-    redirect("/auth/register")
-  }
-
-  await prisma.user.upsert({
-    where: { email },
-    create: {
-      email,
-      name: name || null
-    },
-    update: {
-      name: name || undefined
-    },
-    select: { id: true }
+export async function signOut() {
+  await auth.api.signOut({
+    headers: await headers(),
   })
 
-  const fd = new FormData()
-  fd.set("email", email)
-  return signIn("nodemailer", fd)
+  const locale = (await cookies()).get("NEXT_LOCALE")?.value
+  const prefix = locale === "pt" ? "/pt" : ""
+  redirect(`${prefix}/auth/login`)
 }

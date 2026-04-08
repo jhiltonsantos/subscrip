@@ -116,8 +116,7 @@ Subscrip provides a unified dashboard to track, manage, and get alerts for all y
 
 - **Node.js** 20+
 - **pnpm** (recommended) or npm/yarn
-- PostgreSQL database
-- Email service credentials
+- **Docker** (for local PostgreSQL)
 
 ### Installation
 
@@ -136,23 +135,50 @@ Subscrip provides a unified dashboard to track, manage, and get alerts for all y
    ```bash
    cp .env.example .env
    ```
-   Fill in your database and service credentials.
+   The default `.env.example` is pre-configured for Docker local development.
 
-4. **Set up the database**
+4. **Start PostgreSQL with Docker**
    ```bash
-   pnpm db:generate
-   pnpm db:push
-   pnpm db:seed  # Optional: seed with sample data
+   pnpm docker:up
+   ```
+   This starts a PostgreSQL 16 container on `localhost:5432`.
+
+5. **Set up the database**
+   ```bash
+   pnpm db:generate   # Generate Prisma Client
+   pnpm db:push       # Sync schema to database
+   pnpm db:seed       # Seed with sample data
+   ```
+   
+   Or run all at once:
+   ```bash
+   pnpm setup
    ```
 
-5. **Start the development server**
+6. **Start the development server**
    ```bash
    pnpm dev
    ```
 
-6. **Open your browser**
+7. **Open your browser**
    
    Navigate to [http://localhost:3000](http://localhost:3000)
+
+### Available Scripts
+
+| Command | Description |
+|---|---|
+| `pnpm dev` | Start development server |
+| `pnpm docker:up` | Start PostgreSQL container |
+| `pnpm docker:down` | Stop PostgreSQL container |
+| `pnpm db:studio` | Open Prisma Studio (database GUI) |
+| `pnpm db:seed` | Seed database with sample data |
+| `pnpm setup` | Full setup (docker + generate + push + seed) |
+
+### Test User
+
+After seeding, you can use:
+- **Email:** `test@subscrip.dev`
 
 ---
 
@@ -193,7 +219,131 @@ The design uses an **Emerald green** palette, conveying **financial control**, *
 
 ---
 
-## 📄 License
+## � Project Structure
+
+```
+src/
+├── app/                                    # App Router (Next.js 16)
+│   ├── layout.tsx                          # Root Layout (providers, fonts)
+│   ├── globals.css                         # Global styles
+│   │
+│   ├── (landing)/                          # Route Group: Landing pages
+│   │   ├── layout.tsx                      # → LandingLayout
+│   │   └── page.tsx                        # → URL: /
+│   │
+│   ├── (auth)/                             # Route Group: Authentication
+│   │   ├── layout.tsx                      # → AuthLayout
+│   │   └── auth/
+│   │       ├── login/page.tsx              # → URL: /auth/login
+│   │       └── register/page.tsx           # → URL: /auth/register
+│   │
+│   ├── (platform)/                         # Route Group: Authenticated platform
+│   │   ├── layout.tsx                      # Server: session check
+│   │   ├── layout-client.tsx               # Client: PlatformLayout wrapper
+│   │   └── dashboard/page.tsx              # → URL: /dashboard
+│   │
+│   └── api/auth/[...all]/route.ts          # Better Auth API handler
+│
+├── components/
+│   ├── global/                             # Global reusable components
+│   │   ├── index.ts                        # Exports
+│   │   ├── LocaleLink.tsx                  # Link with locale support
+│   │   └── LocaleSwitcher.tsx              # Language selector
+│   ├── layout/                             # Layout components
+│   │   ├── index.ts                        # Exports
+│   │   ├── Header.tsx                      # Header with variants (landing, auth, platform)
+│   │   ├── LandingLayout.tsx               # Public layout
+│   │   ├── AuthLayout.tsx                  # Auth pages layout
+│   │   └── PlatformLayout.tsx              # Authenticated platform layout
+│   └── ui/                                 # shadcn/ui components
+│
+├── lib/
+│   ├── proxy/                              # Modular proxy logic
+│   │   ├── index.ts                        # Exports
+│   │   ├── auth.ts                         # Authentication logic
+│   │   └── i18n.ts                         # Internationalization logic
+│   │
+│   ├── i18n/                               # next-intl configuration
+│   │   ├── config.ts                       # Locales config (en, pt)
+│   │   ├── request.ts                      # getRequestConfig
+│   │   └── server-translations.ts          # Server-side translation helper
+│   │
+│   ├── utils/
+│   │   ├── helpers.ts                      # cn(), etc.
+│   │   └── formatters.ts                   # formatCurrency(), etc.
+│   │
+│   ├── auth.ts                             # Better Auth server config
+│   ├── auth-client.ts                      # Better Auth client
+│   └── prisma.ts                           # Prisma client
+│
+├── server/
+│   └── actions/
+│       └── auth.ts                         # Server actions (signOut, getSession)
+│
+├── translations/
+│   ├── client/                             # UI translations (next-intl)
+│   │   ├── en.json
+│   │   └── pt.json
+│   └── server/                             # Server-only translations (emails)
+│       ├── en.json
+│       └── pt.json
+│
+└── proxy.ts                                # Proxy entry point
+```
+
+### Route Groups
+
+Next.js App Router uses **Route Groups** `(name)` to organize routes without affecting URLs:
+
+| Route Group | Purpose | Layout |
+|---|---|---|
+| `(landing)` | Public landing pages | `LandingLayout` |
+| `(auth)` | Authentication pages (login, register) | `AuthLayout` |
+| `(platform)` | Authenticated platform pages | `PlatformLayout` |
+
+### Proxy vs Middleware
+
+This project uses `proxy.ts` instead of `middleware.ts`:
+
+| Aspect | `middleware.ts` | `proxy.ts` |
+|---|---|---|
+| **Runtime** | Edge Runtime (limited) | Node.js Runtime (full) |
+| **Location** | `src/middleware.ts` | `src/proxy.ts` (Next.js 16+) |
+| **API Access** | Limited (no fs, prisma) | Full (any Node.js lib) |
+| **Recommended for** | Simple redirects | Complex auth, i18n |
+
+### Proxy Flow
+
+```
+Request → proxy.ts
+              │
+              ├─→ 1. stripLocalePrefix()     [lib/proxy/i18n.ts]
+              │       Extract locale from URL (/pt/dashboard → pt)
+              │
+              ├─→ 2. Skip /api/*
+              │
+              ├─→ 3. checkAuth()             [lib/proxy/auth.ts]
+              │       Check session and return action
+              │       → redirect to /dashboard (if logged in on /auth/*)
+              │       → redirect to /auth/login (if not logged in on protected route)
+              │       → next (continue)
+              │
+              └─→ 4. handleLocaleRewrite()   [lib/proxy/i18n.ts]
+                      Rewrite /pt/* → /* with x-locale header
+                      Set NEXT_LOCALE cookie
+```
+
+### Internationalization (i18n)
+
+URLs follow the pattern:
+- **English (default):** `/dashboard`, `/auth/login`
+- **Portuguese:** `/pt/dashboard`, `/pt/auth/login`
+
+The proxy rewrites `/pt/*` routes internally while setting the locale via cookie and header.
+
+---
+
+## �📄 License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 

@@ -1,0 +1,104 @@
+{
+  "common": {
+    "appName": "Subscrip",
+    "loading": "Carregando...",
+    "error": "Algo deu errado",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "submit": "Enviar",
+    "confirm": "Confirmar",
+    "or": "ou"
+  },
+  "metadata": {
+    "title": "Subscrip | Gestão de Assinaturas",
+    "description": "Controle seus gastos recorrentes e evite surpresas."
+  },
+  "landing": {
+    "signIn": "Entrar",
+    "getStarted": "Começar Agora",
+    "hero": {
+      "title": "Controle suas assinaturas\nem um só lugar.",
+      "description": "Pare de perder dinheiro com renovações esquecidas. O Subscrip te avisa antes da fatura chegar.",
+      "cta": "Criar Conta Grátis"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Acessar Subscrip",
+      "titleOtp": "Digite o código",
+      "description": "Digite seu email para receber um código de acesso.",
+      "descriptionOtp": "Enviamos um código de 6 dígitos para {email}",
+      "emailPlaceholder": "exemplo@email.com",
+      "sendCode": "Enviar código",
+      "sending": "Enviando...",
+      "verifyCode": "Verificar código",
+      "verifying": "Verificando...",
+      "noAccount": "Não tem conta?",
+      "createAccount": "Criar conta",
+      "backEmail": "Voltar e usar outro email",
+      "resendCode": "Reenviar código",
+      "errorSendCode": "Erro ao enviar código",
+      "errorSendCodeRetry": "Erro ao enviar código. Tente novamente.",
+      "errorInvalidCode": "Código inválido",
+      "errorVerifyCode": "Erro ao verificar código. Tente novamente."
+    },
+    "register": {
+      "title": "Criar conta",
+      "titleOtp": "Digite o código",
+      "description": "Preencha seus dados para criar seu acesso.",
+      "descriptionOtp": "Enviamos um código de 6 dígitos para {email}",
+      "namePlaceholder": "Seu nome",
+      "emailPlaceholder": "exemplo@email.com",
+      "createAccount": "Criar conta",
+      "sending": "Enviando...",
+      "verifyCreate": "Verificar e criar conta",
+      "verifying": "Verificando...",
+      "terms": "Ao continuar, você concorda com nossos Termos de Serviço e Política de Privacidade.",
+      "hasAccount": "Já tem conta?",
+      "signIn": "Fazer login",
+      "backEdit": "Voltar e editar dados",
+      "resendCode": "Reenviar código",
+      "errorSendCode": "Erro ao enviar código",
+      "errorSendCodeRetry": "Erro ao enviar código. Tente novamente.",
+      "errorInvalidCode": "Código inválido",
+      "errorVerifyCode": "Erro ao verificar código. Tente novamente."
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "greeting": "Olá, {name}",
+    "newSubscription": "Nova Assinatura",
+    "cards": {
+      "monthlySpend": "Gasto Mensal (Est.)",
+      "conversionBase": "Conversão base: USD 1 = R$ 6",
+      "activeSubscriptions": "Assinaturas Ativas",
+      "subscriptionCount": "{count, plural, one {# assinatura} other {# assinaturas}} ativas",
+      "nextPayment": "Próxima Fatura",
+      "noUpcoming": "Nenhuma"
+    },
+    "subscriptions": {
+      "title": "Suas Assinaturas",
+      "due": "Vence: {date}",
+      "empty": "Nenhuma assinatura encontrada.",
+      "addFirst": "Adicione sua primeira assinatura"
+    }
+  },
+  "header":{
+    "dashboard": "Dashboard",
+    "subscriptions": "Assinaturas",
+    "settings": "Configurações",
+    "profile": "Perfil",
+    "language": "Idioma",
+    "theme": "Tema",
+    "notifications": "Notificações",
+    "logout": "Sair"
+  },
+  "locale": {
+    "en": "English",
+    "pt": "Português"
+  }
+}

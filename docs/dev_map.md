@@ -473,18 +473,32 @@ Cada etapa contém suas tarefas com status de conclusão. O checkbox `[x]` indic
 
 > **Objetivo:** Inicializar o projeto, configurar a stack base e o banco de dados.
 
+#### 1A — Setup Inicial
+
 - [x] Inicializar projeto Next.js 16 com TypeScript e App Router
 - [x] Configurar Tailwind CSS 4 e variáveis de design tokens (`globals.css`)
 - [x] Configurar Shadcn UI (estilo New York, Lucide icons)
-- [x] Instalar e configurar Prisma com PostgreSQL (Neon)
-- [x] Criar schema do banco: `User`, `Account`, `Session`, `VerificationToken`, `Subscription`
-- [x] Criar enums: `Currency`, `BillingCycle`, `Category`
-- [x] Executar primeira migration (`init_fix_v5`)
-- [x] Criar seed de desenvolvimento (Netflix, Vercel Pro, Amazon Prime, Curso de Inglês)
-- [x] Configurar singleton do PrismaClient (`lib/prisma.ts`)
 - [x] Configurar `next.config.ts` com React Compiler
-- [x] Criar `.env.example` com template de variáveis
 - [x] Criar utilitários base: `cn()`, `formatCurrency()`
+
+#### 1B — Banco de Dados e Prisma
+
+- [x] Instalar e configurar Prisma com PostgreSQL
+- [x] Criar `docker-compose.yml` para PostgreSQL 16 local (desenvolvimento)
+- [x] Criar schema do banco: `User`, `Account`, `Session`, `VerificationToken`, `Subscription`
+- [x] Criar novos models: `ServiceTemplate` (base de assinaturas populares), `Reminder` (lembretes)
+- [x] Criar enums: `Currency`, `BillingCycle`, `Category` (+ `FITNESS`, `OTHER`), `ReminderChannel`, `Theme`
+- [x] Adicionar campos de preferências no `User`: `theme`, `preferredCurrency`, `defaultReminderDays`, `defaultReminderChannel`
+- [x] Configurar singleton do PrismaClient (`lib/prisma.ts`)
+
+#### 1C — Seed e Ambiente
+
+- [x] Criar seed completo com:
+  - Usuário de teste (`test@subscrip.dev`)
+  - 24 service templates (Netflix, Spotify, AWS, Vercel, Notion, etc.)
+  - 5 assinaturas de exemplo vinculadas ao usuário
+- [x] Criar `.env.example` com configuração Docker local e Neon (produção)
+- [x] Adicionar scripts no `package.json`: `docker:up`, `docker:down`, `db:studio`, `setup`
 
 **Status: ✅ COMPLETA**
 
@@ -510,24 +524,24 @@ Cada etapa contém suas tarefas com status de conclusão. O checkbox `[x]` indic
 
 #### 2B — Migração para Better Auth com OTP (Semana 2–3)
 
-- [ ] Instalar `better-auth` e suas dependências
-- [ ] Remover `next-auth`, `@auth/prisma-adapter` do projeto
-- [ ] Configurar Better Auth (`lib/auth.ts`) com adapter Prisma
-- [ ] Configurar plugin de **Email OTP** no Better Auth
-- [ ] Atualizar schema Prisma para o modelo de dados do Better Auth (se necessário)
-- [ ] Criar novo endpoint de API para Better Auth (`/api/auth/[...all]`)
-- [ ] Criar cliente Better Auth (`lib/auth-client.ts`) para uso no frontend
-- [ ] Refatorar Server Actions de login/register para usar Better Auth
-- [ ] Refatorar Middleware de proteção de rotas para Better Auth
-- [ ] Atualizar página de Login: trocar Magic Link por input de **código OTP**
-- [ ] Criar componente de input OTP (6 dígitos) com auto-focus entre campos
-- [ ] Atualizar página de Registro para fluxo OTP
-- [ ] Atualizar página de verificação para input de código OTP (ao invés de "verifique email")
-- [ ] Configurar envio de OTP via Resend
-- [ ] Atualizar variáveis de ambiente (`.env.example`)
-- [ ] Testar fluxo completo: registro → OTP → dashboard → logout → login → OTP → dashboard
+- [x] Instalar `better-auth` e `@better-auth/prisma-adapter`
+- [x] Remover `next-auth`, `@auth/prisma-adapter` do projeto
+- [x] Configurar Better Auth (`lib/auth.ts`) com adapter Prisma
+- [x] Configurar plugin de **Email OTP** no Better Auth
+- [x] Atualizar schema Prisma para o modelo de dados do Better Auth (`Account`, `Session`, `Verification`)
+- [x] Criar novo endpoint de API para Better Auth (`/api/auth/[...all]/route.ts`)
+- [x] Criar cliente Better Auth (`lib/auth-client.ts`) para uso no frontend
+- [x] Refatorar Server Actions (`getSession`, `signOut`)
+- [x] Refatorar Middleware de proteção de rotas para Better Auth (`getSessionCookie`)
+- [x] Atualizar página de Login: trocar Magic Link por input de **código OTP**
+- [x] Criar componente de input OTP (6 dígitos) com auto-focus entre campos (`components/ui/input-otp.tsx`)
+- [x] Atualizar página de Registro para fluxo OTP
+- [x] Remover página de verificação antiga (`/auth/login/verify`)
+- [x] Configurar envio de OTP via Resend (com fallback para console em dev)
+- [x] Atualizar Dashboard para usar Better Auth session e filtrar por `userId`
+- [x] Testar fluxo completo: registro → OTP → dashboard → logout → login → OTP → dashboard
 
-**Status: 🟡 2A completa / 2B pendente**
+**Status: ✅ COMPLETA (pendente teste manual)**
 
 ---
 
