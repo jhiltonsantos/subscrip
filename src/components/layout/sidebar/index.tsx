@@ -118,24 +118,30 @@ export function Sidebar({ user }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon
-          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
+          // Remove locale prefix for comparison
+          const pathnameWithoutLocale = pathname.replace(/^\/pt/, '')
+          const isActive = pathnameWithoutLocale === item.href || pathnameWithoutLocale.startsWith(`${item.href}/`)
           
           return (
             <LocaleLink
               key={item.href}
               href={item.href}
               className={`
-                flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group
+                flex items-center rounded-xl transition-all group
+                ${isCollapsed ? "justify-center px-3 py-4" : "gap-3 px-4 py-3"}
                 ${isActive 
-                  ? "text-emerald-600 dark:text-emerald-400" 
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                  ? "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400" 
+                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-100"
                 }
               `}
             >
-              <Icon className={`h-5 w-5 shrink-0 ${!isActive && "group-hover:scale-105 transition-transform"}`} />
+              <Icon 
+                className={`shrink-0 transition-transform h-5 w-5 ${!isActive && "group-hover:scale-105"}`}
+                strokeWidth={isActive ? 2.5 : 2}
+              />
               {!isCollapsed && (
                 <span className="text-sm font-medium">{item.label}</span>
               )}

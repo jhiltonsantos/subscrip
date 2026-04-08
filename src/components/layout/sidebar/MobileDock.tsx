@@ -57,7 +57,8 @@ export function MobileDock() {
         <div className="flex items-center justify-around px-2 py-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-200/80 dark:border-gray-800/80 shadow-lg">
           {navItems.map((item) => {
             const Icon = item.icon
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
+            const pathnameWithoutLocale = pathname.replace(/^\/pt/, '')
+            const isActive = pathnameWithoutLocale === item.href || pathnameWithoutLocale.startsWith(`${item.href}/`)
             
             return (
               <LocaleLink
