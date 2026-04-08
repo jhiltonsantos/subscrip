@@ -72,12 +72,6 @@
     "title": "Dashboard",
     "greeting": "Olá, {name}",
     "newSubscription": "Nova Assinatura",
-    "nav": {
-      "dashboard": "Dashboard",
-      "subscriptions": "Assinaturas",
-      "settings": "Configurações",
-      "profile": "Perfil"
-    },
     "cards": {
       "monthlySpend": "Gasto Mensal (Est.)",
       "conversionBase": "Conversão base: USD 1 = R$ 6",
@@ -92,6 +86,16 @@
       "empty": "Nenhuma assinatura encontrada.",
       "addFirst": "Adicione sua primeira assinatura"
     }
+  },
+  "header":{
+    "dashboard": "Dashboard",
+    "subscriptions": "Assinaturas",
+    "settings": "Configurações",
+    "profile": "Perfil",
+    "language": "Idioma",
+    "theme": "Tema",
+    "notifications": "Notificações",
+    "logout": "Sair"
   },
   "locale": {
     "en": "English",

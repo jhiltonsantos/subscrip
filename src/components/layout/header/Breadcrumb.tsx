@@ -30,15 +30,15 @@ export function Breadcrumb() {
 
         return (
           <div key={segment} className="flex items-center gap-2">
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <ChevronRight className="h-4 w-4 text-gray-400 hidden md:block" />
             {isLast ? (
-              <span className="font-medium text-gray-900 dark:text-gray-100 capitalize">
+              <span className="font-medium text-gray-900 dark:text-gray-100 capitalize hidden md:inline">
                 {label}
               </span>
             ) : (
               <LocaleLink 
                 href={href}
-                className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors capitalize"
+                className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors capitalize hidden md:inline"
               >
                 {label}
               </LocaleLink>

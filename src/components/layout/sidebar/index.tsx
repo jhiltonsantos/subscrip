@@ -25,23 +25,28 @@ interface SidebarProps {
 export function Sidebar({ user }: SidebarProps) {
   const t = useTranslations()
   const pathname = usePathname()
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 1024
+    }
+    return true
+  })
   const sidebarRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
   const navItems = [
     {
-      label: t("dashboard.nav.dashboard"),
+      label: t("header.dashboard"),
       href: "/dashboard",
       icon: LayoutDashboard,
     },
     {
-      label: t("dashboard.nav.subscriptions"),
+      label: t("header.subscriptions"),
       href: "/subscriptions",
       icon: CreditCard,
     },
     {
-      label: t("dashboard.nav.settings"),
+      label: t("header.settings"),
       href: "/settings",
       icon: Settings,
     },
@@ -82,7 +87,12 @@ export function Sidebar({ user }: SidebarProps) {
 
   useEffect(() => {
     if (sidebarRef.current) {
-      gsap.set(sidebarRef.current, { width: 280 })
+      const initialWidth = isCollapsed ? 88 : 280
+      gsap.set(sidebarRef.current, { width: initialWidth })
+      
+      if (isCollapsed && contentRef.current) {
+        gsap.set(contentRef.current, { opacity: 0 })
+      }
     }
   }, [])
 
