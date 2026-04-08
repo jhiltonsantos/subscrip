@@ -70,7 +70,7 @@ export function Sidebar({ user }: SidebarProps) {
         duration: 0.15,
       })
       gsap.to(sidebar, {
-        width: 80,
+        width: 88,
         duration: 0.3,
         ease: "power2.out",
         delay: 0.1,
@@ -89,11 +89,11 @@ export function Sidebar({ user }: SidebarProps) {
   return (
     <aside
       ref={sidebarRef}
-      className="fixed left-0 top-0 h-screen bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-r border-gray-200/80 dark:border-gray-800/80 flex flex-col"
+      className="fixed left-4 top-4 bottom-4 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl rounded-2xl border border-gray-200/80 dark:border-gray-800/80 flex flex-col shadow-lg"
       style={{ width: 280 }}
     >
       {/* Header */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200/50 dark:border-gray-800/50">
+      <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200/30 dark:border-gray-800/30">
         <div ref={contentRef}>
           <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
             {t("common.appName")}
@@ -137,7 +137,7 @@ export function Sidebar({ user }: SidebarProps) {
       </nav>
 
       {/* User Section */}
-      <div className="p-4 border-t border-gray-200/50 dark:border-gray-800/50">
+      <div className="p-4 border-t border-gray-200/30 dark:border-gray-800/30">
         {user && (
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-linear-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
@@ -167,12 +167,12 @@ export function Sidebar({ user }: SidebarProps) {
               </>
             )}
             {isCollapsed && (
-              <form action={signOut}>
+              <form action={signOut} className="flex justify-center mt-2">
                 <Button
                   variant="ghost"
                   size="icon"
                   type="submit"
-                  className="h-8 w-8 absolute bottom-16 left-1/2 -translate-x-1/2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20"
+                  className="h-8 w-8 text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20"
                   title="Sign out"
                 >
                   <LogOut className="h-4 w-4" />
