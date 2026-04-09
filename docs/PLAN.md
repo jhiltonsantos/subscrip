@@ -7,12 +7,13 @@
 
 ## 1. Resumo do Projeto
 
-O **Subscrip** é uma plataforma SaaS de gestão inteligente de finanças pessoais e empresariais, focada em resolver o problema do **"vazamento invisível de dinheiro"**: usuários que perdem o controle sobre múltiplas assinaturas ativas (Netflix, AWS, Vercel, academias, etc.) e acabam pagando por serviços que não utilizam ou sendo surpreendidos por renovações inesperadas.
+O **Subscrip** é uma plataforma SaaS de gestão inteligente de finanças pessoais e empresariais, focada em resolver o problema do **"vazamento invisível de dinheiro"**: usuários que perdem o controle sobre múltiplas assinaturas ativas (Netflix, AWS, Vercel, academias, etc.) e acabam pagando por serviços que não utilizam ou sendo surpreendidos por renovações inesperadas. Além do controle de assinaturas, o produto evolui para um **planejamento financeiro mensal completo**, onde o usuário organiza entradas, saídas recorrentes e despesas variáveis para ter visão clara do saldo do mês.
 
 ### Valor Entregue
 
 - **Centralização** de todas as assinaturas em um único painel
-- **Previsão exata** do gasto mensal e anual
+- **Planejamento mensal** com entradas, saídas e saldo previsto
+- **Previsão exata** do gasto mensal e anual com assinaturas
 - **Alertas** de próximas faturas (evitando surpresas no cartão)
 - **Conversão automática de moedas** (ex: custo da AWS em BRL com base no dólar atual)
 
@@ -31,14 +32,18 @@ O **Subscrip** é uma plataforma SaaS de gestão inteligente de finanças pessoa
 
 > Visão geral rápida das finanças do usuário.
 
-- **Cards de resumo:**
-  - Gasto mensal estimado (com conversão de moedas)
-  - Gasto anual estimado
+- **Cards de resumo financeiros:**
+  - Receitas planejadas do mês
+  - Outras saídas planejadas (contas, cartões, saúde, impostos, etc.)
+  - Assinaturas (estimativa mensal)
+  - Total de saídas (outras saídas + assinaturas)
+  - Saldo previsto do mês
+- **Cards de assinaturas:**
   - Total de assinaturas ativas
   - Próxima fatura (data + nome + valor)
 - **Gráfico de gastos por categoria** (pizza ou donut)
 - **Lista das próximas 5 faturas** (ordenadas por data)
-- **Acesso rápido:** botão "Nova Assinatura"
+- **Acesso rápido:** botões "Nova Assinatura" e "Adicionar Item do Mês"
 
 ### 2.3 Base de Assinaturas Populares
 
@@ -167,6 +172,35 @@ O **Subscrip** é uma plataforma SaaS de gestão inteligente de finanças pessoa
 - **Lembrete padrão** para novas assinaturas (ex: 3 dias antes, email)
 - **Desativar todos os lembretes** (modo silêncioso)
 - **Resumo semanal** por email (dom/seg) com próximas cobranças
+
+### 2.6 Planejamento Financeiro Mensal
+
+> Organização mensal completa de entradas e saídas para prever saldo e tomada de decisão.
+
+- **Escopo por mês** (ano + mês), por usuário
+- **Entradas (A Receber):**
+  - Nome da entrada (ex: salário, freelas, comissão)
+  - Valor
+  - Moeda
+- **Saídas planejadas:**
+  - Nome do custo (ex: aluguel, cartão, plano de saúde, DAS, parcela)
+  - Valor
+  - Moeda
+  - Bucket (categoria financeira de planejamento)
+- **Buckets padrão para resumo mensal:**
+  - `MONTHLY_BILLS` (contas do mês)
+  - `CREDIT_CARD` (fatura de cartão)
+  - `FIXED_CARD` (cartões fixos/parcelas fixas)
+  - `OTHER` (demais custos)
+- **Totais calculados automaticamente:**
+  - Total a receber
+  - Total de saídas planejadas
+  - Assinaturas estimadas no mês
+  - Total de saídas consolidadas
+  - Saldo do mês
+- **Regra de produto para evitar duplicação:**
+  - Assinaturas permanecem como fonte oficial de cobrança/lembrete
+  - Planejamento mensal armazena linhas manuais de orçamento
 
 ---
 
@@ -398,12 +432,13 @@ enum Currency    { BRL, USD, EUR }
 enum BillingCycle { MONTHLY, YEARLY, WEEKLY }
 enum Category    { INFRASTRUCTURE, ENTERTAINMENT, EDUCATION, TOOLS, FITNESS, OTHER }
 enum ReminderChannel { EMAIL, PUSH, BOTH }
+enum ExpenseBucket { MONTHLY_BILLS, CREDIT_CARD, FIXED_CARD, OTHER }
 
 model User {
   id, name?, email (unique), emailVerified?, image?
   preferredCurrency, theme (dark/light/system)
   defaultReminderDays, defaultReminderChannel
-  → accounts[], sessions[], subscriptions[], reminders[]
+  → accounts[], sessions[], subscriptions[], reminders[], monthlyPlans[]
 }
 
 model Account   { userId, type, provider, providerAccountId, tokens... }
@@ -438,6 +473,79 @@ model Reminder {
   lastSentAt?
   @@index([subscriptionId])
 }
+
+model MonthlyPlan {
+  id, year, month, notes?
+  userId → User
+  → incomes[], expenses[]
+  @@unique([userId, year, month])
+  @@index([userId, year, month])
+}
+
+model PlannedIncome {
+  id, name
+  amount (Decimal 10,2), currency
+  sortOrder
+  monthlyPlanId → MonthlyPlan
+  @@index([monthlyPlanId])
+}
+
+model PlannedExpense {
+  id, name
+  amount (Decimal 10,2), currency
+  expenseBucket (MONTHLY_BILLS, CREDIT_CARD, FIXED_CARD, OTHER)
+  sortOrder
+  monthlyPlanId → MonthlyPlan
+  @@index([monthlyPlanId])
+}
+```
+
+### Fluxo de Agregação Financeira
+
+```mermaid
+flowchart LR
+  subgraph dataSources [FontesDeDados]
+    Sub[Subscription]
+    Inc[PlannedIncome]
+    Exp[PlannedExpense]
+  end
+  Calc[monthSummary]
+  Dash[Dashboard]
+  PlanPage[PlanPage]
+  Sub --> Calc
+  Inc --> Calc
+  Exp --> Calc
+  Calc --> Dash
+  Inc --> PlanPage
+  Exp --> PlanPage
+```
+
+### Diagrama de Caso de Uso
+
+```mermaid
+flowchart TB
+  User[Usuario]
+  UC1[GerenciarAssinaturas]
+  UC2[PlanejarMes]
+  UC3[RegistrarEntradas]
+  UC4[RegistrarSaidas]
+  UC5[VisualizarResumoMensal]
+  UC6[VerProximaFatura]
+  UC7[ReceberLembretes]
+
+  User --> UC1
+  User --> UC2
+  User --> UC3
+  User --> UC4
+  User --> UC5
+  User --> UC6
+  User --> UC7
+
+  UC2 --> UC3
+  UC2 --> UC4
+  UC2 --> UC5
+  UC1 --> UC6
+  UC1 --> UC7
 ```
 
 ---
@@ -570,7 +678,7 @@ Cada etapa contém suas tarefas com status de conclusão. O checkbox `[x]` indic
 
 ### FASE 4 — Dashboard Completo (Semana 4–5)
 
-> **Objetivo:** Transformar o dashboard básico em uma plataforma funcional e rica.
+> **Objetivo:** Transformar o dashboard básico em uma visão consolidada de assinaturas + planejamento financeiro mensal.
 
 #### 4A — Layout e Navegação
 
@@ -585,6 +693,10 @@ Cada etapa contém suas tarefas com status de conclusão. O checkbox `[x]` indic
 - [x] Card: Gasto Mensal Estimado (com conversão básica USD→BRL)
 - [x] Card: Assinaturas Ativas (contagem)
 - [x] Card: Próxima Fatura (data + nome)
+- [ ] Card: Receitas planejadas do mês
+- [ ] Card: Outras saídas planejadas do mês
+- [ ] Card: Total de saídas consolidadas (planejamento + assinaturas)
+- [ ] Card: Saldo previsto do mês
 - [ ] Card: Gasto Anual Estimado
 - [ ] Animação GSAP nos números (counter animation ao carregar)
 - [ ] Conversão de moedas com taxa real (API de câmbio ou config manual)
@@ -605,8 +717,40 @@ Cada etapa contém suas tarefas com status de conclusão. O checkbox `[x]` indic
 - [ ] Refatorar queries do dashboard para filtrar por `userId` da sessão autenticada
 - [ ] Garantir isolamento total de dados entre usuários
 - [ ] Seed vinculado a um usuário de teste
+- [ ] Garantir isolamento por `userId` também em `MonthlyPlan`, `PlannedIncome` e `PlannedExpense`
 
 **Status: 🟡 PARCIALMENTE IMPLEMENTADA**
+
+---
+
+### FASE 4.5 — Planejamento Financeiro Mensal (Semana 5)
+
+> **Objetivo:** Implementar a camada de planejamento do mês com entradas, saídas e saldo previsto.
+
+#### 4.5A — Modelagem e Persistência
+
+- [ ] Adicionar model `MonthlyPlan` com chave única por `userId + year + month`
+- [ ] Adicionar model `PlannedIncome` para entradas mensais
+- [ ] Adicionar model `PlannedExpense` com enum `ExpenseBucket`
+- [ ] Criar índices para leitura eficiente por mês/usuário
+- [ ] Atualizar seed com plano mensal de exemplo para usuário de teste
+
+#### 4.5B — Backend (Server Actions + Validação)
+
+- [ ] Criar função `getOrCreateMonthlyPlan(userId, year, month)`
+- [ ] Criar Server Actions para CRUD de `PlannedIncome`
+- [ ] Criar Server Actions para CRUD de `PlannedExpense`
+- [ ] Validar payloads com Zod (nome, valor, moeda, bucket)
+- [ ] Implementar agregador `monthSummary` no servidor
+
+#### 4.5C — Interface de Planejamento
+
+- [ ] Criar rota `/plan` (ou `/dashboard/plan`) com seletor de mês/ano
+- [ ] Exibir colunas de entradas e saídas em formato de planejamento mensal
+- [ ] Exibir resumo: receber total, custos totais, assinaturas, saldo
+- [ ] Garantir experiência mobile-first para edição rápida
+
+**Status: 🔴 PENDENTE**
 
 ---
 
@@ -714,8 +858,8 @@ Cada etapa contém suas tarefas com status de conclusão. O checkbox `[x]` indic
 > **Objetivo:** Visualizações que ajudem o usuário a entender seus gastos.
 
 - [ ] Instalar biblioteca de gráficos (Recharts ou similar compatível com SSR)
-- [ ] Gráfico de pizza: gastos por categoria
-- [ ] Gráfico de linha: evolução de gastos mensais
+- [ ] Gráfico de pizza: gastos por categoria (incluindo buckets do planejamento mensal)
+- [ ] Gráfico de linha: evolução mensal de receitas vs saídas
 - [ ] Gráfico de barras: comparação entre assinaturas
 - [ ] Integrar gráficos no dashboard como seção
 - [ ] Animação GSAP de entrada nos gráficos
@@ -798,8 +942,8 @@ pnpm dev
 1. **Aplicar paleta de cores verde** e configurar dark/light mode (`next-themes`)
 2. **Migrar autenticação** de NextAuth para Better Auth com OTP (Fase 2B)
 3. **Criar base de assinaturas populares** no banco (model `ServiceTemplate`)
-4. **Implementar layout do dashboard** com sidebar responsiva (mobile-first)
-5. **Instalar GSAP** e refatorar a landing page (Fase 3)
+4. **Implementar camada de planejamento mensal** (`MonthlyPlan`, `PlannedIncome`, `PlannedExpense`)
+5. **Refatorar dashboard** para consolidar entradas, saídas, assinaturas e saldo
 
 ---
 
@@ -848,7 +992,7 @@ O **Resend** foi escolhido por:
 
 ### Multi-tenant por userId
 
-Toda query de dados de assinatura **deve** ser filtrada por `userId` da sessão, garantindo isolamento total de dados entre usuários.
+Toda query de dados (assinaturas e planejamento mensal) **deve** ser filtrada por `userId` da sessão, garantindo isolamento total de dados entre usuários.
 
 ---
 
@@ -874,6 +1018,7 @@ Toda query de dados de assinatura **deve** ser filtrada por `userId` da sessão,
 | **Fase 2B** | Migração para Better Auth (OTP) | 🔴 Pendente |
 | **Fase 3** | Landing Page com GSAP | 🔴 Pendente |
 | **Fase 4** | Dashboard Completo | 🟡 Parcial |
+| **Fase 4.5** | Planejamento Financeiro Mensal | 🔴 Pendente |
 | **Fase 5** | CRUD de Assinaturas | 🔴 Pendente |
 | **Fase 6** | Alertas e Notificações | 🔴 Pendente |
 | **Fase 7** | Conversão de Moedas | 🟡 Básico |
