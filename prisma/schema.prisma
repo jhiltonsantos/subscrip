@@ -42,26 +42,64 @@ enum Theme {
   SYSTEM
 }
 
+enum ExpenseBucket {
+  MONTHLY_BILLS
+  CREDIT_CARD
+  FIXED_CARD
+  OTHER
+}
+
+enum PaymentMethodType {
+  CREDIT_CARD
+  DEBIT_CARD
+  PIX
+  BANK_TRANSFER
+  BOLETO
+  CASH
+  OTHER
+}
+
+enum PlanEntryType {
+  INCOME
+  EXPENSE
+}
+
+enum PlanEntrySourceType {
+  MANUAL
+  SUBSCRIPTION
+  CREDIT_CARD
+  OTHER
+}
+
+enum Language {
+  pt-BR
+  en-US
+}
+
 model User {
-  id            String   @id @default(cuid())
-  name          String?
-  email         String   @unique
-  emailVerified Boolean  @default(false)
-  image         String?
+  id                      String            @id @default(cuid())
+  name                    String?
+  email                   String            @unique
+  emailVerified           Boolean           @default(false)
+  image                   String?
 
   // Preferences
-  preferredCurrency   Currency         @default(BRL)
-  theme               Theme            @default(SYSTEM)
-  defaultReminderDays Int              @default(3)
-  defaultReminderChannel ReminderChannel @default(EMAIL)
+  preferredCurrency       Currency          @default(BRL)
+  theme                   Theme             @default(SYSTEM)
+  defaultReminderDays     Int               @default(3)
+  defaultReminderChannel  ReminderChannel   @default(EMAIL)
+  language                String            @default(en-US)
 
-  accounts      Account[]
-  sessions      Session[]
-  subscriptions Subscription[]
-  reminders     Reminder[]
+  accounts                Account[]
+  sessions                Session[]
+  subscriptions           Subscription[]
+  reminders               Reminder[]
+  monthlyPlans            MonthlyPlan[]
+  paymentMethods          PaymentMethod[]
+  paymentCards            PaymentCard[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
 }
 
 model Account {
@@ -134,7 +172,11 @@ model Subscription {
   userId          String
   user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  paymentMethodId String?
+  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+
   reminders       Reminder[]
+  planEntries     MonthlyPlanEntry[]
 
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -142,6 +184,7 @@ model Subscription {
   @@index([userId])
   @@index([nextBillingDate])
   @@index([serviceTemplateId])
+  @@index([paymentMethodId])
 }
 
 model ServiceTemplate {
@@ -179,4 +222,144 @@ model Reminder {
 
   @@index([subscriptionId])
   @@index([userId])
+}
+
+model PaymentMethod {
+  id              String            @id @default(uuid())
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name            String
+  type            PaymentMethodType
+  isActive        Boolean           @default(true)
+
+  paymentCard     PaymentCard?
+  subscriptions   Subscription[]
+  expenses        PlannedExpense[]
+  planEntries     MonthlyPlanEntry[]
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([userId])
+  @@index([type])
+}
+
+model PaymentCard {
+  id              String          @id @default(uuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  paymentMethodId String          @unique
+  paymentMethod   PaymentMethod   @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
+
+  nickname        String
+  brand           String?
+  holderName      String?
+  last4           String?
+  closingDay      Int?
+  dueDay          Int?
+  limitAmount     Decimal?        @db.Decimal(10, 2)
+
+  planEntries     MonthlyPlanEntry[]
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([userId])
+}
+
+model MonthlyPlan {
+  id              String          @id @default(uuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  year            Int
+  month           Int
+  notes           String?
+
+  incomes         PlannedIncome[]
+  expenses        PlannedExpense[]
+  entries         MonthlyPlanEntry[]
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([userId, year, month])
+  @@index([userId, year, month])
+}
+
+model PlannedIncome {
+  id              String          @id @default(uuid())
+  monthlyPlanId   String
+  monthlyPlan     MonthlyPlan     @relation(fields: [monthlyPlanId], references: [id], onDelete: Cascade)
+
+  name            String
+  amount          Decimal         @db.Decimal(10, 2)
+  currency        Currency        @default(BRL)
+  sortOrder       Int             @default(0)
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([monthlyPlanId])
+}
+
+model PlannedExpense {
+  id              String          @id @default(uuid())
+  monthlyPlanId   String
+  monthlyPlan     MonthlyPlan     @relation(fields: [monthlyPlanId], references: [id], onDelete: Cascade)
+
+  name            String
+  amount          Decimal         @db.Decimal(10, 2)
+  currency        Currency        @default(BRL)
+  expenseBucket   ExpenseBucket   @default(OTHER)
+  sortOrder       Int             @default(0)
+
+  paymentMethodId String?
+  paymentMethod   PaymentMethod?  @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([monthlyPlanId])
+  @@index([paymentMethodId])
+}
+
+model MonthlyPlanEntry {
+  id              String               @id @default(uuid())
+  monthlyPlanId   String
+  monthlyPlan     MonthlyPlan          @relation(fields: [monthlyPlanId], references: [id], onDelete: Cascade)
+
+  entryType       PlanEntryType
+  sourceType      PlanEntrySourceType
+  sourceId        String?
+
+  name            String
+  amount          Decimal              @db.Decimal(10, 2)
+  currency        Currency             @default(BRL)
+  occursOn        DateTime
+
+  expenseBucket   ExpenseBucket?
+  paymentMethodId String?
+  paymentMethod   PaymentMethod?       @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+  paymentCardId   String?
+  paymentCard     PaymentCard?         @relation(fields: [paymentCardId], references: [id], onDelete: SetNull)
+
+  subscriptionId  String?
+  subscription    Subscription?        @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  isAutoGenerated Boolean              @default(false)
+  isLocked        Boolean              @default(false)
+
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([monthlyPlanId])
+  @@index([sourceType, sourceId])
+  @@index([occursOn])
+  @@index([paymentMethodId])
+  @@index([paymentCardId])
+  @@index([subscriptionId])
+  @@unique([monthlyPlanId, sourceType, sourceId, occursOn])
 }
