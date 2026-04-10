@@ -71,11 +71,6 @@ enum PlanEntrySourceType {
   OTHER
 }
 
-enum Language {
-  pt-BR
-  en-US
-}
-
 model User {
   id                      String            @id @default(cuid())
   name                    String?
@@ -88,7 +83,7 @@ model User {
   theme                   Theme             @default(SYSTEM)
   defaultReminderDays     Int               @default(3)
   defaultReminderChannel  ReminderChannel   @default(EMAIL)
-  language                String            @default(en-US)
+  language                String            @default("en-US")
 
   accounts                Account[]
   sessions                Session[]
