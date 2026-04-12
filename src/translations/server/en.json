@@ -11,5 +11,27 @@
       "expires": "This code expires in 5 minutes.",
       "ignore": "If you didn't request this code, ignore this email."
     }
+  },
+  "actions": {
+    "subscriptions": {
+      "assertPaymentMethodOwnedByUser":{
+        "error": "Payment method not found or does not belong to the user."
+      },
+      "assertServiceTemplateExists":{
+        "error": "Service template not found."
+      }
+    }
+  },
+  "common": {
+    "unauthorized": "Unauthorized.",
+    "notFound": "Not found.",
+    "invalidData": "Invalid data.",
+    "internalServerError": "Internal server error.",
+    "badRequest": "Bad request.",
+    "unprocessableEntity": "Unprocessable entity.",
+    "notImplemented": "Not implemented.",
+    "serviceUnavailable": "Service unavailable.",
+    "gatewayTimeout": "Gateway timeout.",
+    "conflict": "Conflict."
   }
 }
