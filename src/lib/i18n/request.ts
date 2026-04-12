@@ -8,8 +8,14 @@ export default getRequestConfig(async () => {
   const raw = headerLocale || cookieLocale || defaultLocale
   const locale = locales.includes(raw as Locale) ? raw : defaultLocale
 
+  const [clientMessages, serverMessages] = await Promise.all([
+    import(`@/translations/client/${locale}.json`).then((m) => m.default),
+    import(`@/translations/server/${locale}.json`).then((m) => m.default),
+  ])
+
   return {
     locale,
-    messages: (await import(`@/translations/client/${locale}.json`)).default,
+    // Server messages (email templates, server actions) overlay client UI strings.
+    messages: { ...serverMessages, ...clientMessages },
   }
 })
