@@ -149,6 +149,7 @@ model Verification {
 model Subscription {
   id              String       @id @default(uuid())
   name            String
+  planLabel       String?
 
   price           Decimal      @db.Decimal(10, 2)
   currency        Currency     @default(BRL)

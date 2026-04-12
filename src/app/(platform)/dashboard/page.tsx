@@ -49,9 +49,6 @@ export default async function DashboardPage() {
               {t("greeting", { name: session.user.name || session.user.email })}
             </p>
           </div>
-          <Button className="bg-gradient-primary hover:opacity-90 transition-opacity">
-            {t("newSubscription")}
-          </Button>
         </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

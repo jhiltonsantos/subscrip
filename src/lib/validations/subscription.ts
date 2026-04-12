@@ -1,9 +1,13 @@
 import { z } from "zod"
 import { BillingCycle, Category, Currency } from "@prisma/client"
+import { getTranslations } from "next-intl/server"
+
+const t = await getTranslations()
 
 export const subscriptionCreateSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório").max(200),
-  price: z.coerce.number().positive("Preço deve ser maior que zero"),
+  name: z.string().min(1, t("common.required")).max(200),
+  planLabel: z.string().max(120).nullable().optional(),
+  price: z.coerce.number().positive(t("common.positive")),
   currency: z.nativeEnum(Currency),
   billingCycle: z.nativeEnum(BillingCycle),
   category: z.nativeEnum(Category),

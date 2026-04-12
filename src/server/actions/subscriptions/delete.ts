@@ -31,5 +31,6 @@ export async function deleteSubscription(
   })
 
   revalidatePath("/dashboard")
+  revalidatePath("/subscriptions")
   return { success: true, data: { id } }
 }

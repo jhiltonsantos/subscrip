@@ -11,7 +11,10 @@
     "next": "Próximo",
     "submit": "Enviar",
     "confirm": "Confirmar",
-    "or": "ou"
+    "or": "ou",
+    "positive": "Deve ser positivo",
+    "required": "Obrigatório",
+    "invalid": "Inválido"
   },
   "metadata": {
     "title": "Subscrip | Gestão de Assinaturas",
@@ -100,5 +103,77 @@
   "locale": {
     "en": "English",
     "pt": "Português"
+  },
+  "subscriptionsPage": {
+    "title": "Assinaturas",
+    "subtitle": "Gerencie suas assinaturas recorrentes.",
+    "add": "Adicionar assinatura",
+    "empty": "Nenhuma assinatura ainda. Adicione uma para começar.",
+    "loadError": "Não foi possível carregar as assinaturas.",
+    "optionsError": "Não foi possível carregar o formulário.",
+    "table": {
+      "name": "Nome",
+      "price": "Preço",
+      "nextBilling": "Próxima cobrança",
+      "status": "Status",
+      "actions": "Ações"
+    },
+    "status": {
+      "active": "Ativa",
+      "inactive": "Inativa"
+    },
+    "rowActions": {
+      "open": "Ver detalhes",
+      "edit": "Editar",
+      "delete": "Excluir"
+    },
+    "form": {
+      "createTitle": "Nova assinatura",
+      "editTitle": "Editar assinatura",
+      "name": "Nome",
+      "price": "Preço",
+      "currency": "Moeda",
+      "billingCycle": "Ciclo de cobrança",
+      "category": "Categoria",
+      "startDate": "Data de início",
+      "nextBillingDate": "Próxima cobrança",
+      "active": "Ativa",
+      "serviceTemplate": "Template de serviço",
+      "planLabel": "Plano / faixa",
+      "planLabelHint": "ex.: Padrão, Premium, com anúncios",
+      "paymentMethod": "Método de pagamento",
+      "none": "Nenhum",
+      "save": "Salvar",
+      "saving": "Salvando…",
+      "cancel": "Cancelar",
+      "error": "Algo deu errado. Tente novamente."
+    },
+    "delete": {
+      "title": "Excluir assinatura?",
+      "description": "Esta ação não pode ser desfeita.",
+      "confirm": "Excluir",
+      "deleting": "Excluindo…",
+      "cancel": "Cancelar"
+    },
+    "detail": {
+      "title": "Detalhes da assinatura",
+      "back": "Voltar às assinaturas",
+      "overview": "Visão geral",
+      "billing": "Cobrança",
+      "relations": "Vínculos",
+      "reminders": "Lembretes",
+      "noReminders": "Nenhum lembrete configurado.",
+      "serviceTemplate": "Template",
+      "paymentMethod": "Método de pagamento",
+      "links": "Links",
+      "pricingPage": "Preços",
+      "cancelPage": "Cancelar assinatura",
+      "notFound": "Assinatura não encontrada.",
+      "loadError": "Não foi possível carregar esta assinatura.",
+      "daysBefore": "{days} dias antes",
+      "channel": "Canal",
+      "enabled": "Ativo",
+      "disabled": "Desativado"
+    }
   }
 }

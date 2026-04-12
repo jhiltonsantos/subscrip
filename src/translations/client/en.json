@@ -11,7 +11,10 @@
     "next": "Next",
     "submit": "Submit",
     "confirm": "Confirm",
-    "or": "or"
+    "or": "or",
+    "positive": "Must be positive",
+    "required": "Required",
+    "invalid": "Invalid"
   },
   "metadata": {
     "title": "Subscrip | Subscription Management",
@@ -100,5 +103,77 @@
   "locale": {
     "en": "English",
     "pt": "Português"
+  },
+  "subscriptionsPage": {
+    "title": "Subscriptions",
+    "subtitle": "Manage your recurring subscriptions.",
+    "add": "Add subscription",
+    "empty": "No subscriptions yet. Add one to get started.",
+    "loadError": "Could not load subscriptions.",
+    "optionsError": "Could not load form options.",
+    "table": {
+      "name": "Name",
+      "price": "Price",
+      "nextBilling": "Next billing",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "rowActions": {
+      "open": "View details",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "form": {
+      "createTitle": "New subscription",
+      "editTitle": "Edit subscription",
+      "name": "Name",
+      "price": "Price",
+      "currency": "Currency",
+      "billingCycle": "Billing cycle",
+      "category": "Category",
+      "startDate": "Start date",
+      "nextBillingDate": "Next billing date",
+      "active": "Active",
+      "serviceTemplate": "Service template",
+      "planLabel": "Plan / tier",
+      "planLabelHint": "e.g. Standard, Premium, with ads",
+      "paymentMethod": "Payment method",
+      "none": "None",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "error": "Something went wrong. Try again."
+    },
+    "delete": {
+      "title": "Delete subscription?",
+      "description": "This action cannot be undone.",
+      "confirm": "Delete",
+      "deleting": "Deleting…",
+      "cancel": "Cancel"
+    },
+    "detail": {
+      "title": "Subscription details",
+      "back": "Back to subscriptions",
+      "overview": "Overview",
+      "billing": "Billing",
+      "relations": "Linked records",
+      "reminders": "Reminders",
+      "noReminders": "No reminders configured.",
+      "serviceTemplate": "Template",
+      "paymentMethod": "Payment method",
+      "links": "Links",
+      "pricingPage": "Pricing",
+      "cancelPage": "Cancel subscription",
+      "notFound": "Subscription not found.",
+      "loadError": "Could not load this subscription.",
+      "daysBefore": "{days} days before",
+      "channel": "Channel",
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    }
   }
 }
