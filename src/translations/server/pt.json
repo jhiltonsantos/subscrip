@@ -11,5 +11,27 @@
       "expires": "Este código expira em 5 minutos.",
       "ignore": "Se você não solicitou este código, ignore este email."
     }
+  },
+  "actions": {
+    "subscriptions": {
+      "assertPaymentMethodOwnedByUser":{
+        "error": "Método de pagamento não encontrado ou não pertence ao usuário."
+      },
+      "assertServiceTemplateExists":{
+        "error": "Template de serviço não encontrado."
+      }
+    }
+  },
+  "common": {
+    "unauthorized": "Não autenticado.",
+    "notFound": "Não encontrado.",
+    "invalidData": "Dados inválidos.",
+    "internalServerError": "Erro interno do servidor.",
+    "badRequest": "Requisição inválida.",
+    "unprocessableEntity": "Entidade não processável.",
+    "notImplemented": "Não implementado.",
+    "serviceUnavailable": "Serviço indisponível.",
+    "gatewayTimeout": "Tempo limite de gateway.",
+    "conflict": "Conflito."
   }
 }
