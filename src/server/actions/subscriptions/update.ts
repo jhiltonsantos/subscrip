@@ -61,6 +61,12 @@ export async function updateSubscription(
   const updateData: Prisma.SubscriptionUpdateInput = {}
 
   if (data.name !== undefined) updateData.name = data.name
+  if (data.planLabel !== undefined) {
+    updateData.planLabel =
+      data.planLabel && data.planLabel.trim() !== ""
+        ? data.planLabel.trim()
+        : null
+  }
   if (data.price !== undefined) updateData.price = new Prisma.Decimal(data.price)
   if (data.currency !== undefined) updateData.currency = data.currency
   if (data.billingCycle !== undefined) updateData.billingCycle = data.billingCycle
@@ -85,5 +91,6 @@ export async function updateSubscription(
   })
 
   revalidatePath("/dashboard")
+  revalidatePath("/subscriptions")
   return { success: true, data: serializeSubscription(row) }
 }

@@ -20,6 +20,34 @@ async function getLocaleFromCookie(): Promise<string> {
   }
 }
 
+function buildTrustedOrigins(): string[] {
+  const origins = new Set<string>()
+  const candidates = [process.env.BETTER_AUTH_URL, process.env.APP_URL]
+
+  for (const candidate of candidates) {
+    if (!candidate) continue
+
+    try {
+      const url = new URL(candidate)
+      origins.add(url.origin)
+
+      if (url.hostname.startsWith("www.")) {
+        origins.add(`${url.protocol}//${url.hostname.slice(4)}`)
+      } else {
+        origins.add(`${url.protocol}//www.${url.hostname}`)
+      }
+    } catch {
+      // Ignore invalid URL values and keep defaults below.
+    }
+  }
+
+  if (origins.size === 0) {
+    origins.add("http://localhost:3000")
+  }
+
+  return Array.from(origins)
+}
+
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
@@ -88,9 +116,7 @@ export const auth = betterAuth({
       maxAge: 60 * 5, // 5 minutes
     },
   },
-  trustedOrigins: [
-    process.env.BETTER_AUTH_URL || "http://localhost:3000",
-  ],
+  trustedOrigins: buildTrustedOrigins(),
 })
 
 export type Session = typeof auth.$Infer.Session

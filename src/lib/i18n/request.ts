@@ -1,5 +1,6 @@
 import { getRequestConfig } from "next-intl/server"
 import { cookies, headers } from "next/headers"
+import { mergeMessages } from "./merge-messages"
 import { locales, defaultLocale, Locale } from "./config"
 
 export default getRequestConfig(async () => {
@@ -15,7 +16,9 @@ export default getRequestConfig(async () => {
 
   return {
     locale,
-    // Server messages (email templates, server actions) overlay client UI strings.
-    messages: { ...serverMessages, ...clientMessages },
+    messages: mergeMessages(
+      serverMessages as Record<string, unknown>,
+      clientMessages as Record<string, unknown>
+    ),
   }
 })
