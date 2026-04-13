@@ -5,10 +5,14 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, type Resolver } from "react-hook-form"
 import { addMonths } from "date-fns"
 import {
-  BillingCycle,
-  Category,
-  Currency,
-} from "@prisma/client"
+  BILLING_CYCLE_VALUES,
+  CATEGORY_VALUES,
+  CURRENCY_VALUES,
+  DEFAULT_SUBSCRIPTION_FORM,
+  type BillingCycle,
+  type Category,
+  type Currency,
+} from "@/lib/subscription-constants"
 import { subscriptionCreateSchema } from "@/lib/validations/subscription"
 import {
   createSubscription,
@@ -60,9 +64,9 @@ function createEmptyDefaults(): SubscriptionFormValues {
   return {
     name: "",
     price: 9.99,
-    currency: Currency.BRL,
-    billingCycle: BillingCycle.MONTHLY,
-    category: Category.OTHER,
+    currency: DEFAULT_SUBSCRIPTION_FORM.currency,
+    billingCycle: DEFAULT_SUBSCRIPTION_FORM.billingCycle,
+    category: DEFAULT_SUBSCRIPTION_FORM.category,
     startDate: start,
     nextBillingDate: addMonths(start, 1),
     active: true,
@@ -281,7 +285,7 @@ export function SubscriptionForm({
                   <FormLabel>{t("form.currency")}</FormLabel>
                   <FormControl>
                     <select {...field} className={selectClassName}>
-                      {Object.values(Currency).map((currency) => (
+                      {CURRENCY_VALUES.map((currency) => (
                         <option key={currency} value={currency}>
                           {currency}
                         </option>
@@ -303,7 +307,7 @@ export function SubscriptionForm({
                   <FormLabel>{t("form.billingCycle")}</FormLabel>
                   <FormControl>
                     <select {...field} className={selectClassName}>
-                      {Object.values(BillingCycle).map((billingCycle) => (
+                      {BILLING_CYCLE_VALUES.map((billingCycle) => (
                         <option key={billingCycle} value={billingCycle}>
                           {billingCycle}
                         </option>
@@ -322,7 +326,7 @@ export function SubscriptionForm({
                   <FormLabel>{t("form.category")}</FormLabel>
                   <FormControl>
                     <select {...field} className={selectClassName}>
-                      {Object.values(Category).map((category) => (
+                      {CATEGORY_VALUES.map((category) => (
                         <option key={category} value={category}>
                           {category}
                         </option>
