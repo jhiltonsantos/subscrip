@@ -43,9 +43,15 @@ export async function createSubscription(
   const stErr = await assertServiceTemplateExists(data.serviceTemplateId)
   if (stErr) return stErr
 
+  const planLabel =
+    data.planLabel && data.planLabel.trim() !== ""
+      ? data.planLabel.trim()
+      : null
+
   const row = await prisma.subscription.create({
     data: {
       name: data.name,
+      planLabel,
       price: new Prisma.Decimal(data.price),
       currency: data.currency,
       billingCycle: data.billingCycle,
@@ -61,5 +67,6 @@ export async function createSubscription(
   })
 
   revalidatePath("/dashboard")
+  revalidatePath("/subscriptions")
   return { success: true, data: serializeSubscription(row) }
 }
