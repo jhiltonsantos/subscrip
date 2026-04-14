@@ -3,9 +3,15 @@
 import { useLocale, useTranslations } from "next-intl"
 import { usePathname } from "next/navigation"
 import { locales } from "@/lib/i18n/config"
-import { Globe } from "lucide-react"
+import { ChevronDown, Globe } from "lucide-react"
+import { cn } from "@/lib/utils/helpers"
 
-export function LocaleSwitcher() {
+interface LocaleSwitcherProps {
+  className?: string
+  selectClassName?: string
+}
+
+export function LocaleSwitcher({ className, selectClassName }: LocaleSwitcherProps) {
   const t = useTranslations("locale")
   const locale = useLocale()
   const pathname = usePathname()
@@ -21,19 +27,28 @@ export function LocaleSwitcher() {
   }
 
   return (
-    <div className="relative inline-flex items-center gap-1.5">
-      <Globe className="h-4 w-4 text-muted-foreground" />
+    <div
+      className={cn(
+        "relative inline-flex h-9 items-center gap-1.5 rounded-md border border-transparent bg-transparent px-2.5 transition-colors hover:bg-accent/40",
+        className
+      )}
+    >
+      <Globe className="h-3.5 w-3.5 text-muted-foreground" />
       <select
         value={locale}
         onChange={(e) => handleChange(e.target.value)}
-        className="appearance-none bg-transparent text-sm text-muted-foreground hover:text-foreground cursor-pointer focus:outline-none pr-4"
+        className={cn(
+          "h-full cursor-pointer appearance-none bg-transparent pr-4 text-sm font-medium text-muted-foreground hover:text-foreground focus:outline-none",
+          selectClassName
+        )}
       >
         {locales.map((loc) => (
-          <option key={loc} value={loc}>
+          <option key={loc} value={loc} className="bg-background text-foreground">
             {t(loc)}
           </option>
         ))}
       </select>
+      <ChevronDown className="pointer-events-none absolute right-2 h-3.5 w-3.5 text-muted-foreground" />
     </div>
   )
 }

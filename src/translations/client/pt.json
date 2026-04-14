@@ -24,9 +24,16 @@
     "signIn": "Entrar",
     "getStarted": "Começar Agora",
     "hero": {
-      "title": "Controle suas assinaturas\nem um só lugar.",
-      "description": "Pare de perder dinheiro com renovações esquecidas. O Subscrip te avisa antes da fatura chegar.",
-      "cta": "Criar Conta Grátis"
+      "title": "Gerencie assinaturas,\nganhos e gastos em um só lugar.",
+      "description": "Tenha uma visão integral das suas finanças recorrentes com alertas inteligentes e acompanhamento mensal em tempo real.",
+      "cta": "Criar Conta Grátis",
+      "metrics": {
+        "monthlySpend": "Gasto mensal consolidado",
+        "savings": "em economia no mês",
+        "activeSubscriptions": "Assinaturas ativas",
+        "gains": "Ganhos do mês",
+        "controlMessage": "Centralize tudo em um painel e acompanhe cada assinatura sem perder dinheiro com cobranças esquecidas."
+      }
     }
   },
   "auth": {
