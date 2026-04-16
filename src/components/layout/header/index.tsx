@@ -33,7 +33,7 @@ export function Header({ variant }: HeaderProps) {
 
   // Landing variant
   return (
-    <header className="border-b border-gray-200/50 bg-background/50 py-2 dark:border-gray-800/50">
+    <header className="relative z-40 border-b border-gray-200/50 bg-background/50 py-2 dark:border-gray-800/50">
       <div className="mx-auto w-full max-w-6xl px-4 py-2 sm:px-6">
         <div className="flex items-center justify-between gap-3 rounded-full border border-gray-200/80 bg-white/60 px-3 py-2 shadow-lg backdrop-blur-xl sm:px-5 dark:border-gray-800/80 dark:bg-gray-900/60">
           <LocaleLink href="/" className="text-lg font-bold text-gray-900 dark:text-gray-100">

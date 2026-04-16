@@ -20,7 +20,7 @@ export function ThemeToggle({ className, title }: ThemeToggleProps) {
       size="icon"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
       className={cn(
-        "h-9 w-9 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100",
+        "h-9 w-9 text-gray-600 hover:text-gray-900 dark:text-white dark:hover:text-gray-200",
         className
       )}
       title={buttonTitle}
