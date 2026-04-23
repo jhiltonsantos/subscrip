@@ -16,6 +16,7 @@ import {
   assertSubscriptionOwnedByUser,
   formatZodError,
   getUserIdOrNull,
+  validateExpenseRelations,
   type FinancePlannerActionResult,
 } from "./shared"
 
@@ -116,6 +117,8 @@ export async function updatePlannedExpense(
     ))
 
   if (ownershipError) return ownershipError
+  const relationError = await validateExpenseRelations(userId, data)
+  if (relationError) return relationError
 
   const updateData: Prisma.PlannedExpenseUpdateInput = {}
   if (data.name !== undefined) updateData.name = data.name
@@ -187,5 +190,5 @@ function resolveExpenseSource(data: {
 
 function revalidatePlannerPaths() {
   revalidatePath("/dashboard")
-  revalidatePath("/plan")
+  revalidatePath("/finance-planner")
 }

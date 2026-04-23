@@ -58,5 +58,5 @@ export async function deletePlannedExpense(
 
 function revalidatePlannerPaths() {
   revalidatePath("/dashboard")
-  revalidatePath("/plan")
+  revalidatePath("/finance-planner")
 }

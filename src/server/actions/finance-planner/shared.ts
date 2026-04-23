@@ -156,6 +156,73 @@ export async function assertInstallmentPurchaseOwnedByUser(
   return null
 }
 
+export async function validateExpenseRelations(
+  userId: string,
+  data: {
+    paymentMethodId?: string | null
+    paymentCardId?: string | null
+    creditCardInvoiceId?: string | null
+    subscriptionId?: string | null
+    installmentPurchaseId?: string | null
+  }
+): Promise<FinancePlannerActionResult<never> | null> {
+  const t = await getTranslations()
+
+  const [paymentCard, invoice, subscription, installmentPurchase] =
+    await Promise.all([
+      data.paymentCardId
+        ? prisma.paymentCard.findFirst({
+            where: { id: data.paymentCardId, userId },
+            select: { id: true, paymentMethodId: true },
+          })
+        : null,
+      data.creditCardInvoiceId
+        ? prisma.creditCardInvoice.findFirst({
+            where: { id: data.creditCardInvoiceId, userId },
+            select: { id: true, paymentCardId: true },
+          })
+        : null,
+      data.subscriptionId
+        ? prisma.subscription.findFirst({
+            where: { id: data.subscriptionId, userId },
+            select: { id: true, paymentMethodId: true },
+          })
+        : null,
+      data.installmentPurchaseId
+        ? prisma.installmentPurchase.findFirst({
+            where: { id: data.installmentPurchaseId, userId },
+            select: { id: true, paymentCardId: true },
+          })
+        : null,
+    ])
+
+  if (data.paymentMethodId && paymentCard) {
+    if (paymentCard.paymentMethodId !== data.paymentMethodId) {
+      return { success: false, error: t("common.invalidData") }
+    }
+  }
+
+  if (invoice && data.paymentCardId && invoice.paymentCardId !== data.paymentCardId) {
+    return { success: false, error: t("common.invalidData") }
+  }
+
+  if (
+    installmentPurchase &&
+    data.paymentCardId &&
+    installmentPurchase.paymentCardId !== data.paymentCardId
+  ) {
+    return { success: false, error: t("common.invalidData") }
+  }
+
+  if (subscription && data.paymentMethodId) {
+    if (!subscription.paymentMethodId || subscription.paymentMethodId !== data.paymentMethodId) {
+      return { success: false, error: t("common.invalidData") }
+    }
+  }
+
+  return null
+}
+
 export function serializeMonthlyPlan(row: MonthlyPlanWithRelations) {
   return {
     ...row,

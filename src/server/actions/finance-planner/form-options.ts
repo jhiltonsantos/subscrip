@@ -26,6 +26,23 @@ export type FinancePlannerFormOptions = {
     currency: string
     paymentMethodId: string | null
   }[]
+  creditCardInvoices: {
+    id: string
+    year: number
+    month: number
+    status: string
+    total: string
+    currency: string
+    paymentCardId: string
+  }[]
+  installmentPurchases: {
+    id: string
+    name: string
+    totalAmount: string
+    currency: string
+    installmentCount: number
+    paymentCardId: string
+  }[]
 }
 
 export async function getFinancePlannerFormOptions(): Promise<
@@ -38,7 +55,8 @@ export async function getFinancePlannerFormOptions(): Promise<
     return { success: false, error: t("common.unauthorized") }
   }
 
-  const [paymentMethods, subscriptions] = await Promise.all([
+  const [paymentMethods, subscriptions, creditCardInvoices, installmentPurchases] =
+    await Promise.all([
     prisma.paymentMethod.findMany({
       where: { userId, isActive: true },
       select: {
@@ -67,6 +85,31 @@ export async function getFinancePlannerFormOptions(): Promise<
       },
       orderBy: { name: "asc" },
     }),
+    prisma.creditCardInvoice.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        year: true,
+        month: true,
+        status: true,
+        total: true,
+        currency: true,
+        paymentCardId: true,
+      },
+      orderBy: [{ year: "desc" }, { month: "desc" }],
+    }),
+    prisma.installmentPurchase.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        name: true,
+        totalAmount: true,
+        currency: true,
+        installmentCount: true,
+        paymentCardId: true,
+      },
+      orderBy: { createdAt: "desc" },
+    }),
   ])
 
   return {
@@ -76,6 +119,14 @@ export async function getFinancePlannerFormOptions(): Promise<
       subscriptions: subscriptions.map((subscription) => ({
         ...subscription,
         price: subscription.price.toString(),
+      })),
+      creditCardInvoices: creditCardInvoices.map((invoice) => ({
+        ...invoice,
+        total: invoice.total.toString(),
+      })),
+      installmentPurchases: installmentPurchases.map((installment) => ({
+        ...installment,
+        totalAmount: installment.totalAmount.toString(),
       })),
     },
   }

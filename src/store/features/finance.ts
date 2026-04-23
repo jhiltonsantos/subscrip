@@ -12,6 +12,7 @@ import {
   type FinancePlannerFormOptions,
   type SerializedMonthlyPlan,
 } from "@/server/actions/finance-planner"
+import type { RootState } from "@/store"
 
 type MonthRef = { year: number; month: number }
 
@@ -81,66 +82,108 @@ export const fetchFinanceFormOptions = createAsyncThunk(
 
 export const createPlannedIncomeAction = createAsyncThunk(
   "finance/createPlannedIncome",
-  async (payload: unknown) => {
+  async (payload: unknown, thunkAPI) => {
     const result = await createPlannedIncome(payload)
     if (!result.success) {
       throw new Error(result.error)
     }
+    const state = thunkAPI.getState() as RootState
+    await thunkAPI.dispatch(
+      fetchMonthlyPlan({
+        year: state.finance.selectedYear,
+        month: state.finance.selectedMonth,
+      })
+    )
     return result.data
   }
 )
 
 export const updatePlannedIncomeAction = createAsyncThunk(
   "finance/updatePlannedIncome",
-  async (payload: { id: string; data: unknown }) => {
+  async (payload: { id: string; data: unknown }, thunkAPI) => {
     const result = await updatePlannedIncome(payload.id, payload.data)
     if (!result.success) {
       throw new Error(result.error)
     }
+    const state = thunkAPI.getState() as RootState
+    await thunkAPI.dispatch(
+      fetchMonthlyPlan({
+        year: state.finance.selectedYear,
+        month: state.finance.selectedMonth,
+      })
+    )
     return result.data
   }
 )
 
 export const deletePlannedIncomeAction = createAsyncThunk(
   "finance/deletePlannedIncome",
-  async (id: string) => {
+  async (id: string, thunkAPI) => {
     const result = await deletePlannedIncome(id)
     if (!result.success) {
       throw new Error(result.error)
     }
+    const state = thunkAPI.getState() as RootState
+    await thunkAPI.dispatch(
+      fetchMonthlyPlan({
+        year: state.finance.selectedYear,
+        month: state.finance.selectedMonth,
+      })
+    )
     return result.data
   }
 )
 
 export const createPlannedExpenseAction = createAsyncThunk(
   "finance/createPlannedExpense",
-  async (payload: unknown) => {
+  async (payload: unknown, thunkAPI) => {
     const result = await createPlannedExpense(payload)
     if (!result.success) {
       throw new Error(result.error)
     }
+    const state = thunkAPI.getState() as RootState
+    await thunkAPI.dispatch(
+      fetchMonthlyPlan({
+        year: state.finance.selectedYear,
+        month: state.finance.selectedMonth,
+      })
+    )
     return result.data
   }
 )
 
 export const updatePlannedExpenseAction = createAsyncThunk(
   "finance/updatePlannedExpense",
-  async (payload: { id: string; data: unknown }) => {
+  async (payload: { id: string; data: unknown }, thunkAPI) => {
     const result = await updatePlannedExpense(payload.id, payload.data)
     if (!result.success) {
       throw new Error(result.error)
     }
+    const state = thunkAPI.getState() as RootState
+    await thunkAPI.dispatch(
+      fetchMonthlyPlan({
+        year: state.finance.selectedYear,
+        month: state.finance.selectedMonth,
+      })
+    )
     return result.data
   }
 )
 
 export const deletePlannedExpenseAction = createAsyncThunk(
   "finance/deletePlannedExpense",
-  async (id: string) => {
+  async (id: string, thunkAPI) => {
     const result = await deletePlannedExpense(id)
     if (!result.success) {
       throw new Error(result.error)
     }
+    const state = thunkAPI.getState() as RootState
+    await thunkAPI.dispatch(
+      fetchMonthlyPlan({
+        year: state.finance.selectedYear,
+        month: state.finance.selectedMonth,
+      })
+    )
     return result.data
   }
 )
@@ -181,6 +224,72 @@ const financeStore = createSlice({
       })
       .addCase(fetchFinanceFormOptions.fulfilled, (state, action) => {
         state.formOptions = action.payload
+      })
+      .addCase(createPlannedIncomeAction.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(createPlannedIncomeAction.fulfilled, (state) => {
+        state.isLoading = false
+      })
+      .addCase(createPlannedIncomeAction.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.error.message ?? "Failed to create planned income"
+      })
+      .addCase(updatePlannedIncomeAction.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(updatePlannedIncomeAction.fulfilled, (state) => {
+        state.isLoading = false
+      })
+      .addCase(updatePlannedIncomeAction.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.error.message ?? "Failed to update planned income"
+      })
+      .addCase(deletePlannedIncomeAction.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(deletePlannedIncomeAction.fulfilled, (state) => {
+        state.isLoading = false
+      })
+      .addCase(deletePlannedIncomeAction.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.error.message ?? "Failed to delete planned income"
+      })
+      .addCase(createPlannedExpenseAction.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(createPlannedExpenseAction.fulfilled, (state) => {
+        state.isLoading = false
+      })
+      .addCase(createPlannedExpenseAction.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.error.message ?? "Failed to create planned expense"
+      })
+      .addCase(updatePlannedExpenseAction.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(updatePlannedExpenseAction.fulfilled, (state) => {
+        state.isLoading = false
+      })
+      .addCase(updatePlannedExpenseAction.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.error.message ?? "Failed to update planned expense"
+      })
+      .addCase(deletePlannedExpenseAction.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(deletePlannedExpenseAction.fulfilled, (state) => {
+        state.isLoading = false
+      })
+      .addCase(deletePlannedExpenseAction.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.error.message ?? "Failed to delete planned expense"
       })
   },
 })

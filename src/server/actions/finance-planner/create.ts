@@ -17,6 +17,7 @@ import {
   formatZodError,
   getOrCreateMonthlyPlan,
   getUserIdOrNull,
+  validateExpenseRelations,
   type FinancePlannerActionResult,
 } from "./shared"
 
@@ -91,6 +92,8 @@ export async function createPlannedExpense(
     ))
 
   if (ownershipError) return ownershipError
+  const relationError = await validateExpenseRelations(userId, data)
+  if (relationError) return relationError
 
   const plan = await getOrCreateMonthlyPlan(userId, data.year, data.month)
   const source = resolveExpenseSource(data)
@@ -136,5 +139,5 @@ function resolveExpenseSource(data: {
 
 function revalidatePlannerPaths() {
   revalidatePath("/dashboard")
-  revalidatePath("/plan")
+  revalidatePath("/finance-planner")
 }
