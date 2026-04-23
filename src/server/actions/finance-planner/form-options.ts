@@ -1,6 +1,7 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
+import { Prisma } from "@prisma/client"
 import { getTranslations } from "next-intl/server"
 import {
   getUserIdOrNull,
@@ -85,31 +86,8 @@ export async function getFinancePlannerFormOptions(): Promise<
       },
       orderBy: { name: "asc" },
     }),
-    prisma.creditCardInvoice.findMany({
-      where: { userId },
-      select: {
-        id: true,
-        year: true,
-        month: true,
-        status: true,
-        total: true,
-        currency: true,
-        paymentCardId: true,
-      },
-      orderBy: [{ year: "desc" }, { month: "desc" }],
-    }),
-    prisma.installmentPurchase.findMany({
-      where: { userId },
-      select: {
-        id: true,
-        name: true,
-        totalAmount: true,
-        currency: true,
-        installmentCount: true,
-        paymentCardId: true,
-      },
-      orderBy: { createdAt: "desc" },
-    }),
+    safeFindCreditCardInvoices(userId),
+    safeFindInstallmentPurchases(userId),
   ])
 
   return {
@@ -130,4 +108,55 @@ export async function getFinancePlannerFormOptions(): Promise<
       })),
     },
   }
+}
+
+async function safeFindCreditCardInvoices(userId: string) {
+  try {
+    return await prisma.creditCardInvoice.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        year: true,
+        month: true,
+        status: true,
+        total: true,
+        currency: true,
+        paymentCardId: true,
+      },
+      orderBy: [{ year: "desc" }, { month: "desc" }],
+    })
+  } catch (error) {
+    if (isMissingTableError(error)) {
+      return []
+    }
+    throw error
+  }
+}
+
+async function safeFindInstallmentPurchases(userId: string) {
+  try {
+    return await prisma.installmentPurchase.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        name: true,
+        totalAmount: true,
+        currency: true,
+        installmentCount: true,
+        paymentCardId: true,
+      },
+      orderBy: { createdAt: "desc" },
+    })
+  } catch (error) {
+    if (isMissingTableError(error)) {
+      return []
+    }
+    throw error
+  }
+}
+
+function isMissingTableError(error: unknown) {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021"
+  )
 }
