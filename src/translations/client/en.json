@@ -182,5 +182,10 @@
       "enabled": "Enabled",
       "disabled": "Disabled"
     }
+  },
+  "theme": {
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode",
+    "toggleTheme": "Toggle theme"
   }
 }
