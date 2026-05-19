@@ -5,8 +5,8 @@ generator client {
 // PostgreSQL
 datasource db {
   provider  = "postgresql"
-  url       = env("DATABASE_URL")  // Pooled connection
-  directUrl = env("DIRECT_URL")    // Direct connection (migrations)
+  url       = env("DATABASE_URL") // Pooled connection
+  directUrl = env("DIRECT_URL") // Direct connection (migrations)
 }
 
 enum Currency {
@@ -59,56 +59,60 @@ enum PaymentMethodType {
   OTHER
 }
 
-enum PlanEntryType {
-  INCOME
-  EXPENSE
-}
-
-enum PlanEntrySourceType {
+enum PlanEntrySource {
   MANUAL
   SUBSCRIPTION
-  CREDIT_CARD
-  OTHER
+  CREDIT_CARD_INVOICE
+  INSTALLMENT
+}
+
+enum InvoiceStatus {
+  OPEN
+  CLOSED
+  PAID
+  OVERDUE
 }
 
 model User {
-  id                      String            @id @default(cuid())
-  name                    String?
-  email                   String            @unique
-  emailVerified           Boolean           @default(false)
-  image                   String?
+  id            String  @id @default(cuid())
+  name          String?
+  email         String  @unique
+  emailVerified Boolean @default(false)
+  image         String?
 
   // Preferences
-  preferredCurrency       Currency          @default(BRL)
-  theme                   Theme             @default(SYSTEM)
-  defaultReminderDays     Int               @default(3)
-  defaultReminderChannel  ReminderChannel   @default(EMAIL)
-  language                String            @default("en-US")
+  preferredCurrency      Currency        @default(BRL)
+  theme                  Theme           @default(SYSTEM)
+  defaultReminderDays    Int             @default(3)
+  defaultReminderChannel ReminderChannel @default(EMAIL)
+  language               String          @default("en-US")
 
-  accounts                Account[]
-  sessions                Session[]
-  subscriptions           Subscription[]
-  reminders               Reminder[]
-  monthlyPlans            MonthlyPlan[]
-  paymentMethods          PaymentMethod[]
-  paymentCards            PaymentCard[]
+  accounts             Account[]
+  sessions             Session[]
+  subscriptions        Subscription[]
+  reminders            Reminder[]
+  monthlyPlans         MonthlyPlan[]
+  paymentMethods       PaymentMethod[]
+  paymentCards         PaymentCard[]
+  creditCardInvoices   CreditCardInvoice[]
+  installmentPurchases InstallmentPurchase[]
 
-  createdAt               DateTime          @default(now())
-  updatedAt               DateTime          @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Account {
-  id                String    @id @default(cuid())
-  userId            String
-  accountId         String
-  providerId        String
-  accessToken       String?
-  refreshToken      String?
-  accessTokenExpiresAt DateTime?
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
   refreshTokenExpiresAt DateTime?
-  scope             String?
-  idToken           String?
-  password          String?
+  scope                 String?
+  idToken               String?
+  password              String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -140,42 +144,42 @@ model Verification {
   value      String
   expiresAt  DateTime
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([identifier])
 }
 
 model Subscription {
-  id              String       @id @default(uuid())
-  name            String
-  planLabel       String?
+  id        String  @id @default(uuid())
+  name      String
+  planLabel String?
 
-  price           Decimal      @db.Decimal(10, 2)
-  currency        Currency     @default(BRL)
+  price    Decimal  @db.Decimal(10, 2)
+  currency Currency @default(BRL)
 
-  billingCycle    BillingCycle
-  category        Category
+  billingCycle BillingCycle
+  category     Category
 
   startDate       DateTime
   nextBillingDate DateTime
 
-  active          Boolean      @default(true)
+  active Boolean @default(true)
 
   serviceTemplateId String?
   serviceTemplate   ServiceTemplate? @relation(fields: [serviceTemplateId], references: [id])
 
-  userId          String
-  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   paymentMethodId String?
   paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
 
   reminders       Reminder[]
-  planEntries     MonthlyPlanEntry[]
+  plannedExpenses PlannedExpense[]
 
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([nextBillingDate])
@@ -184,178 +188,224 @@ model Subscription {
 }
 
 model ServiceTemplate {
-  id              String       @id @default(uuid())
+  id              String   @id @default(uuid())
   name            String
-  slug            String       @unique
+  slug            String   @unique
   logoUrl         String?
   category        Category
-  defaultCurrency Currency     @default(USD)
+  defaultCurrency Currency @default(USD)
   pricingUrl      String?
   cancelUrl       String?
 
-  subscriptions   Subscription[]
+  subscriptions Subscription[]
 
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Reminder {
-  id              String          @id @default(uuid())
-  daysBefore      Int             @default(3)
-  channel         ReminderChannel @default(EMAIL)
-  preferredTime   String          @default("morning") // morning, afternoon, evening
-  enabled         Boolean         @default(true)
-  lastSentAt      DateTime?
+  id            String          @id @default(uuid())
+  daysBefore    Int             @default(3)
+  channel       ReminderChannel @default(EMAIL)
+  preferredTime String          @default("morning") // morning, afternoon, evening
+  enabled       Boolean         @default(true)
+  lastSentAt    DateTime?
 
-  subscriptionId  String
-  subscription    Subscription    @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
-  userId          String
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([subscriptionId])
   @@index([userId])
 }
 
 model PaymentMethod {
-  id              String            @id @default(uuid())
-  userId          String
-  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  name            String
-  type            PaymentMethodType
-  isActive        Boolean           @default(true)
+  name     String
+  type     PaymentMethodType
+  isActive Boolean           @default(true)
 
-  paymentCard     PaymentCard?
-  subscriptions   Subscription[]
-  expenses        PlannedExpense[]
-  planEntries     MonthlyPlanEntry[]
+  paymentCard   PaymentCard?
+  subscriptions Subscription[]
+  expenses      PlannedExpense[]
 
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([type])
 }
 
 model PaymentCard {
-  id              String          @id @default(uuid())
-  userId          String
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  paymentMethodId String          @unique
-  paymentMethod   PaymentMethod   @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
+  paymentMethodId String        @unique
+  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
 
-  nickname        String
-  brand           String?
-  holderName      String?
-  last4           String?
-  closingDay      Int?
-  dueDay          Int?
-  limitAmount     Decimal?        @db.Decimal(10, 2)
+  nickname    String
+  brand       String?
+  holderName  String?
+  last4       String?
+  closingDay  Int?
+  dueDay      Int?
+  limitAmount Decimal? @db.Decimal(10, 2)
 
-  planEntries     MonthlyPlanEntry[]
+  invoices             CreditCardInvoice[]
+  installmentPurchases InstallmentPurchase[]
+  plannedExpenses      PlannedExpense[]
 
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
 }
 
 model MonthlyPlan {
-  id              String          @id @default(uuid())
-  userId          String
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  year            Int
-  month           Int
-  notes           String?
+  year  Int
+  month Int
+  notes String?
 
-  incomes         PlannedIncome[]
-  expenses        PlannedExpense[]
-  entries         MonthlyPlanEntry[]
+  incomes  PlannedIncome[]
+  expenses PlannedExpense[]
 
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, year, month])
   @@index([userId, year, month])
 }
 
 model PlannedIncome {
-  id              String          @id @default(uuid())
-  monthlyPlanId   String
-  monthlyPlan     MonthlyPlan     @relation(fields: [monthlyPlanId], references: [id], onDelete: Cascade)
+  id            String      @id @default(uuid())
+  monthlyPlanId String
+  monthlyPlan   MonthlyPlan @relation(fields: [monthlyPlanId], references: [id], onDelete: Cascade)
 
-  name            String
-  amount          Decimal         @db.Decimal(10, 2)
-  currency        Currency        @default(BRL)
-  sortOrder       Int             @default(0)
+  name      String
+  amount    Decimal  @db.Decimal(10, 2)
+  currency  Currency @default(BRL)
+  sortOrder Int      @default(0)
 
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  expectedDate DateTime?
+  receivedAt   DateTime?
+  isReceived   Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([monthlyPlanId])
 }
 
 model PlannedExpense {
-  id              String          @id @default(uuid())
-  monthlyPlanId   String
-  monthlyPlan     MonthlyPlan     @relation(fields: [monthlyPlanId], references: [id], onDelete: Cascade)
+  id            String      @id @default(uuid())
+  monthlyPlanId String
+  monthlyPlan   MonthlyPlan @relation(fields: [monthlyPlanId], references: [id], onDelete: Cascade)
 
-  name            String
-  amount          Decimal         @db.Decimal(10, 2)
-  currency        Currency        @default(BRL)
-  expenseBucket   ExpenseBucket   @default(OTHER)
-  sortOrder       Int             @default(0)
+  name          String
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      Currency      @default(BRL)
+  expenseBucket ExpenseBucket @default(OTHER)
+  sortOrder     Int           @default(0)
+
+  purchaseDate DateTime?
+  dueDate      DateTime?
+  paidAt       DateTime?
+  isPaid       Boolean   @default(false)
+
+  source          PlanEntrySource @default(MANUAL)
+  isAutoGenerated Boolean         @default(false)
+  isLocked        Boolean         @default(false)
 
   paymentMethodId String?
-  paymentMethod   PaymentMethod?  @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
 
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  paymentCardId String?
+  paymentCard   PaymentCard? @relation(fields: [paymentCardId], references: [id], onDelete: SetNull)
 
-  @@index([monthlyPlanId])
-  @@index([paymentMethodId])
-}
+  creditCardInvoiceId String?
+  creditCardInvoice   CreditCardInvoice? @relation(fields: [creditCardInvoiceId], references: [id], onDelete: SetNull)
 
-model MonthlyPlanEntry {
-  id              String               @id @default(uuid())
-  monthlyPlanId   String
-  monthlyPlan     MonthlyPlan          @relation(fields: [monthlyPlanId], references: [id], onDelete: Cascade)
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
 
-  entryType       PlanEntryType
-  sourceType      PlanEntrySourceType
-  sourceId        String?
+  installmentPurchaseId String?
+  installmentPurchase   InstallmentPurchase? @relation(fields: [installmentPurchaseId], references: [id], onDelete: Cascade)
+  installmentNumber     Int?
+  installmentTotal      Int?
 
-  name            String
-  amount          Decimal              @db.Decimal(10, 2)
-  currency        Currency             @default(BRL)
-  occursOn        DateTime
-
-  expenseBucket   ExpenseBucket?
-  paymentMethodId String?
-  paymentMethod   PaymentMethod?       @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
-  paymentCardId   String?
-  paymentCard     PaymentCard?         @relation(fields: [paymentCardId], references: [id], onDelete: SetNull)
-
-  subscriptionId  String?
-  subscription    Subscription?        @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
-
-  isAutoGenerated Boolean              @default(false)
-  isLocked        Boolean              @default(false)
-
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([monthlyPlanId])
-  @@index([sourceType, sourceId])
-  @@index([occursOn])
   @@index([paymentMethodId])
   @@index([paymentCardId])
+  @@index([creditCardInvoiceId])
   @@index([subscriptionId])
-  @@unique([monthlyPlanId, sourceType, sourceId, occursOn])
+  @@index([installmentPurchaseId])
+  @@index([expenseBucket])
+}
+
+model CreditCardInvoice {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  paymentCardId String
+  paymentCard   PaymentCard @relation(fields: [paymentCardId], references: [id], onDelete: Cascade)
+
+  year  Int
+  month Int
+
+  closingDate DateTime?
+  dueDate     DateTime?
+  total       Decimal       @default(0) @db.Decimal(12, 2)
+  currency    Currency      @default(BRL)
+  status      InvoiceStatus @default(OPEN)
+  paidAt      DateTime?
+
+  plannedExpenses PlannedExpense[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([paymentCardId, year, month])
+  @@index([userId, year, month])
+  @@index([paymentCardId])
+  @@index([status])
+}
+
+model InstallmentPurchase {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  paymentCardId String
+  paymentCard   PaymentCard @relation(fields: [paymentCardId], references: [id], onDelete: Cascade)
+
+  name              String
+  totalAmount       Decimal  @db.Decimal(12, 2)
+  currency          Currency @default(BRL)
+  installmentCount  Int
+  firstPurchaseDate DateTime
+
+  plannedExpenses PlannedExpense[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([paymentCardId])
 }

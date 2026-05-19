@@ -100,6 +100,7 @@
   "header":{
     "dashboard": "Dashboard",
     "subscriptions": "Assinaturas",
+    "financePlanner": "Planejador Financeiro",
     "settings": "Configurações",
     "profile": "Perfil",
     "language": "Idioma",
@@ -182,5 +183,10 @@
       "enabled": "Ativo",
       "disabled": "Desativado"
     }
+  },
+  "theme": {
+    "lightMode": "Modo claro",
+    "darkMode": "Modo escuro",
+    "toggleTheme": "Alternar tema"
   }
 }
