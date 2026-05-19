@@ -1,6 +1,7 @@
 # Next dev/build outputs
 .output
 dist
+tsconfig.tsbuildinfo
 
 # Node dependencies
 .next
@@ -13,11 +14,14 @@ logs
 # Misc
 .DS_Store
 .idea
+.cursor
+.cursor/
+.cursor/mcp.json
 
 # Local env files
 .env
 .env.*
 !.env.example
 
-
+# Prisma
 /src/generated/prisma

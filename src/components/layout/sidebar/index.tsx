@@ -9,7 +9,8 @@ import {
   CreditCard, 
   Settings,
   ChevronLeft,
-  LogOut
+  LogOut,
+  DollarSign
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { signOut } from "@/server/actions/auth"
@@ -40,6 +41,11 @@ export function Sidebar({ user }: SidebarProps) {
       label: t("header.subscriptions"),
       href: "/subscriptions",
       icon: CreditCard,
+    },
+    {
+      label: t("header.financePlanner"),
+      href: "/finance-planner",
+      icon: DollarSign,
     },
     {
       label: t("header.settings"),

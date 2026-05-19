@@ -7,6 +7,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "db:setup": "prisma generate && prisma migrate deploy && prisma db seed",
     "db:generate": "prisma generate",
     "db:pull": "prisma db pull",
     "db:push": "prisma db push",
@@ -17,7 +18,7 @@
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f postgres",
-    "setup": "docker compose up -d && pnpm db:generate && pnpm db:push && pnpm db:seed"
+    "setup": "docker compose up -d && pnpm db:setup"
   },
   "dependencies": {
     "@better-auth/prisma-adapter": "^1.6.0",

@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from "next-intl"
 import { ThemeProvider } from "next-themes"
 import { getLocale, getMessages, getTranslations } from "next-intl/server"
 import { cn } from "@/lib/utils/helpers"
+import { ReduxProvider } from "@/store/provider"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
@@ -32,11 +33,13 @@ export default async function RootLayout({
           inter.variable
         )}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <NextIntlClientProvider messages={messages}>
-            {children}
-          </NextIntlClientProvider>
-        </ThemeProvider>
+        <ReduxProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <NextIntlClientProvider messages={messages}>
+              {children}
+            </NextIntlClientProvider>
+          </ThemeProvider>
+        </ReduxProvider>
       </body>
     </html>
   )
