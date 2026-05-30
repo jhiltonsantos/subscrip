@@ -184,6 +184,50 @@
       "disabled": "Desativado"
     }
   },
+  "settingsPage": {
+    "title": "Configurações",
+    "subtitle": "Gerencie seu perfil e preferências padrão.",
+    "loadError": "Não foi possível carregar suas configurações.",
+    "form": {
+      "title": "Configurações da conta",
+      "description": "Essas preferências são usadas como padrão no Subscrip.",
+      "name": "Nome",
+      "namePlaceholder": "Seu nome",
+      "email": "Email",
+      "emailDescription": "Alteração de email não está disponível nesta versão.",
+      "preferredCurrency": "Moeda padrão",
+      "theme": "Tema",
+      "language": "Idioma",
+      "defaultReminderChannel": "Canal padrão de lembrete",
+      "defaultReminderDays": "Dias padrão de lembrete",
+      "defaultReminderDaysDescription": "Quantos dias antes da renovação o Subscrip deve lembrar você por padrão.",
+      "save": "Salvar configurações",
+      "saving": "Salvando…",
+      "success": "Configurações salvas.",
+      "error": "Não foi possível salvar as configurações. Tente novamente."
+    },
+    "options": {
+      "currency": {
+        "BRL": "Real brasileiro (BRL)",
+        "USD": "Dólar americano (USD)",
+        "EUR": "Euro (EUR)"
+      },
+      "theme": {
+        "LIGHT": "Claro",
+        "DARK": "Escuro",
+        "SYSTEM": "Sistema"
+      },
+      "language": {
+        "en-US": "Inglês",
+        "pt-BR": "Português"
+      },
+      "reminderChannel": {
+        "EMAIL": "Email",
+        "PUSH": "Push",
+        "BOTH": "Email e push"
+      }
+    }
+  },
   "theme": {
     "lightMode": "Modo claro",
     "darkMode": "Modo escuro",

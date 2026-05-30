@@ -184,6 +184,50 @@
       "disabled": "Disabled"
     }
   },
+  "settingsPage": {
+    "title": "Settings",
+    "subtitle": "Manage your account profile and default preferences.",
+    "loadError": "Could not load your settings.",
+    "form": {
+      "title": "Account settings",
+      "description": "These preferences are used as defaults across Subscrip.",
+      "name": "Name",
+      "namePlaceholder": "Your name",
+      "email": "Email",
+      "emailDescription": "Email changes are not available in this version.",
+      "preferredCurrency": "Default currency",
+      "theme": "Theme",
+      "language": "Language",
+      "defaultReminderChannel": "Default reminder channel",
+      "defaultReminderDays": "Default reminder days",
+      "defaultReminderDaysDescription": "How many days before a renewal Subscrip should remind you by default.",
+      "save": "Save settings",
+      "saving": "Saving…",
+      "success": "Settings saved.",
+      "error": "Could not save settings. Try again."
+    },
+    "options": {
+      "currency": {
+        "BRL": "Brazilian Real (BRL)",
+        "USD": "US Dollar (USD)",
+        "EUR": "Euro (EUR)"
+      },
+      "theme": {
+        "LIGHT": "Light",
+        "DARK": "Dark",
+        "SYSTEM": "System"
+      },
+      "language": {
+        "en-US": "English",
+        "pt-BR": "Portuguese"
+      },
+      "reminderChannel": {
+        "EMAIL": "Email",
+        "PUSH": "Push",
+        "BOTH": "Email and push"
+      }
+    }
+  },
   "theme": {
     "lightMode": "Light mode",
     "darkMode": "Dark mode",

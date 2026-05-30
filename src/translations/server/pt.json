@@ -13,6 +13,11 @@
     }
   },
   "actions": {
+    "user": {
+      "updateSettings": {
+        "error": "Não foi possível atualizar as configurações do usuário."
+      }
+    },
     "subscriptions": {
       "assertPaymentMethodOwnedByUser":{
         "error": "Método de pagamento não encontrado ou não pertence ao usuário."
