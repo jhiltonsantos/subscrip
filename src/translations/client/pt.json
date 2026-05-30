@@ -327,7 +327,15 @@
       "confirmDelete": "Excluir este item?",
       "noPaymentMethod": "Sem método de pagamento"
     },
+    "planning": {
+      "description": "Use esta área como a planilha mensal: entradas de um lado, saídas do outro e totais de cartões agrupados automaticamente."
+    },
+    "view": {
+      "cards": "Cards",
+      "list": "Lista"
+    },
     "income": {
+      "columnTitle": "Entradas",
       "createTitle": "Adicionar entrada",
       "editTitle": "Editar entrada",
       "empty": "Nenhuma entrada cadastrada para este mês.",
@@ -337,6 +345,7 @@
       "markPending": "Marcar como pendente"
     },
     "expense": {
+      "columnTitle": "Saídas",
       "createTitle": "Adicionar saída",
       "editTitle": "Editar saída",
       "empty": "Nenhuma saída cadastrada para este mês.",
@@ -353,13 +362,32 @@
     },
     "cards": {
       "title": "Cartões - detalhamento mensal",
-      "empty": "Nenhum gasto em cartão para o período selecionado."
+      "empty": "Nenhum gasto em cartão para o período selecionado.",
+      "cta": "Detalhes dos cartões",
+      "open": "Abrir detalhes dos cartões",
+      "summaryBucket": "Compras no cartão",
+      "purchaseCount": "{count, plural, one {# compra} other {# compras}}",
+      "pageTitle": "Compras no cartão",
+      "pageSubtitle": "Despesas detalhadas dos cartões em {month}.",
+      "backToPlanner": "Voltar ao planejamento",
+      "syncHint": "Compras adicionadas aqui são salvas como despesas de cartão e aparecem automaticamente no planejamento mensal.",
+      "noCards": "Crie um método de pagamento do tipo cartão de crédito em configurações antes de adicionar compras.",
+      "managePaymentMethods": "Gerenciar métodos de pagamento",
+      "endingIn": "Final {last4}",
+      "addPurchase": "Adicionar compra",
+      "installmentNumber": "Atual",
+      "installmentTotal": "Total",
+      "emptyPurchases": "Nenhuma compra adicionada neste cartão neste mês.",
+      "noPurchaseDate": "Sem data de compra"
     },
     "table": {
       "date": "Data",
       "name": "Nome",
       "amount": "Valor",
-      "installment": "Parcela"
+      "installment": "Parcela",
+      "status": "Status",
+      "actions": "Ações",
+      "bucket": "Tipo"
     }
   },
   "theme": {
