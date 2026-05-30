@@ -14,8 +14,9 @@ logs
 # Misc
 .DS_Store
 .idea
-.cursor
-.cursor/
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
 .cursor/mcp.json
 
 # Local env files

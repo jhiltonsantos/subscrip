@@ -1,0 +1,18 @@
+---
+description: Server Actions, Prisma and multi-tenant data rules
+globs: src/server/actions/**/*.ts,prisma/**/*.prisma,prisma/**/*.ts
+alwaysApply: false
+---
+
+# Server Actions and Prisma
+
+Use `.agents/engineering-standards.md` as the canonical reference.
+
+- Validate mutation payloads with Zod.
+- Derive `userId` from `auth.api.getSession()` or shared helpers on the server.
+- Filter every user-owned read/write by session `userId`.
+- Check ownership before connecting related records.
+- Return structured action results with `success`, `data`, `error` and optional `fieldErrors`.
+- Revalidate affected platform routes after successful mutations.
+- Use Prisma migrations for schema changes; avoid durable reliance on `db:push`.
+- Keep destructive seed behavior clearly local/dev.
