@@ -201,6 +201,7 @@
       "defaultReminderChannel": "Canal padrão de lembrete",
       "defaultReminderDays": "Dias padrão de lembrete",
       "defaultReminderDaysDescription": "Quantos dias antes da renovação o Subscrip deve lembrar você por padrão.",
+      "quickReminderDays": "{days, plural, =0 {No mesmo dia} one {# dia} other {# dias}}",
       "save": "Salvar configurações",
       "saving": "Salvando…",
       "success": "Configurações salvas.",
@@ -225,6 +226,27 @@
         "EMAIL": "Email",
         "PUSH": "Push",
         "BOTH": "Email e push"
+      }
+    },
+    "descriptions": {
+      "currency": {
+        "BRL": "Use BRL como padrão para novos registros.",
+        "USD": "Útil quando a maioria dos serviços é cobrada em dólar.",
+        "EUR": "Use EUR como moeda padrão."
+      },
+      "theme": {
+        "LIGHT": "Usar sempre a interface clara.",
+        "DARK": "Usar sempre a interface escura.",
+        "SYSTEM": "Seguir a preferência do dispositivo."
+      },
+      "language": {
+        "en-US": "Show the platform in English.",
+        "pt-BR": "Mostrar a plataforma em português."
+      },
+      "reminderChannel": {
+        "EMAIL": "Enviar lembretes por email.",
+        "PUSH": "Usar notificações push quando disponíveis.",
+        "BOTH": "Usar os dois canais para renovações importantes."
       }
     }
   },

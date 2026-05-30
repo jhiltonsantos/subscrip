@@ -201,6 +201,7 @@
       "defaultReminderChannel": "Default reminder channel",
       "defaultReminderDays": "Default reminder days",
       "defaultReminderDaysDescription": "How many days before a renewal Subscrip should remind you by default.",
+      "quickReminderDays": "{days, plural, =0 {Same day} one {# day} other {# days}}",
       "save": "Save settings",
       "saving": "Saving…",
       "success": "Settings saved.",
@@ -225,6 +226,27 @@
         "EMAIL": "Email",
         "PUSH": "Push",
         "BOTH": "Email and push"
+      }
+    },
+    "descriptions": {
+      "currency": {
+        "BRL": "Use BRL as your default for new records.",
+        "USD": "Useful when most services are billed in dollars.",
+        "EUR": "Use EUR as your default currency."
+      },
+      "theme": {
+        "LIGHT": "Always use the light interface.",
+        "DARK": "Always use the dark interface.",
+        "SYSTEM": "Follow your device preference."
+      },
+      "language": {
+        "en-US": "Show the platform in English.",
+        "pt-BR": "Mostrar a plataforma em português."
+      },
+      "reminderChannel": {
+        "EMAIL": "Send reminders by email.",
+        "PUSH": "Use app push notifications when available.",
+        "BOTH": "Use both channels for important renewals."
       }
     }
   },
