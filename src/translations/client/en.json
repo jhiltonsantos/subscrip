@@ -85,9 +85,16 @@
     "cards": {
       "monthlySpend": "Monthly Spend (Est.)",
       "conversionBase": "Base: USD 1 = R$ 6",
+      "plannedIncome": "Planned income",
+      "plannedExpenses": "Planned expenses",
+      "totalOutflow": "Total outflow",
+      "projectedBalance": "Projected balance",
+      "currentMonth": "Current month",
+      "plannedPlusSubscriptions": "Planning + subscriptions",
       "activeSubscriptions": "Active Subscriptions",
       "subscriptionCount": "{count, plural, one {# subscription} other {# subscriptions}} active",
       "nextPayment": "Next Payment",
+      "nextPaymentWithName": "{name} on {date}",
       "noUpcoming": "No upcoming"
     },
     "subscriptions": {
@@ -133,7 +140,15 @@
     "rowActions": {
       "open": "View details",
       "edit": "Edit",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate",
       "delete": "Delete"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name or plan...",
+      "allStatuses": "All statuses",
+      "allCategories": "All categories",
+      "noResults": "No subscription matches the filters."
     },
     "form": {
       "createTitle": "New subscription",
@@ -248,6 +263,103 @@
         "PUSH": "Use app push notifications when available.",
         "BOTH": "Use both channels for important renewals."
       }
+    },
+    "paymentMethods": {
+      "title": "Payment methods",
+      "description": "Manage cards and payment methods used by subscriptions and planned expenses.",
+      "empty": "No payment method registered yet.",
+      "active": "Active",
+      "inactive": "Inactive",
+      "deactivate": "Deactivate",
+      "last4": "ending in {last4}",
+      "form": {
+        "createTitle": "New payment method",
+        "editTitle": "Edit payment method",
+        "name": "Name",
+        "cardNickname": "Card nickname",
+        "brand": "Brand",
+        "last4": "Last 4 digits",
+        "closingDay": "Closing day",
+        "dueDay": "Due day",
+        "limitAmount": "Limit amount",
+        "save": "Save method",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "edit": "Edit"
+      },
+      "types": {
+        "CREDIT_CARD": "Credit card",
+        "DEBIT_CARD": "Debit card",
+        "PIX": "PIX",
+        "BANK_TRANSFER": "Bank transfer",
+        "BOLETO": "Boleto",
+        "CASH": "Cash",
+        "OTHER": "Other"
+      }
+    }
+  },
+  "financePlannerPage": {
+    "title": "Finance Planner",
+    "subtitle": "Monthly record of income, bills, subscriptions, and card expenses.",
+    "monthPlan": "Planning for {month}",
+    "filters": {
+      "month": "Month",
+      "year": "Year",
+      "apply": "Apply",
+      "loading": "Loading..."
+    },
+    "summary": {
+      "incomeTotal": "Income total",
+      "expenseTotal": "Expense total",
+      "subscriptionTotal": "Subscriptions",
+      "creditCardTotal": "Credit card",
+      "balance": "Balance"
+    },
+    "form": {
+      "name": "Name",
+      "amount": "Amount",
+      "save": "Save",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "validation": "Name and a positive amount are required.",
+      "confirmDelete": "Delete this item?",
+      "noPaymentMethod": "No payment method"
+    },
+    "income": {
+      "createTitle": "Add income",
+      "editTitle": "Edit income",
+      "empty": "No income registered for this month.",
+      "received": "Received",
+      "pending": "Pending",
+      "markReceived": "Mark as received",
+      "markPending": "Mark as pending"
+    },
+    "expense": {
+      "createTitle": "Add expense",
+      "editTitle": "Edit expense",
+      "empty": "No expense registered for this month.",
+      "paid": "Paid",
+      "pending": "Pending",
+      "markPaid": "Mark as paid",
+      "markPending": "Mark as pending"
+    },
+    "buckets": {
+      "MONTHLY_BILLS": "Monthly bills",
+      "FIXED_CARD": "Fixed card",
+      "CREDIT_CARD": "Credit card",
+      "OTHER": "Other"
+    },
+    "cards": {
+      "title": "Cards - monthly detail",
+      "empty": "No card expense for the selected period."
+    },
+    "table": {
+      "date": "Date",
+      "name": "Name",
+      "amount": "Amount",
+      "installment": "Installment"
     }
   },
   "theme": {

@@ -1,5 +1,7 @@
 import { SettingsForm } from "@/components/settings/settings-form"
+import { PaymentMethodsManager } from "@/components/settings/payment-methods-manager"
 import { Container } from "@/components/ui/container"
+import { getPaymentMethods } from "@/server/actions/payment-methods"
 import { getUser } from "@/server/actions/user"
 import { getTranslations } from "next-intl/server"
 
@@ -7,7 +9,10 @@ export const revalidate = 0
 
 export default async function SettingsPage() {
   const t = await getTranslations("settingsPage")
-  const userResult = await getUser()
+  const [userResult, paymentMethodsResult] = await Promise.all([
+    getUser(),
+    getPaymentMethods(),
+  ])
 
   if (!userResult.success || !userResult.data) {
     return (
@@ -28,6 +33,11 @@ export default async function SettingsPage() {
         </div>
 
         <SettingsForm user={userResult.data} />
+        <PaymentMethodsManager
+          initialMethods={
+            paymentMethodsResult.success ? paymentMethodsResult.data : []
+          }
+        />
       </div>
     </Container>
   )

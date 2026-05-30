@@ -1,6 +1,5 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
@@ -14,16 +13,9 @@ interface ThemeToggleProps {
 
 export function ThemeToggle({ className, title }: ThemeToggleProps) {
   const { setTheme, resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
   const t = useTranslations()
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const buttonTitle = mounted
-    ? title ?? (resolvedTheme === "dark" ? t("theme.lightMode") : t("theme.darkMode"))
-    : title ?? t("theme.toggleTheme")
+  const buttonTitle =
+    title ?? (resolvedTheme === "dark" ? t("theme.lightMode") : t("theme.darkMode"))
 
   return (
     <Button

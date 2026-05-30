@@ -82,14 +82,17 @@ Prioridade: v1 importante.
 
 ### 6. Lembretes e notificações
 
-Prioridade: v1.1, exceto se alertas forem promessa central da primeira entrega.
+Prioridade: v1.1. Decisão final para v1 enxuta: manter somente a estrutura de dados,
+preferências padrão em `/settings` e visualização de lembretes já existentes nos
+detalhes da assinatura. CRUD completo de `Reminder`, cron, envio de email e badge
+real ficam fora da v1.
 
 - CRUD de `Reminder` por assinatura.
 - Agendador com Vercel Cron ou script server-side.
 - Email via Resend X dias antes.
 - Header badge real.
 
-Para v1 enxuta, documentar como “em breve” e manter apenas preferências/estrutura.
+Texto de produto para v1 deve tratar notificações como “em breve” ou “v1.1”.
 
 ### 7. Qualidade e release
 
