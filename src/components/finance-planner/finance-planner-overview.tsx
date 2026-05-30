@@ -113,7 +113,8 @@ export function FinancePlannerBoard() {
 
   const [monthInput, setMonthInput] = useState(String(selectedMonth))
   const [yearInput, setYearInput] = useState(String(selectedYear))
-  const [viewMode, setViewMode] = useState<ViewMode>("cards")
+  const [incomeViewMode, setIncomeViewMode] = useState<ViewMode>("cards")
+  const [expenseViewMode, setExpenseViewMode] = useState<ViewMode>("cards")
   const [incomeForm, setIncomeForm] = useState(emptyIncomeForm)
   const [expenseForm, setExpenseForm] = useState(emptyExpenseForm)
   const [editingIncomeId, setEditingIncomeId] = useState<string | null>(null)
@@ -298,8 +299,7 @@ export function FinancePlannerBoard() {
               {t("planning.description")}
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <ViewToggle value={viewMode} onChange={setViewMode} t={t} />
+          <div className="flex justify-start sm:justify-end">
             <Button asChild variant="outline">
               <LocaleLink href="/finance-planner/cards">
                 <CreditCard className="size-4" />
@@ -310,7 +310,9 @@ export function FinancePlannerBoard() {
         </CardHeader>
         <CardContent className="grid gap-6 xl:grid-cols-2">
           <section className="rounded-xl border bg-muted/10 p-3">
-            <ColumnTitle>{t("income.columnTitle")}</ColumnTitle>
+            <ColumnHeader title={t("income.columnTitle")}>
+              <ViewToggle value={incomeViewMode} onChange={setIncomeViewMode} t={t} />
+            </ColumnHeader>
             <IncomeFormBox
               title={editingIncomeId ? t("income.editTitle") : t("income.createTitle")}
               form={incomeForm}
@@ -326,7 +328,7 @@ export function FinancePlannerBoard() {
             />
             <IncomeRows
               rows={incomes}
-              viewMode={viewMode}
+              viewMode={incomeViewMode}
               onToggle={toggleIncome}
               onEdit={editIncome}
               onDelete={removeIncome}
@@ -334,7 +336,9 @@ export function FinancePlannerBoard() {
             />
           </section>
           <section className="rounded-xl border bg-muted/10 p-3">
-            <ColumnTitle>{t("expense.columnTitle")}</ColumnTitle>
+            <ColumnHeader title={t("expense.columnTitle")}>
+              <ViewToggle value={expenseViewMode} onChange={setExpenseViewMode} t={t} />
+            </ColumnHeader>
             <ExpenseFormBox
               title={editingExpenseId ? t("expense.editTitle") : t("expense.createTitle")}
               form={expenseForm}
@@ -352,7 +356,7 @@ export function FinancePlannerBoard() {
             <ExpenseRows
               rows={manualExpenses}
               cardGroups={cardGroups}
-              viewMode={viewMode}
+              viewMode={expenseViewMode}
               onToggle={toggleExpense}
               onEdit={editExpense}
               onDelete={removeExpense}
@@ -440,11 +444,14 @@ function ViewToggle({
   )
 }
 
-function ColumnTitle({ children }: { children: ReactNode }) {
+function ColumnHeader({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+    <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+        {title}
+      </h2>
       {children}
-    </h2>
+    </div>
   )
 }
 

@@ -230,7 +230,7 @@ export function CardExpensesBoard() {
               {t("cards.noCards")}
             </p>
             <Button asChild className="mt-4">
-              <LocaleLink href="/settings">{t("cards.managePaymentMethods")}</LocaleLink>
+              <LocaleLink href="/payment-methods">{t("cards.managePaymentMethods")}</LocaleLink>
             </Button>
           </CardContent>
         </Card>
