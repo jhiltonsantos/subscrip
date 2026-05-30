@@ -1,9 +1,9 @@
 "use server"
 
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { getTranslations } from "next-intl/server";
-import { headers } from "next/headers";
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
+import { getTranslations } from "next-intl/server"
+import { headers } from "next/headers"
 
 export async function getUser() {
   const t = await getTranslations()
@@ -14,7 +14,7 @@ export async function getUser() {
   }
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id},
+    where: { id: session.user.id },
     select: {
       id: true,
       name: true,
@@ -24,7 +24,8 @@ export async function getUser() {
       preferredCurrency: true,
       theme: true,
       defaultReminderDays: true,
-    }
+      defaultReminderChannel: true,
+    },
   })
 
   if (!user) {

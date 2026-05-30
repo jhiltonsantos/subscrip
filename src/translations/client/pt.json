@@ -85,9 +85,16 @@
     "cards": {
       "monthlySpend": "Gasto Mensal (Est.)",
       "conversionBase": "Conversão base: USD 1 = R$ 6",
+      "plannedIncome": "Receitas planejadas",
+      "plannedExpenses": "Despesas planejadas",
+      "totalOutflow": "Total de saídas",
+      "projectedBalance": "Saldo previsto",
+      "currentMonth": "Mês atual",
+      "plannedPlusSubscriptions": "Planejamento + assinaturas",
       "activeSubscriptions": "Assinaturas Ativas",
       "subscriptionCount": "{count, plural, one {# assinatura} other {# assinaturas}} ativas",
       "nextPayment": "Próxima Fatura",
+      "nextPaymentWithName": "{name} em {date}",
       "noUpcoming": "Nenhuma"
     },
     "subscriptions": {
@@ -101,6 +108,7 @@
     "dashboard": "Dashboard",
     "subscriptions": "Assinaturas",
     "financePlanner": "Planejador Financeiro",
+    "paymentMethods": "Métodos de Pagamento",
     "settings": "Configurações",
     "profile": "Perfil",
     "language": "Idioma",
@@ -133,7 +141,15 @@
     "rowActions": {
       "open": "Ver detalhes",
       "edit": "Editar",
+      "deactivate": "Desativar",
+      "reactivate": "Reativar",
       "delete": "Excluir"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por nome ou plano...",
+      "allStatuses": "Todos os status",
+      "allCategories": "Todas as categorias",
+      "noResults": "Nenhuma assinatura corresponde aos filtros."
     },
     "form": {
       "createTitle": "Nova assinatura",
@@ -182,6 +198,197 @@
       "channel": "Canal",
       "enabled": "Ativo",
       "disabled": "Desativado"
+    }
+  },
+  "settingsPage": {
+    "title": "Configurações",
+    "subtitle": "Gerencie seu perfil e preferências padrão.",
+    "loadError": "Não foi possível carregar suas configurações.",
+    "form": {
+      "title": "Configurações da conta",
+      "description": "Essas preferências são usadas como padrão no Subscrip.",
+      "name": "Nome",
+      "namePlaceholder": "Seu nome",
+      "email": "Email",
+      "emailDescription": "Alteração de email não está disponível nesta versão.",
+      "preferredCurrency": "Moeda padrão",
+      "theme": "Tema",
+      "language": "Idioma",
+      "defaultReminderChannel": "Canal padrão de lembrete",
+      "defaultReminderDays": "Dias padrão de lembrete",
+      "defaultReminderDaysDescription": "Quantos dias antes da renovação o Subscrip deve lembrar você por padrão.",
+      "quickReminderDays": "{days, plural, =0 {No mesmo dia} one {# dia} other {# dias}}",
+      "save": "Salvar configurações",
+      "saving": "Salvando…",
+      "success": "Configurações salvas.",
+      "error": "Não foi possível salvar as configurações. Tente novamente."
+    },
+    "options": {
+      "currency": {
+        "BRL": "Real brasileiro (BRL)",
+        "USD": "Dólar americano (USD)",
+        "EUR": "Euro (EUR)"
+      },
+      "theme": {
+        "LIGHT": "Claro",
+        "DARK": "Escuro",
+        "SYSTEM": "Sistema"
+      },
+      "language": {
+        "en-US": "Inglês",
+        "pt-BR": "Português"
+      },
+      "reminderChannel": {
+        "EMAIL": "Email",
+        "PUSH": "Push",
+        "BOTH": "Email e push"
+      }
+    },
+    "descriptions": {
+      "currency": {
+        "BRL": "Use BRL como padrão para novos registros.",
+        "USD": "Útil quando a maioria dos serviços é cobrada em dólar.",
+        "EUR": "Use EUR como moeda padrão."
+      },
+      "theme": {
+        "LIGHT": "Usar sempre a interface clara.",
+        "DARK": "Usar sempre a interface escura.",
+        "SYSTEM": "Seguir a preferência do dispositivo."
+      },
+      "language": {
+        "en-US": "Show the platform in English.",
+        "pt-BR": "Mostrar a plataforma em português."
+      },
+      "reminderChannel": {
+        "EMAIL": "Enviar lembretes por email.",
+        "PUSH": "Usar notificações push quando disponíveis.",
+        "BOTH": "Usar os dois canais para renovações importantes."
+      }
+    },
+    "paymentMethods": {
+      "title": "Métodos de pagamento",
+      "description": "Gerencie cartões e métodos usados por assinaturas e saídas planejadas.",
+      "empty": "Nenhum método de pagamento cadastrado ainda.",
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "deactivate": "Desativar",
+      "last4": "final {last4}",
+      "form": {
+        "createTitle": "Novo método de pagamento",
+        "editTitle": "Editar método de pagamento",
+        "name": "Nome",
+        "cardNickname": "Apelido do cartão",
+        "brand": "Bandeira",
+        "last4": "Últimos 4 dígitos",
+        "closingDay": "Dia de fechamento",
+        "dueDay": "Dia de vencimento",
+        "limitAmount": "Limite",
+        "save": "Salvar método",
+        "saving": "Salvando...",
+        "cancel": "Cancelar",
+        "edit": "Editar"
+      },
+      "types": {
+        "CREDIT_CARD": "Cartão de crédito",
+        "DEBIT_CARD": "Cartão de débito",
+        "PIX": "PIX",
+        "BANK_TRANSFER": "Transferência bancária",
+        "BOLETO": "Boleto",
+        "CASH": "Dinheiro",
+        "OTHER": "Outro"
+      }
+    }
+  },
+  "financePlannerPage": {
+    "title": "Planejador Financeiro",
+    "subtitle": "Registro mensal de entradas, contas, assinaturas e gastos no cartão.",
+    "monthPlan": "Planejamento de {month}",
+    "filters": {
+      "month": "Mês",
+      "year": "Ano",
+      "apply": "Aplicar",
+      "loading": "Carregando..."
+    },
+    "summary": {
+      "incomeTotal": "Receber total",
+      "expenseTotal": "Custos totais",
+      "subscriptionTotal": "Assinaturas",
+      "creditCardTotal": "Cartão de crédito",
+      "balance": "Saldo"
+    },
+    "form": {
+      "name": "Nome",
+      "amount": "Valor",
+      "save": "Salvar",
+      "saving": "Salvando...",
+      "cancel": "Cancelar",
+      "edit": "Editar",
+      "delete": "Excluir",
+      "validation": "Nome e valor positivo são obrigatórios.",
+      "confirmDelete": "Excluir este item?",
+      "noPaymentMethod": "Sem método de pagamento"
+    },
+    "planning": {
+      "description": "Use esta área como a planilha mensal: entradas de um lado, saídas do outro e totais de cartões agrupados automaticamente."
+    },
+    "view": {
+      "cards": "Cards",
+      "list": "Lista"
+    },
+    "income": {
+      "columnTitle": "Entradas",
+      "createTitle": "Adicionar entrada",
+      "editTitle": "Editar entrada",
+      "empty": "Nenhuma entrada cadastrada para este mês.",
+      "received": "Recebida",
+      "pending": "Pendente",
+      "markReceived": "Marcar como recebida",
+      "markPending": "Marcar como pendente"
+    },
+    "expense": {
+      "columnTitle": "Saídas",
+      "createTitle": "Adicionar saída",
+      "editTitle": "Editar saída",
+      "empty": "Nenhuma saída cadastrada para este mês.",
+      "paid": "Paga",
+      "pending": "Pendente",
+      "markPaid": "Marcar como paga",
+      "markPending": "Marcar como pendente"
+    },
+    "buckets": {
+      "MONTHLY_BILLS": "Contas mensais",
+      "FIXED_CARD": "Cartão fixo",
+      "CREDIT_CARD": "Cartão de crédito",
+      "OTHER": "Outro"
+    },
+    "cards": {
+      "title": "Cartões - detalhamento mensal",
+      "empty": "Nenhum gasto em cartão para o período selecionado.",
+      "cta": "Detalhes dos cartões",
+      "open": "Abrir detalhes dos cartões",
+      "summaryBucket": "Compras no cartão",
+      "purchaseCount": "{count, plural, one {# compra} other {# compras}}",
+      "pageTitle": "Compras no cartão",
+      "pageSubtitle": "Despesas detalhadas dos cartões em {month}.",
+      "backToPlanner": "Voltar ao planejamento",
+      "syncHint": "Compras adicionadas aqui são salvas como despesas de cartão e aparecem automaticamente no planejamento mensal.",
+      "noCards": "Crie um método de pagamento do tipo cartão de crédito em configurações antes de adicionar compras.",
+      "managePaymentMethods": "Gerenciar métodos de pagamento",
+      "endingIn": "Final {last4}",
+      "addPurchase": "Adicionar compra",
+      "installmentNumber": "Atual",
+      "installmentTotal": "Total",
+      "emptyPurchases": "Nenhuma compra adicionada neste cartão neste mês.",
+      "noPurchaseDate": "Sem data de compra"
+    },
+    "table": {
+      "date": "Data",
+      "name": "Nome",
+      "amount": "Valor",
+      "installment": "Parcela",
+      "status": "Status",
+      "actions": "Ações",
+      "bucket": "Tipo"
     }
   },
   "theme": {

@@ -1,0 +1,17 @@
+---
+description: Next.js platform UI and App Router conventions
+globs: src/app/**/*.tsx,src/components/**/*.tsx
+alwaysApply: false
+---
+
+# Next.js Platform
+
+Use `.agents/engineering-standards.md` as the canonical reference.
+
+- Keep route files in `src/app` focused on routing, layout and data loading.
+- Use Server Components for session checks and data reads.
+- Use Client Components for forms, browser APIs, animations and local state.
+- Preserve locale behavior: English has no prefix, Portuguese uses `/pt`.
+- Use `LocaleLink` for navigation that should preserve locale.
+- Keep user-facing copy in `src/translations/client/*.json`.
+- Maintain mobile-first and dark/light mode support.

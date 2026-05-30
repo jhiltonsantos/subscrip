@@ -13,6 +13,11 @@
     }
   },
   "actions": {
+    "user": {
+      "updateSettings": {
+        "error": "Could not update user settings."
+      }
+    },
     "subscriptions": {
       "assertPaymentMethodOwnedByUser":{
         "error": "Payment method not found or does not belong to the user."
