@@ -55,6 +55,7 @@ export function CardCostsContent({
             t={t}
           />
         )}
+        getRowTone={(row) => (row.isPaid ? "paid" : "default")}
         t={t}
       />
     )
@@ -66,8 +67,13 @@ export function CardCostsContent({
         <EntryCard
           key={row.id}
           title={row.name}
-          meta={`${row.paymentCard?.nickname ?? row.paymentMethod?.name ?? t("tabs.cardCosts")} · ${formatInstallment(row)}`}
+          meta={[
+            row.paymentCard?.nickname ?? row.paymentMethod?.name ?? t("tabs.cardCosts"),
+            row.merchantName,
+            formatInstallment(row),
+          ].filter(Boolean).join(" · ")}
           status={formatCurrency(Number(row.amount), row.currency)}
+          tone={row.isPaid ? "paid" : "default"}
         >
           <RowActions
             toggleLabel={row.isPaid ? t("expense.markPending") : t("expense.markPaid")}

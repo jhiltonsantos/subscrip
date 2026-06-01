@@ -319,14 +319,20 @@
     "form": {
       "name": "Name",
       "amount": "Amount",
+      "currency": "Currency",
+      "paymentMethod": "Payment method",
+      "titleLabel": "Title",
+      "description": "Description",
       "namePlaceholder": "Name",
       "amountPlaceholder": "Amount",
+      "descriptionPlaceholder": "Optional notes",
       "save": "Save",
       "saving": "Saving...",
       "cancel": "Cancel",
       "edit": "Edit",
       "delete": "Delete",
       "validation": "Name and a positive amount are required.",
+      "installmentValidation": "Current installment and total installments are required.",
       "confirmDelete": "Delete this item?",
       "noPaymentMethod": "No payment method"
     },
@@ -347,6 +353,14 @@
       "incomeDescription": "Add or edit income expected for the selected month.",
       "expenseDescription": "Add or edit monthly expenses outside credit card purchases.",
       "cardCostDescription": "Add or edit credit card purchases for the selected month."
+    },
+    "tooltips": {
+      "purchaseDate": "Date when the purchase happened. Future installments will follow this month.",
+      "dueDate": "Date when this cost should be paid or appear in the monthly plan.",
+      "expensePurchaseDate": "Date when the expense was contracted or purchased.",
+      "expenseDueDate": "Date when this expense is due.",
+      "installmentNumber": "The installment you are adding now. Example: 3 if this is the 3rd payment.",
+      "installmentTotal": "Total number of installments. Example: 12 for a 12-month loan."
     },
     "view": {
       "cards": "Cards",
@@ -370,7 +384,13 @@
       "paid": "Paid",
       "pending": "Pending",
       "markPaid": "Mark as paid",
-      "markPending": "Mark as pending"
+      "markPending": "Mark as pending",
+      "merchantName": "Where / provider",
+      "merchantPlaceholder": "Store, provider, or creditor",
+      "purchaseDate": "Purchase date",
+      "dueDate": "Due date",
+      "isInstallment": "This is an installment expense",
+      "isMonthlyRecurring": "Repeat monthly for the next 12 months"
     },
     "buckets": {
       "MONTHLY_BILLS": "Monthly bills",
@@ -399,7 +419,20 @@
       "noPurchaseDate": "No purchase date",
       "addCost": "Add card cost",
       "editCost": "Edit card cost",
-      "selectCard": "Select a card"
+      "selectCard": "Select a card",
+      "card": "Card",
+      "merchantName": "Where bought",
+      "merchantPlaceholder": "Store or merchant",
+      "purchaseDate": "Purchase date",
+      "dueDate": "Due date",
+      "isInstallment": "This is an installment purchase"
+    },
+    "deleteDialog": {
+      "title": "Delete recurring item?",
+      "singleDescription": "This will remove only this item.",
+      "recurringDescription": "This item belongs to an installment or recurring group. Choose how much you want to remove.",
+      "single": "Remove only this item",
+      "future": "Remove this and future items"
     },
     "table": {
       "date": "Date",

@@ -172,8 +172,10 @@ export const updatePlannedExpenseAction = createAsyncThunk(
 
 export const deletePlannedExpenseAction = createAsyncThunk(
   "finance/deletePlannedExpense",
-  async (id: string, thunkAPI) => {
-    const result = await deletePlannedExpense(id)
+  async (payload: string | { id: string; mode?: "single" | "future" }, thunkAPI) => {
+    const id = typeof payload === "string" ? payload : payload.id
+    const mode = typeof payload === "string" ? "single" : payload.mode
+    const result = await deletePlannedExpense(id, mode)
     if (!result.success) {
       throw new Error(result.error)
     }

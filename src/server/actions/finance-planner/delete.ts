@@ -8,6 +8,8 @@ import {
   type FinancePlannerActionResult,
 } from "./shared"
 
+type DeleteExpenseMode = "single" | "future"
+
 export async function deletePlannedIncome(
   id: string
 ): Promise<FinancePlannerActionResult<{ id: string }>> {
@@ -33,8 +35,9 @@ export async function deletePlannedIncome(
 }
 
 export async function deletePlannedExpense(
-  id: string
-): Promise<FinancePlannerActionResult<{ id: string }>> {
+  id: string,
+  mode: DeleteExpenseMode = "single"
+): Promise<FinancePlannerActionResult<{ id: string; count?: number }>> {
   const t = await getTranslations()
 
   const userId = await getUserIdOrNull()
@@ -44,10 +47,35 @@ export async function deletePlannedExpense(
 
   const existing = await prisma.plannedExpense.findFirst({
     where: { id, monthlyPlan: { userId } },
-    select: { id: true },
+    select: {
+      id: true,
+      recurrenceGroupId: true,
+      monthlyPlan: { select: { year: true, month: true } },
+    },
   })
   if (!existing) {
     return { success: false, error: t("common.notFound") }
+  }
+
+  if (mode === "future" && existing.recurrenceGroupId) {
+    const result = await prisma.plannedExpense.deleteMany({
+      where: {
+        recurrenceGroupId: existing.recurrenceGroupId,
+        monthlyPlan: {
+          userId,
+          OR: [
+            { year: { gt: existing.monthlyPlan.year } },
+            {
+              year: existing.monthlyPlan.year,
+              month: { gte: existing.monthlyPlan.month },
+            },
+          ],
+        },
+      },
+    })
+
+    revalidatePlannerPaths()
+    return { success: true, data: { id, count: result.count } }
   }
 
   await prisma.plannedExpense.delete({ where: { id } })

@@ -319,14 +319,20 @@
     "form": {
       "name": "Nome",
       "amount": "Valor",
+      "currency": "Moeda",
+      "paymentMethod": "Método de pagamento",
+      "titleLabel": "Título",
+      "description": "Descrição",
       "namePlaceholder": "Nome",
       "amountPlaceholder": "Valor",
+      "descriptionPlaceholder": "Observações opcionais",
       "save": "Salvar",
       "saving": "Salvando...",
       "cancel": "Cancelar",
       "edit": "Editar",
       "delete": "Excluir",
       "validation": "Nome e valor positivo são obrigatórios.",
+      "installmentValidation": "Parcela atual e total de parcelas são obrigatórios.",
       "confirmDelete": "Excluir este item?",
       "noPaymentMethod": "Sem método de pagamento"
     },
@@ -347,6 +353,14 @@
       "incomeDescription": "Adicione ou edite entradas esperadas para o mês selecionado.",
       "expenseDescription": "Adicione ou edite saídas mensais fora das compras no cartão.",
       "cardCostDescription": "Adicione ou edite compras de cartão para o mês selecionado."
+    },
+    "tooltips": {
+      "purchaseDate": "Data em que a compra aconteceu. As próximas parcelas seguem este mês como referência.",
+      "dueDate": "Data em que este custo deve ser pago ou aparecer no planejamento mensal.",
+      "expensePurchaseDate": "Data em que a despesa foi contratada ou comprada.",
+      "expenseDueDate": "Data de vencimento desta despesa.",
+      "installmentNumber": "A parcela que você está adicionando agora. Exemplo: 3 se este é o terceiro pagamento.",
+      "installmentTotal": "Quantidade total de parcelas. Exemplo: 12 para um empréstimo de 12 meses."
     },
     "view": {
       "cards": "Cards",
@@ -370,7 +384,13 @@
       "paid": "Paga",
       "pending": "Pendente",
       "markPaid": "Marcar como paga",
-      "markPending": "Marcar como pendente"
+      "markPending": "Marcar como pendente",
+      "merchantName": "Onde / fornecedor",
+      "merchantPlaceholder": "Loja, fornecedor ou credor",
+      "purchaseDate": "Data da compra",
+      "dueDate": "Data de vencimento",
+      "isInstallment": "Esta é uma saída parcelada",
+      "isMonthlyRecurring": "Repetir mensalmente pelos próximos 12 meses"
     },
     "buckets": {
       "MONTHLY_BILLS": "Contas mensais",
@@ -399,7 +419,20 @@
       "noPurchaseDate": "Sem data de compra",
       "addCost": "Adicionar custo de cartão",
       "editCost": "Editar custo de cartão",
-      "selectCard": "Selecione um cartão"
+      "selectCard": "Selecione um cartão",
+      "card": "Cartão",
+      "merchantName": "Onde foi comprado",
+      "merchantPlaceholder": "Loja ou estabelecimento",
+      "purchaseDate": "Data da compra",
+      "dueDate": "Data de vencimento",
+      "isInstallment": "Esta é uma compra parcelada"
+    },
+    "deleteDialog": {
+      "title": "Excluir item recorrente?",
+      "singleDescription": "Isso remove somente este item.",
+      "recurringDescription": "Este item faz parte de um grupo parcelado ou recorrente. Escolha quanto deseja remover.",
+      "single": "Remover apenas este item",
+      "future": "Remover este e os próximos"
     },
     "table": {
       "date": "Data",

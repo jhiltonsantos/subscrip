@@ -122,6 +122,8 @@ export async function updatePlannedExpense(
 
   const updateData: Prisma.PlannedExpenseUpdateInput = {}
   if (data.name !== undefined) updateData.name = data.name
+  if (data.merchantName !== undefined) updateData.merchantName = data.merchantName
+  if (data.description !== undefined) updateData.description = data.description
   if (data.amount !== undefined)
     updateData.amount = new Prisma.Decimal(data.amount)
   if (data.currency !== undefined) updateData.currency = data.currency
@@ -136,6 +138,9 @@ export async function updatePlannedExpense(
     updateData.installmentNumber = data.installmentNumber
   if (data.installmentTotal !== undefined)
     updateData.installmentTotal = data.installmentTotal
+  if (data.recurrenceKind !== undefined) updateData.recurrenceKind = data.recurrenceKind
+  if (data.recurrenceGroupId !== undefined)
+    updateData.recurrenceGroupId = data.recurrenceGroupId
   if (data.paymentMethodId !== undefined)
     updateData.paymentMethod = data.paymentMethodId
       ? { connect: { id: data.paymentMethodId } }

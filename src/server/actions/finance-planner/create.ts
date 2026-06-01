@@ -4,8 +4,11 @@ import { prisma } from "@/lib/prisma"
 import {
   plannedExpenseCreateSchema,
   plannedIncomeCreateSchema,
+  type PlannedExpenseCreateInput,
 } from "@/lib/validations/finance-planner"
-import { Prisma, PlanEntrySource } from "@prisma/client"
+import { addMonths } from "date-fns"
+import { randomUUID } from "node:crypto"
+import { Prisma, PlanEntrySource, RecurrenceKind } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 import { getTranslations } from "next-intl/server"
 import {
@@ -95,35 +98,93 @@ export async function createPlannedExpense(
   const relationError = await validateExpenseRelations(userId, data)
   if (relationError) return relationError
 
-  const plan = await getOrCreateMonthlyPlan(userId, data.year, data.month)
-  const source = resolveExpenseSource(data)
+  if (
+    data.createFutureInstallments &&
+    data.installmentNumber &&
+    data.installmentTotal &&
+    data.installmentNumber > data.installmentTotal
+  ) {
+    return { success: false, error: t("common.invalidData") }
+  }
 
-  const row = await prisma.plannedExpense.create({
-    data: {
-      monthlyPlanId: plan.id,
-      name: data.name,
-      amount: new Prisma.Decimal(data.amount),
-      currency: data.currency,
-      expenseBucket: data.expenseBucket,
-      sortOrder: data.sortOrder,
-      purchaseDate: data.purchaseDate ?? undefined,
-      dueDate: data.dueDate ?? undefined,
-      paidAt: data.paidAt ?? undefined,
-      isPaid: data.isPaid,
-      source,
-      paymentMethodId: data.paymentMethodId ?? undefined,
-      paymentCardId: data.paymentCardId ?? undefined,
-      creditCardInvoiceId: data.creditCardInvoiceId ?? undefined,
-      subscriptionId: data.subscriptionId ?? undefined,
-      installmentPurchaseId: data.installmentPurchaseId ?? undefined,
-      installmentNumber: data.installmentNumber ?? undefined,
-      installmentTotal: data.installmentTotal ?? undefined,
-    },
-    select: { id: true },
-  })
+  const source = resolveExpenseSource(data)
+  const rows = await createPlannedExpenseRows(userId, data, source)
 
   revalidatePlannerPaths()
-  return { success: true, data: row }
+  return { success: true, data: rows[0] }
+}
+
+async function createPlannedExpenseRows(
+  userId: string,
+  data: PlannedExpenseCreateInput,
+  source: PlanEntrySource
+) {
+  const entryCount = getEntryCount(data)
+  const recurrenceKind = getRecurrenceKind(data)
+  const recurrenceGroupId =
+    entryCount > 1 ? data.recurrenceGroupId ?? randomUUID() : data.recurrenceGroupId
+  const startDate = data.purchaseDate ?? data.dueDate ?? new Date(data.year, data.month - 1, 1)
+  const rows: { id: string }[] = []
+
+  for (let index = 0; index < entryCount; index += 1) {
+    const planDate = addMonths(startDate, index)
+    const plan = await getOrCreateMonthlyPlan(
+      userId,
+      planDate.getFullYear(),
+      planDate.getMonth() + 1
+    )
+
+    const row = await prisma.plannedExpense.create({
+      data: {
+        monthlyPlanId: plan.id,
+        name: data.name,
+        merchantName: data.merchantName ?? undefined,
+        description: data.description ?? undefined,
+        amount: new Prisma.Decimal(data.amount),
+        currency: data.currency,
+        expenseBucket: data.expenseBucket,
+        sortOrder: data.sortOrder,
+        purchaseDate: addMonthsToOptionalDate(data.purchaseDate, index),
+        dueDate: addMonthsToOptionalDate(data.dueDate, index),
+        paidAt: data.paidAt ?? undefined,
+        isPaid: data.isPaid,
+        source,
+        paymentMethodId: data.paymentMethodId ?? undefined,
+        paymentCardId: data.paymentCardId ?? undefined,
+        creditCardInvoiceId: data.creditCardInvoiceId ?? undefined,
+        subscriptionId: data.subscriptionId ?? undefined,
+        installmentPurchaseId: data.installmentPurchaseId ?? undefined,
+        installmentNumber: data.installmentNumber
+          ? data.installmentNumber + index
+          : undefined,
+        installmentTotal: data.installmentTotal ?? undefined,
+        recurrenceKind: recurrenceKind ?? undefined,
+        recurrenceGroupId: recurrenceGroupId ?? undefined,
+      },
+      select: { id: true },
+    })
+    rows.push(row)
+  }
+
+  return rows
+}
+
+function getEntryCount(data: PlannedExpenseCreateInput) {
+  if (data.createMonthlyRecurring) return 12
+  if (!data.createFutureInstallments || !data.installmentNumber || !data.installmentTotal) {
+    return 1
+  }
+  return Math.max(1, data.installmentTotal - data.installmentNumber + 1)
+}
+
+function getRecurrenceKind(data: PlannedExpenseCreateInput) {
+  if (data.createMonthlyRecurring) return RecurrenceKind.MONTHLY_RECURRING
+  if (data.createFutureInstallments) return RecurrenceKind.INSTALLMENT
+  return data.recurrenceKind
+}
+
+function addMonthsToOptionalDate(value: Date | null | undefined, months: number) {
+  return value ? addMonths(value, months) : undefined
 }
 
 function resolveExpenseSource(data: {

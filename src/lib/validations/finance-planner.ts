@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { Currency, ExpenseBucket } from "@prisma/client"
+import { Currency, ExpenseBucket, RecurrenceKind } from "@prisma/client"
 
 export const monthPlanParamsSchema = z.object({
   year: z.coerce.number().int().min(2000).max(2100),
@@ -26,6 +26,8 @@ export const plannedExpenseCreateSchema = z.object({
   year: z.coerce.number().int().min(2000).max(2100),
   month: z.coerce.number().int().min(1).max(12),
   name: z.string().min(1, "Nome é obrigatório").max(200),
+  merchantName: z.string().max(200).optional().nullable(),
+  description: z.string().max(1000).optional().nullable(),
   amount: z.coerce.number().positive("Valor deve ser maior que zero"),
   currency: z.nativeEnum(Currency).default(Currency.BRL),
   expenseBucket: z.nativeEnum(ExpenseBucket).default(ExpenseBucket.OTHER),
@@ -41,6 +43,10 @@ export const plannedExpenseCreateSchema = z.object({
   installmentPurchaseId: z.string().uuid().optional().nullable(),
   installmentNumber: z.coerce.number().int().positive().optional().nullable(),
   installmentTotal: z.coerce.number().int().positive().optional().nullable(),
+  recurrenceKind: z.nativeEnum(RecurrenceKind).optional().nullable(),
+  recurrenceGroupId: z.string().uuid().optional().nullable(),
+  createFutureInstallments: z.boolean().optional(),
+  createMonthlyRecurring: z.boolean().optional(),
 })
 
 export const plannedExpenseUpdateSchema = plannedExpenseCreateSchema

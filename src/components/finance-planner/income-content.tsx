@@ -45,6 +45,7 @@ export function IncomeContent({
             t={t}
           />
         )}
+        getRowTone={(row) => (row.isReceived ? "success" : "default")}
         t={t}
       />
     )
@@ -58,6 +59,7 @@ export function IncomeContent({
           title={row.name}
           meta={formatCurrency(Number(row.amount), row.currency)}
           status={row.isReceived ? t("income.received") : t("income.pending")}
+          tone={row.isReceived ? "success" : "default"}
         >
           <RowActions
             toggleLabel={row.isReceived ? t("income.markPending") : t("income.markReceived")}

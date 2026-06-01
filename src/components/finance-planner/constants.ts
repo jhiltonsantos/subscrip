@@ -13,6 +13,8 @@ export const emptyIncomeForm: IncomeForm = {
 
 export const emptyExpenseForm: ExpenseForm = {
   name: "",
+  merchantName: "",
+  description: "",
   amount: "",
   currency: "BRL",
   expenseBucket: "MONTHLY_BILLS",
@@ -20,15 +22,22 @@ export const emptyExpenseForm: ExpenseForm = {
   purchaseDate: "",
   isPaid: false,
   paymentMethodId: "",
+  isInstallment: false,
+  isMonthlyRecurring: false,
+  installmentNumber: "",
+  installmentTotal: "",
 }
 
 export const emptyCardCostForm: CardCostForm = {
   name: "",
+  merchantName: "",
+  description: "",
   amount: "",
   currency: "BRL",
   purchaseDate: "",
   dueDate: "",
   paymentMethodId: "",
+  isInstallment: false,
   installmentNumber: "",
   installmentTotal: "",
   isPaid: false,

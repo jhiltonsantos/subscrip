@@ -21,6 +21,8 @@ export type IncomeForm = {
 
 export type ExpenseForm = {
   name: string
+  merchantName: string
+  description: string
   amount: string
   currency: string
   expenseBucket: string
@@ -28,15 +30,22 @@ export type ExpenseForm = {
   purchaseDate: string
   isPaid: boolean
   paymentMethodId: string
+  isInstallment: boolean
+  isMonthlyRecurring: boolean
+  installmentNumber: string
+  installmentTotal: string
 }
 
 export type CardCostForm = {
   name: string
+  merchantName: string
+  description: string
   amount: string
   currency: string
   purchaseDate: string
   dueDate: string
   paymentMethodId: string
+  isInstallment: boolean
   installmentNumber: string
   installmentTotal: string
   isPaid: boolean
