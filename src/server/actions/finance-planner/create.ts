@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import {
   plannedExpenseCreateSchema,
   plannedIncomeCreateSchema,
+  type PlannedIncomeCreateInput,
   type PlannedExpenseCreateInput,
 } from "@/lib/validations/finance-planner"
 import { addMonths } from "date-fns"
@@ -44,24 +45,56 @@ export async function createPlannedIncome(
   }
 
   const data = parsed.data
-  const plan = await getOrCreateMonthlyPlan(userId, data.year, data.month)
-
-  const row = await prisma.plannedIncome.create({
-    data: {
-      monthlyPlanId: plan.id,
-      name: data.name,
-      amount: new Prisma.Decimal(data.amount),
-      currency: data.currency,
-      sortOrder: data.sortOrder,
-      expectedDate: data.expectedDate ?? undefined,
-      receivedAt: data.receivedAt ?? undefined,
-      isReceived: data.isReceived,
-    },
-    select: { id: true },
-  })
+  const rows = await createPlannedIncomeRows(userId, data)
 
   revalidatePlannerPaths()
-  return { success: true, data: row }
+  return { success: true, data: rows[0] }
+}
+
+async function createPlannedIncomeRows(
+  userId: string,
+  data: PlannedIncomeCreateInput
+) {
+  const entryCount = getIncomeEntryCount(data)
+  const recurrenceGroupId =
+    entryCount > 1 ? data.recurrenceGroupId ?? randomUUID() : data.recurrenceGroupId
+  const startDate = data.expectedDate ?? new Date(data.year, data.month - 1, 1)
+  const rows: { id: string }[] = []
+
+  for (let index = 0; index < entryCount; index += 1) {
+    const planDate = addMonths(startDate, index)
+    const plan = await getOrCreateMonthlyPlan(
+      userId,
+      planDate.getFullYear(),
+      planDate.getMonth() + 1
+    )
+    const isCurrentRowReceived = index === 0 ? data.isReceived : false
+
+    const row = await prisma.plannedIncome.create({
+      data: {
+        monthlyPlanId: plan.id,
+        name: data.name,
+        description: data.description ?? undefined,
+        amount: new Prisma.Decimal(data.amount),
+        currency: data.currency,
+        sortOrder: data.sortOrder,
+        expectedDate: addMonthsToOptionalDate(data.expectedDate, index),
+        receivedAt: isCurrentRowReceived ? data.receivedAt ?? undefined : undefined,
+        isReceived: isCurrentRowReceived,
+        recurrenceKind: entryCount > 1 ? RecurrenceKind.MONTHLY_RECURRING : data.recurrenceKind ?? undefined,
+        recurrenceGroupId: recurrenceGroupId ?? undefined,
+      },
+      select: { id: true },
+    })
+    rows.push(row)
+  }
+
+  return rows
+}
+
+function getIncomeEntryCount(data: PlannedIncomeCreateInput) {
+  if (!data.createMonthlyRecurring) return 1
+  return data.recurrenceMonths ?? 12
 }
 
 export async function createPlannedExpense(

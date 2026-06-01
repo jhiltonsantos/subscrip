@@ -13,10 +13,14 @@ export type TranslationFn = ReturnType<typeof useTranslations>
 
 export type IncomeForm = {
   name: string
+  description: string
   amount: string
   currency: string
   expectedDate: string
   isReceived: boolean
+  isMonthlyRecurring: boolean
+  isFixedRecurring: boolean
+  recurrenceMonths: string
 }
 
 export type ExpenseForm = {

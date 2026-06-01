@@ -10,12 +10,17 @@ export const plannedIncomeCreateSchema = z.object({
   year: z.coerce.number().int().min(2000).max(2100),
   month: z.coerce.number().int().min(1).max(12),
   name: z.string().min(1, "Nome é obrigatório").max(200),
+  description: z.string().max(1000).optional().nullable(),
   amount: z.coerce.number().positive("Valor deve ser maior que zero"),
   currency: z.nativeEnum(Currency).default(Currency.BRL),
   sortOrder: z.coerce.number().int().optional(),
   expectedDate: z.coerce.date().optional().nullable(),
   receivedAt: z.coerce.date().optional().nullable(),
   isReceived: z.boolean().optional(),
+  recurrenceKind: z.nativeEnum(RecurrenceKind).optional().nullable(),
+  recurrenceGroupId: z.string().uuid().optional().nullable(),
+  createMonthlyRecurring: z.boolean().optional(),
+  recurrenceMonths: z.coerce.number().int().positive().max(120).optional().nullable(),
 })
 
 export const plannedIncomeUpdateSchema = plannedIncomeCreateSchema

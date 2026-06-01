@@ -5,10 +5,14 @@ export const expenseBuckets = ["MONTHLY_BILLS", "FIXED_CARD", "OTHER"] as const
 
 export const emptyIncomeForm: IncomeForm = {
   name: "",
+  description: "",
   amount: "",
   currency: "BRL",
   expectedDate: "",
   isReceived: false,
+  isMonthlyRecurring: false,
+  isFixedRecurring: false,
+  recurrenceMonths: "",
 }
 
 export const emptyExpenseForm: ExpenseForm = {

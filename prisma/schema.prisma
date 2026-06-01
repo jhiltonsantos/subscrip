@@ -66,6 +66,11 @@ enum PlanEntrySource {
   INSTALLMENT
 }
 
+enum RecurrenceKind {
+  INSTALLMENT
+  MONTHLY_RECURRING
+}
+
 enum InvoiceStatus {
   OPEN
   CLOSED
@@ -298,15 +303,20 @@ model PlannedIncome {
   amount    Decimal  @db.Decimal(10, 2)
   currency  Currency @default(BRL)
   sortOrder Int      @default(0)
+  description String?
 
   expectedDate DateTime?
   receivedAt   DateTime?
   isReceived   Boolean   @default(false)
 
+  recurrenceKind    RecurrenceKind?
+  recurrenceGroupId String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([monthlyPlanId])
+  @@index([recurrenceGroupId])
 }
 
 model PlannedExpense {
@@ -315,6 +325,8 @@ model PlannedExpense {
   monthlyPlan   MonthlyPlan @relation(fields: [monthlyPlanId], references: [id], onDelete: Cascade)
 
   name          String
+  merchantName  String?
+  description   String?
   amount        Decimal       @db.Decimal(10, 2)
   currency      Currency      @default(BRL)
   expenseBucket ExpenseBucket @default(OTHER)
@@ -345,6 +357,8 @@ model PlannedExpense {
   installmentPurchase   InstallmentPurchase? @relation(fields: [installmentPurchaseId], references: [id], onDelete: Cascade)
   installmentNumber     Int?
   installmentTotal      Int?
+  recurrenceKind        RecurrenceKind?
+  recurrenceGroupId     String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -356,6 +370,7 @@ model PlannedExpense {
   @@index([subscriptionId])
   @@index([installmentPurchaseId])
   @@index([expenseBucket])
+  @@index([recurrenceGroupId])
 }
 
 model CreditCardInvoice {

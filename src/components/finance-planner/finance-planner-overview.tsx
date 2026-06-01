@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CardCostsContent } from "./card-costs-content"
 import { emptyCardCostForm, emptyExpenseForm, emptyIncomeForm } from "./constants"
 import { DeleteExpenseDialog } from "./delete-expense-dialog"
+import { EditScopeDialog } from "./edit-scope-dialog"
 import { ExpenseContent } from "./expense-content"
 import { IncomeContent } from "./income-content"
 import { MonthSelector } from "./month-selector"
@@ -87,6 +88,11 @@ export function FinancePlannerBoard() {
   const [cardCostForm, setCardCostForm] = useState<CardCostForm>(emptyCardCostForm)
   const [formError, setFormError] = useState<string | null>(null)
   const [pendingDeleteExpense, setPendingDeleteExpense] = useState<PlannedExpense | null>(null)
+  const [pendingEdit, setPendingEdit] = useState<{
+    type: "income" | "expense"
+    id: string
+    data: unknown
+  } | null>(null)
 
   useEffect(() => {
     dispatch(fetchMonthlyPlan({ year: selectedYear, month: selectedMonth }))
@@ -132,10 +138,14 @@ export function FinancePlannerBoard() {
     setEditingExpenseId(null)
     setIncomeForm({
       name: row.name,
+      description: row.description ?? "",
       amount: row.amount,
       currency: row.currency,
       expectedDate: toDateInput(row.expectedDate),
       isReceived: row.isReceived,
+      isMonthlyRecurring: row.recurrenceKind === "MONTHLY_RECURRING",
+      isFixedRecurring: false,
+      recurrenceMonths: "",
     })
     setDialogOpen(true)
   }
@@ -191,12 +201,20 @@ export function FinancePlannerBoard() {
       setFormError(t("form.validation"))
       return
     }
+    if (
+      incomeForm.isFixedRecurring &&
+      (!incomeForm.recurrenceMonths || Number(incomeForm.recurrenceMonths) <= 0)
+    ) {
+      setFormError(t("form.recurrenceValidation"))
+      return
+    }
 
     const current = incomes.find((income) => income.id === editingIncomeId)
     const data = {
       year: selectedYear,
       month: selectedMonth,
       name: incomeForm.name.trim(),
+      description: incomeForm.description.trim() || null,
       amount: Number(incomeForm.amount),
       currency: incomeForm.currency,
       expectedDate: toDateOrUndefined(incomeForm.expectedDate),
@@ -206,9 +224,22 @@ export function FinancePlannerBoard() {
           ? new Date(current.receivedAt)
           : new Date()
         : null,
+      createMonthlyRecurring:
+        !editingIncomeId && (incomeForm.isMonthlyRecurring || incomeForm.isFixedRecurring),
+      recurrenceMonths: incomeForm.isFixedRecurring
+        ? toOptionalNumber(incomeForm.recurrenceMonths)
+        : incomeForm.isMonthlyRecurring
+          ? 12
+          : null,
     }
 
     if (editingIncomeId) {
+      const editingIncome = incomes.find((income) => income.id === editingIncomeId)
+      if (editingIncome?.recurrenceGroupId) {
+        setPendingEdit({ type: "income", id: editingIncomeId, data })
+        setDialogOpen(false)
+        return
+      }
       await dispatch(updatePlannedIncomeAction({ id: editingIncomeId, data })).unwrap()
     } else {
       await dispatch(createPlannedIncomeAction(data)).unwrap()
@@ -264,6 +295,12 @@ export function FinancePlannerBoard() {
     }
 
     if (editingExpenseId) {
+      const editingExpense = manualExpenses.find((expense) => expense.id === editingExpenseId)
+      if (editingExpense?.recurrenceGroupId) {
+        setPendingEdit({ type: "expense", id: editingExpenseId, data })
+        setDialogOpen(false)
+        return
+      }
       await dispatch(updatePlannedExpenseAction({ id: editingExpenseId, data })).unwrap()
     } else {
       await dispatch(createPlannedExpenseAction(data)).unwrap()
@@ -323,6 +360,12 @@ export function FinancePlannerBoard() {
     }
 
     if (editingExpenseId) {
+      const editingExpense = cardCosts.find((expense) => expense.id === editingExpenseId)
+      if (editingExpense?.recurrenceGroupId) {
+        setPendingEdit({ type: "expense", id: editingExpenseId, data })
+        setDialogOpen(false)
+        return
+      }
       await dispatch(updatePlannedExpenseAction({ id: editingExpenseId, data })).unwrap()
     } else {
       await dispatch(createPlannedExpenseAction(data)).unwrap()
@@ -369,6 +412,31 @@ export function FinancePlannerBoard() {
       deletePlannedExpenseAction({ id: pendingDeleteExpense.id, mode })
     ).unwrap()
     setPendingDeleteExpense(null)
+  }
+
+  async function confirmEditScope(mode: "single" | "future") {
+    if (!pendingEdit) return
+
+    if (pendingEdit.type === "income") {
+      await dispatch(
+        updatePlannedIncomeAction({
+          id: pendingEdit.id,
+          data: pendingEdit.data,
+          mode,
+        })
+      ).unwrap()
+    } else {
+      await dispatch(
+        updatePlannedExpenseAction({
+          id: pendingEdit.id,
+          data: pendingEdit.data,
+          mode,
+        })
+      ).unwrap()
+    }
+
+    setPendingEdit(null)
+    closeDialog()
   }
 
   function closeDialog() {
@@ -495,6 +563,15 @@ export function FinancePlannerBoard() {
         }}
         onDeleteSingle={() => confirmDeleteExpense("single")}
         onDeleteFuture={() => confirmDeleteExpense("future")}
+        t={t}
+      />
+      <EditScopeDialog
+        open={Boolean(pendingEdit)}
+        onOpenChange={(open) => {
+          if (!open) setPendingEdit(null)
+        }}
+        onEditSingle={() => confirmEditScope("single")}
+        onEditFuture={() => confirmEditScope("future")}
         t={t}
       />
     </div>

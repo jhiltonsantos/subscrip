@@ -45,7 +45,15 @@ export async function getUserIdOrNull(): Promise<string | null> {
   const session = await auth.api.getSession({
     headers: await headers(),
   })
-  return session?.user?.id ?? null
+  const userId = session?.user?.id
+  if (!userId) return null
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  })
+
+  return user?.id ?? null
 }
 
 export async function getOrCreateMonthlyPlan(

@@ -333,6 +333,7 @@
       "delete": "Delete",
       "validation": "Name and a positive amount are required.",
       "installmentValidation": "Current installment and total installments are required.",
+      "recurrenceValidation": "Enter a valid number of months for the recurrence.",
       "confirmDelete": "Delete this item?",
       "noPaymentMethod": "No payment method"
     },
@@ -360,7 +361,9 @@
       "expensePurchaseDate": "Date when the expense was contracted or purchased.",
       "expenseDueDate": "Date when this expense is due.",
       "installmentNumber": "The installment you are adding now. Example: 3 if this is the 3rd payment.",
-      "installmentTotal": "Total number of installments. Example: 12 for a 12-month loan."
+      "installmentTotal": "Total number of installments. Example: 12 for a 12-month loan.",
+      "incomeExpectedDate": "Expected date to receive this income. Future recurrences use this month as reference.",
+      "incomeRecurrenceMonths": "Total number of months this income should be created for, including the current month."
     },
     "view": {
       "cards": "Cards",
@@ -374,7 +377,12 @@
       "received": "Received",
       "pending": "Pending",
       "markReceived": "Mark as received",
-      "markPending": "Mark as pending"
+      "markPending": "Mark as pending",
+      "expectedDate": "Expected date",
+      "isMonthlyRecurring": "Repeat monthly for the next 12 months",
+      "isFixedRecurring": "I will receive this amount for a fixed number of months",
+      "recurrenceMonths": "Number of months",
+      "recurrenceMonthsPlaceholder": "Ex: 5"
     },
     "expense": {
       "columnTitle": "Expenses",
@@ -433,6 +441,14 @@
       "recurringDescription": "This item belongs to an installment or recurring group. Choose how much you want to remove.",
       "single": "Remove only this item",
       "future": "Remove this and future items"
+    },
+    "editScopeDialog": {
+      "title": "Apply edit to which items?",
+      "description": "This item belongs to an installment or recurring sequence. Choose whether this change applies only to this record or to this and future records.",
+      "single": "Edit only this item",
+      "singleDescription": "Keeps future installments or recurring records unchanged.",
+      "future": "Edit this and future items",
+      "futureDescription": "Applies the new values to this month and future months in the same group."
     },
     "table": {
       "date": "Date",
