@@ -319,6 +319,8 @@
     "form": {
       "name": "Nome",
       "amount": "Valor",
+      "namePlaceholder": "Nome",
+      "amountPlaceholder": "Valor",
       "save": "Salvar",
       "saving": "Salvando...",
       "cancel": "Cancelar",
@@ -329,7 +331,22 @@
       "noPaymentMethod": "Sem método de pagamento"
     },
     "planning": {
-      "description": "Use esta área como a planilha mensal: entradas de um lado, saídas do outro e totais de cartões agrupados automaticamente."
+      "description": "Alterne entre entradas, saídas e custos de cartão mantendo o contexto do mês selecionado."
+    },
+    "tabs": {
+      "income": "Entradas",
+      "expenses": "Saídas",
+      "cardCosts": "Custos de Cartão"
+    },
+    "add": {
+      "income": "Adicionar Entrada",
+      "expenses": "Adicionar Saída",
+      "cardCosts": "Adicionar Custo de Cartão"
+    },
+    "modal": {
+      "incomeDescription": "Adicione ou edite entradas esperadas para o mês selecionado.",
+      "expenseDescription": "Adicione ou edite saídas mensais fora das compras no cartão.",
+      "cardCostDescription": "Adicione ou edite compras de cartão para o mês selecionado."
     },
     "view": {
       "cards": "Cards",
@@ -379,11 +396,15 @@
       "installmentNumber": "Atual",
       "installmentTotal": "Total",
       "emptyPurchases": "Nenhuma compra adicionada neste cartão neste mês.",
-      "noPurchaseDate": "Sem data de compra"
+      "noPurchaseDate": "Sem data de compra",
+      "addCost": "Adicionar custo de cartão",
+      "editCost": "Editar custo de cartão",
+      "selectCard": "Selecione um cartão"
     },
     "table": {
       "date": "Data",
       "name": "Nome",
+      "card": "Cartão",
       "amount": "Valor",
       "installment": "Parcela",
       "status": "Status",

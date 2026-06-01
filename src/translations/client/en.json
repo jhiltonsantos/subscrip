@@ -319,6 +319,8 @@
     "form": {
       "name": "Name",
       "amount": "Amount",
+      "namePlaceholder": "Name",
+      "amountPlaceholder": "Amount",
       "save": "Save",
       "saving": "Saving...",
       "cancel": "Cancel",
@@ -329,7 +331,22 @@
       "noPaymentMethod": "No payment method"
     },
     "planning": {
-      "description": "Use this area like the monthly spreadsheet: income on one side, expenses on the other, and card totals grouped automatically."
+      "description": "Switch between income, expenses, and card costs while keeping the selected month context."
+    },
+    "tabs": {
+      "income": "Income",
+      "expenses": "Expenses",
+      "cardCosts": "Card Costs"
+    },
+    "add": {
+      "income": "Add Income",
+      "expenses": "Add Expense",
+      "cardCosts": "Add Card Cost"
+    },
+    "modal": {
+      "incomeDescription": "Add or edit income expected for the selected month.",
+      "expenseDescription": "Add or edit monthly expenses outside credit card purchases.",
+      "cardCostDescription": "Add or edit credit card purchases for the selected month."
     },
     "view": {
       "cards": "Cards",
@@ -379,11 +396,15 @@
       "installmentNumber": "Current",
       "installmentTotal": "Total",
       "emptyPurchases": "No purchase added to this card this month.",
-      "noPurchaseDate": "No purchase date"
+      "noPurchaseDate": "No purchase date",
+      "addCost": "Add card cost",
+      "editCost": "Edit card cost",
+      "selectCard": "Select a card"
     },
     "table": {
       "date": "Date",
       "name": "Name",
+      "card": "Card",
       "amount": "Amount",
       "installment": "Installment",
       "status": "Status",
