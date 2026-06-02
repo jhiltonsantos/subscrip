@@ -3,14 +3,16 @@
 import type { ComponentType } from "react"
 import { useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, type Resolver } from "react-hook-form"
+import { useForm, useWatch, type Resolver } from "react-hook-form"
 import { usePathname, useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
 import { useTranslations } from "next-intl"
 import {
   USER_SETTINGS_CURRENCY_VALUES,
+  USER_SETTINGS_DARK_THEME_VARIANT_VALUES,
   USER_SETTINGS_LANGUAGE_VALUES,
   type UserSettingsCurrency,
+  type UserSettingsDarkThemeVariant,
   type UserSettingsLanguage,
   type UserSettingsReminderChannel,
   type UserSettingsTheme,
@@ -19,7 +21,7 @@ import {
   userSettingsSchema,
   type UserSettingsInput,
 } from "@/lib/validations/user-settings"
-import { updateUserSettings } from "@/server/actions/user"
+import { updateDarkThemeVariant, updateUserSettings } from "@/server/actions/user"
 import { cn } from "@/lib/utils/helpers"
 import {
   Bell,
@@ -30,6 +32,7 @@ import {
   Mail,
   Monitor,
   Moon,
+  Palette,
   Sun,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -40,6 +43,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   Form,
   FormControl,
@@ -58,6 +69,7 @@ type SettingsUser = {
   language: string
   preferredCurrency: UserSettingsCurrency
   theme: UserSettingsTheme
+  darkThemeVariant: UserSettingsDarkThemeVariant
   defaultReminderDays: number
   defaultReminderChannel: UserSettingsReminderChannel
 }
@@ -84,6 +96,7 @@ function createDefaultValues(user: SettingsUser): UserSettingsInput {
     name: user.name ?? "",
     preferredCurrency: user.preferredCurrency,
     theme: user.theme,
+    darkThemeVariant: user.darkThemeVariant,
     language: normalizeLanguage(user.language),
     defaultReminderDays: user.defaultReminderDays,
     defaultReminderChannel: user.defaultReminderChannel,
@@ -94,6 +107,18 @@ function themeToNextTheme(theme: UserSettingsTheme): "light" | "dark" | "system"
   if (theme === "LIGHT") return "light"
   if (theme === "DARK") return "dark"
   return "system"
+}
+
+function applyDarkThemeVariant(
+  variant: UserSettingsDarkThemeVariant,
+  theme: UserSettingsTheme,
+  resolvedTheme?: string
+) {
+  const root = document.documentElement
+  const darkModeIsActive =
+    theme === "DARK" || (theme === "SYSTEM" && resolvedTheme === "dark")
+
+  root.classList.toggle("dark-black", variant === "BLACK" && darkModeIsActive)
 }
 
 function languageToLocale(language: UserSettingsLanguage): "en" | "pt" {
@@ -179,14 +204,23 @@ export function SettingsForm({ user }: SettingsFormProps) {
   const t = useTranslations("settingsPage")
   const router = useRouter()
   const pathname = usePathname()
-  const { setTheme } = useTheme()
+  const { resolvedTheme, setTheme } = useTheme()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [isDarkVariantDialogOpen, setIsDarkVariantDialogOpen] = useState(false)
+  const [selectedDarkVariant, setSelectedDarkVariant] =
+    useState<UserSettingsDarkThemeVariant>(user.darkThemeVariant)
   const [isPending, startTransition] = useTransition()
+  const [isVariantPending, startVariantTransition] = useTransition()
 
   const form = useForm<UserSettingsInput>({
     resolver: zodResolver(userSettingsSchema) as Resolver<UserSettingsInput>,
     defaultValues: createDefaultValues(user),
+  })
+
+  const currentDarkVariant = useWatch({
+    control: form.control,
+    name: "darkThemeVariant",
   })
 
   function onSubmit(values: UserSettingsInput) {
@@ -201,6 +235,11 @@ export function SettingsForm({ user }: SettingsFormProps) {
         const nextPath = localizedPath(pathname, updatedValues.language)
 
         setTheme(themeToNextTheme(updatedValues.theme))
+        applyDarkThemeVariant(
+          updatedValues.darkThemeVariant,
+          updatedValues.theme,
+          resolvedTheme
+        )
         form.reset(updatedValues)
         setSuccess(t("form.success"))
 
@@ -224,6 +263,34 @@ export function SettingsForm({ user }: SettingsFormProps) {
       }
 
       setError(result.error || t("form.error"))
+    })
+  }
+
+  function saveDarkThemeVariant() {
+    setError(null)
+    setSuccess(null)
+
+    startVariantTransition(async () => {
+      const result = await updateDarkThemeVariant({
+        darkThemeVariant: selectedDarkVariant,
+      })
+
+      if (result.success) {
+        form.setValue("darkThemeVariant", result.data.darkThemeVariant, {
+          shouldDirty: false,
+        })
+        applyDarkThemeVariant(
+          result.data.darkThemeVariant,
+          form.getValues("theme"),
+          resolvedTheme
+        )
+        setSuccess(t("darkThemeVariant.success"))
+        setIsDarkVariantDialogOpen(false)
+        router.refresh()
+        return
+      }
+
+      setError(result.error || t("darkThemeVariant.error"))
     })
   }
 
@@ -255,6 +322,14 @@ export function SettingsForm({ user }: SettingsFormProps) {
       icon: Monitor,
     },
   ]
+
+  const darkThemeVariantOptions: OptionCard<UserSettingsDarkThemeVariant>[] =
+    USER_SETTINGS_DARK_THEME_VARIANT_VALUES.map((variant) => ({
+      value: variant,
+      label: t(`darkThemeVariant.options.${variant}.label`),
+      description: t(`darkThemeVariant.options.${variant}.description`),
+      icon: variant === "BLACK" ? Palette : Moon,
+    }))
 
   const languageOptions: OptionCard<UserSettingsLanguage>[] =
     USER_SETTINGS_LANGUAGE_VALUES.map((language) => ({
@@ -370,6 +445,151 @@ export function SettingsForm({ user }: SettingsFormProps) {
                 </FormItem>
               )}
             />
+
+            <div className="rounded-xl border border-border/80 bg-background/60 p-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <span className="rounded-lg border border-border/70 bg-muted/30 p-2 text-foreground">
+                    <Palette className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-medium">
+                      {t("darkThemeVariant.title")}
+                    </p>
+                    <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
+                      {t("darkThemeVariant.description")}
+                    </p>
+                    <p className="text-muted-foreground mt-2 text-xs">
+                      {t("darkThemeVariant.current", {
+                        theme: t(
+                          `darkThemeVariant.options.${currentDarkVariant}.label`
+                        ),
+                      })}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedDarkVariant(currentDarkVariant)
+                    setIsDarkVariantDialogOpen(true)
+                  }}
+                >
+                  {t("darkThemeVariant.button")}
+                </Button>
+              </div>
+            </div>
+
+            <Dialog
+              open={isDarkVariantDialogOpen}
+              onOpenChange={setIsDarkVariantDialogOpen}
+            >
+              <DialogContent className="sm:max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>{t("darkThemeVariant.modalTitle")}</DialogTitle>
+                  <DialogDescription>
+                    {t("darkThemeVariant.modalDescription")}
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div role="radiogroup" className="grid gap-3 sm:grid-cols-2">
+                  {darkThemeVariantOptions.map((option) => {
+                    const selected = option.value === selectedDarkVariant
+                    const Icon = option.icon
+
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => setSelectedDarkVariant(option.value)}
+                        className={cn(
+                          "rounded-2xl border p-4 text-left transition-all",
+                          "hover:border-emerald-500/60 hover:bg-emerald-500/5",
+                          "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-none",
+                          selected
+                            ? "border-emerald-500 bg-emerald-500/10"
+                            : "border-border/70 bg-background"
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "mb-4 block overflow-hidden rounded-xl border p-3",
+                            option.value === "BLACK"
+                              ? "border-zinc-800 bg-black"
+                              : "border-slate-700 bg-slate-900"
+                          )}
+                        >
+                          <span className="mb-3 block h-2 w-16 rounded-full bg-emerald-400" />
+                          <span className="grid gap-2">
+                            <span
+                              className={cn(
+                                "block h-8 rounded-lg",
+                                option.value === "BLACK"
+                                  ? "bg-zinc-900"
+                                  : "bg-slate-800"
+                              )}
+                            />
+                            <span
+                              className={cn(
+                                "block h-8 rounded-lg",
+                                option.value === "BLACK"
+                                  ? "bg-neutral-900"
+                                  : "bg-gray-800"
+                              )}
+                            />
+                          </span>
+                        </span>
+                        <span className="flex items-start gap-3">
+                          <span
+                            className={cn(
+                              "rounded-lg border p-2",
+                              selected
+                                ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-300"
+                                : "border-border/70 bg-muted/30"
+                            )}
+                          >
+                            <Icon className="h-4 w-4" />
+                          </span>
+                          <span className="min-w-0">
+                            <span className="flex items-center gap-2 text-sm font-medium">
+                              {option.label}
+                              {selected ? (
+                                <Check className="h-4 w-4 text-emerald-500" />
+                              ) : null}
+                            </span>
+                            <span className="text-muted-foreground mt-1 block text-xs leading-relaxed">
+                              {option.description}
+                            </span>
+                          </span>
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDarkVariantDialogOpen(false)}
+                  >
+                    {t("darkThemeVariant.cancel")}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={saveDarkThemeVariant}
+                    disabled={isVariantPending}
+                  >
+                    {isVariantPending
+                      ? t("darkThemeVariant.saving")
+                      : t("darkThemeVariant.save")}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
 
             <FormField
               control={form.control}

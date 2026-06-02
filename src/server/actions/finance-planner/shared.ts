@@ -45,7 +45,15 @@ export async function getUserIdOrNull(): Promise<string | null> {
   const session = await auth.api.getSession({
     headers: await headers(),
   })
-  return session?.user?.id ?? null
+  const userId = session?.user?.id
+  if (!userId) return null
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  })
+
+  return user?.id ?? null
 }
 
 export async function getOrCreateMonthlyPlan(
@@ -313,11 +321,15 @@ export function buildMonthSummary(row: MonthlyPlanWithRelations) {
     new Prisma.Decimal(0)
   )
   const expenseTotal = row.expenses.reduce(
-    (total, expense) => total.plus(expense.amount),
+    (total, expense) =>
+      expense.expenseBucket === "CREDIT_CARD" ? total : total.plus(expense.amount),
     new Prisma.Decimal(0)
   )
   const paidTotal = row.expenses.reduce(
-    (total, expense) => (expense.isPaid ? total.plus(expense.amount) : total),
+    (total, expense) =>
+      expense.expenseBucket !== "CREDIT_CARD" && expense.isPaid
+        ? total.plus(expense.amount)
+        : total,
     new Prisma.Decimal(0)
   )
   const subscriptionTotal = row.expenses.reduce(

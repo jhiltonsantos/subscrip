@@ -24,15 +24,20 @@ export function LocaleSwitcher({ className, selectClassName }: LocaleSwitcherPro
 
   const handleChange = async (newLocale: Locale) => {
     setIsOpen(false)
-    const cleanPath = pathname.replace(/^\/pt/, "") || "/"
+    if (newLocale === locale) return
+
+    const cleanPath = pathname.replace(/^\/pt(?=\/|$)/, "") || "/"
+    const nextPath =
+      newLocale === "pt"
+        ? cleanPath === "/" ? "/pt" : `/pt${cleanPath}`
+        : cleanPath
 
     const session = await getSession()
     if (session?.user) {
       await changeUserLanguage(newLocale)
     }
 
-    router.push(newLocale === "pt" ? `/pt${cleanPath}` : cleanPath)
-    router.refresh()
+    router.push(nextPath)
   }
 
   useEffect(() => {

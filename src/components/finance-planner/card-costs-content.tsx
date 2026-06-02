@@ -2,12 +2,11 @@ import { format, type Locale } from "date-fns"
 import { formatCurrency } from "@/lib/utils/formatters"
 import { CardGrid, EmptyState, EntryCard, RowActions, TableView } from "./entry-list-parts"
 import type { PlannedExpense, TranslationFn, ViewMode } from "./types"
-import { formatInstallment } from "./utils"
+import { formatExpenseInstallment } from "./utils"
 
 export function CardCostsContent({
   rows,
   viewMode,
-  onToggle,
   onEdit,
   onDelete,
   t,
@@ -15,13 +14,13 @@ export function CardCostsContent({
 }: {
   rows: PlannedExpense[]
   viewMode: ViewMode
-  onToggle: (row: PlannedExpense) => void
   onEdit: (row: PlannedExpense) => void
   onDelete: (row: PlannedExpense) => void
   t: TranslationFn
   dateLocale: Locale
 }) {
   if (rows.length === 0) return <EmptyState>{t("cards.empty")}</EmptyState>
+  const hasInstallments = rows.some((row) => formatExpenseInstallment(row))
   if (viewMode === "list") {
     return (
       <TableView
@@ -37,8 +36,17 @@ export function CardCostsContent({
             key: "date",
             label: t("table.date"),
             render: (row) =>
-              row.purchaseDate ? format(new Date(row.purchaseDate), "P", { locale: dateLocale }) : "-",
+            row.dueDate ? format(new Date(row.dueDate), "P", { locale: dateLocale }) : "-",
           },
+          ...(hasInstallments
+            ? [
+                {
+                  key: "installment",
+                  label: t("table.installment"),
+                  render: (row: PlannedExpense) => formatExpenseInstallment(row) ?? "-",
+                },
+              ]
+            : []),
           {
             key: "amount",
             label: t("table.amount"),
@@ -48,13 +56,12 @@ export function CardCostsContent({
         ]}
         actions={(row) => (
           <RowActions
-            toggleLabel={row.isPaid ? t("expense.markPending") : t("expense.markPaid")}
-            onToggle={() => onToggle(row)}
             onEdit={() => onEdit(row)}
             onDelete={() => onDelete(row)}
             t={t}
           />
         )}
+        getRowTone={(row) => (row.isPaid ? "paid" : "default")}
         t={t}
       />
     )
@@ -66,12 +73,15 @@ export function CardCostsContent({
         <EntryCard
           key={row.id}
           title={row.name}
-          meta={`${row.paymentCard?.nickname ?? row.paymentMethod?.name ?? t("tabs.cardCosts")} · ${formatInstallment(row)}`}
+          meta={[
+            row.paymentCard?.nickname ?? row.paymentMethod?.name ?? t("tabs.cardCosts"),
+            row.merchantName,
+            formatExpenseInstallment(row),
+          ].filter(Boolean).join(" · ")}
           status={formatCurrency(Number(row.amount), row.currency)}
+          tone={row.isPaid ? "paid" : "default"}
         >
           <RowActions
-            toggleLabel={row.isPaid ? t("expense.markPending") : t("expense.markPaid")}
-            onToggle={() => onToggle(row)}
             onEdit={() => onEdit(row)}
             onDelete={() => onDelete(row)}
             t={t}

@@ -10,6 +10,7 @@ type AuthUser = {
   language?: string
   preferredCurrency?: string
   theme?: string
+  darkThemeVariant?: string
   defaultReminderDays?: number
 }
 

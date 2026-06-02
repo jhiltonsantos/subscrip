@@ -1,5 +1,6 @@
 "use client"
 
+import { useSyncExternalStore } from "react"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
@@ -11,11 +12,22 @@ interface ThemeToggleProps {
   title?: string
 }
 
+const subscribe = () => () => {}
+const getClientSnapshot = () => true
+const getServerSnapshot = () => false
+
 export function ThemeToggle({ className, title }: ThemeToggleProps) {
   const { setTheme, resolvedTheme } = useTheme()
   const t = useTranslations()
+  const mounted = useSyncExternalStore(
+    subscribe,
+    getClientSnapshot,
+    getServerSnapshot
+  )
+
   const buttonTitle =
-    title ?? (resolvedTheme === "dark" ? t("theme.lightMode") : t("theme.darkMode"))
+    title ??
+    (mounted && resolvedTheme === "dark" ? t("theme.lightMode") : t("theme.darkMode"))
 
   return (
     <Button

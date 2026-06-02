@@ -35,6 +35,8 @@ export function PlannerEntryDialog({
   setCardCostForm,
   paymentMethods,
   cardMethods,
+  selectedYear,
+  selectedMonth,
   onSaveIncome,
   onSaveExpense,
   onSaveCardCost,
@@ -54,6 +56,8 @@ export function PlannerEntryDialog({
   setCardCostForm: (form: CardCostForm) => void
   paymentMethods: PaymentMethodOption[]
   cardMethods: PaymentMethodOption[]
+  selectedYear: number
+  selectedMonth: number
   onSaveIncome: (event: FormEvent<HTMLFormElement>) => void
   onSaveExpense: (event: FormEvent<HTMLFormElement>) => void
   onSaveCardCost: (event: FormEvent<HTMLFormElement>) => void
@@ -94,6 +98,8 @@ export function PlannerEntryDialog({
             form={cardCostForm}
             setForm={setCardCostForm}
             cardMethods={cardMethods}
+            selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
             onSubmit={onSaveCardCost}
             t={t}
           />

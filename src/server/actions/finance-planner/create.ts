@@ -4,8 +4,12 @@ import { prisma } from "@/lib/prisma"
 import {
   plannedExpenseCreateSchema,
   plannedIncomeCreateSchema,
+  type PlannedIncomeCreateInput,
+  type PlannedExpenseCreateInput,
 } from "@/lib/validations/finance-planner"
-import { Prisma, PlanEntrySource } from "@prisma/client"
+import { addMonths } from "date-fns"
+import { randomUUID } from "node:crypto"
+import { Prisma, PlanEntrySource, RecurrenceKind } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 import { getTranslations } from "next-intl/server"
 import {
@@ -20,6 +24,7 @@ import {
   validateExpenseRelations,
   type FinancePlannerActionResult,
 } from "./shared"
+import { buildCardDueDate, syncCreditCardInvoices } from "./card-invoices"
 
 export async function createPlannedIncome(
   raw: unknown
@@ -41,24 +46,59 @@ export async function createPlannedIncome(
   }
 
   const data = parsed.data
-  const plan = await getOrCreateMonthlyPlan(userId, data.year, data.month)
-
-  const row = await prisma.plannedIncome.create({
-    data: {
-      monthlyPlanId: plan.id,
-      name: data.name,
-      amount: new Prisma.Decimal(data.amount),
-      currency: data.currency,
-      sortOrder: data.sortOrder,
-      expectedDate: data.expectedDate ?? undefined,
-      receivedAt: data.receivedAt ?? undefined,
-      isReceived: data.isReceived,
-    },
-    select: { id: true },
-  })
+  const rows = await createPlannedIncomeRows(userId, data)
 
   revalidatePlannerPaths()
-  return { success: true, data: row }
+  return { success: true, data: rows[0] }
+}
+
+async function createPlannedIncomeRows(
+  userId: string,
+  data: PlannedIncomeCreateInput
+) {
+  const entryCount = getIncomeEntryCount(data)
+  const isFiniteRecurrence = data.createMonthlyRecurring && Boolean(data.recurrenceMonths)
+  const recurrenceGroupId =
+    entryCount > 1 ? data.recurrenceGroupId ?? randomUUID() : data.recurrenceGroupId
+  const startDate = data.expectedDate ?? new Date(data.year, data.month - 1, 1)
+  const rows: { id: string }[] = []
+
+  for (let index = 0; index < entryCount; index += 1) {
+    const planDate = addMonths(startDate, index)
+    const plan = await getOrCreateMonthlyPlan(
+      userId,
+      planDate.getFullYear(),
+      planDate.getMonth() + 1
+    )
+    const isCurrentRowReceived = index === 0 ? data.isReceived : false
+
+    const row = await prisma.plannedIncome.create({
+      data: {
+        monthlyPlanId: plan.id,
+        name: data.name,
+        description: data.description ?? undefined,
+        amount: new Prisma.Decimal(data.amount),
+        currency: data.currency,
+        sortOrder: data.sortOrder,
+        expectedDate: addMonthsToOptionalDate(data.expectedDate, index),
+        receivedAt: isCurrentRowReceived ? data.receivedAt ?? undefined : undefined,
+        isReceived: isCurrentRowReceived,
+        recurrenceKind: entryCount > 1 ? RecurrenceKind.MONTHLY_RECURRING : data.recurrenceKind ?? undefined,
+        recurrenceGroupId: recurrenceGroupId ?? undefined,
+        recurrenceNumber: isFiniteRecurrence ? index + 1 : data.recurrenceNumber ?? undefined,
+        recurrenceTotal: isFiniteRecurrence ? entryCount : data.recurrenceTotal ?? undefined,
+      },
+      select: { id: true },
+    })
+    rows.push(row)
+  }
+
+  return rows
+}
+
+function getIncomeEntryCount(data: PlannedIncomeCreateInput) {
+  if (!data.createMonthlyRecurring) return 1
+  return data.recurrenceMonths ?? 12
 }
 
 export async function createPlannedExpense(
@@ -95,35 +135,208 @@ export async function createPlannedExpense(
   const relationError = await validateExpenseRelations(userId, data)
   if (relationError) return relationError
 
-  const plan = await getOrCreateMonthlyPlan(userId, data.year, data.month)
-  const source = resolveExpenseSource(data)
+  if (
+    data.createFutureInstallments &&
+    data.installmentNumber &&
+    data.installmentTotal &&
+    data.installmentNumber > data.installmentTotal
+  ) {
+    return { success: false, error: t("common.invalidData") }
+  }
 
-  const row = await prisma.plannedExpense.create({
-    data: {
-      monthlyPlanId: plan.id,
-      name: data.name,
-      amount: new Prisma.Decimal(data.amount),
-      currency: data.currency,
-      expenseBucket: data.expenseBucket,
-      sortOrder: data.sortOrder,
-      purchaseDate: data.purchaseDate ?? undefined,
-      dueDate: data.dueDate ?? undefined,
-      paidAt: data.paidAt ?? undefined,
-      isPaid: data.isPaid,
-      source,
-      paymentMethodId: data.paymentMethodId ?? undefined,
-      paymentCardId: data.paymentCardId ?? undefined,
-      creditCardInvoiceId: data.creditCardInvoiceId ?? undefined,
-      subscriptionId: data.subscriptionId ?? undefined,
-      installmentPurchaseId: data.installmentPurchaseId ?? undefined,
-      installmentNumber: data.installmentNumber ?? undefined,
-      installmentTotal: data.installmentTotal ?? undefined,
-    },
-    select: { id: true },
-  })
+  const source = resolveExpenseSource(data)
+  const rows = await createPlannedExpenseRows(userId, data, source)
+  await syncCreditCardInvoices(userId, rows)
 
   revalidatePlannerPaths()
-  return { success: true, data: row }
+  return { success: true, data: rows[0] }
+}
+
+async function createPlannedExpenseRows(
+  userId: string,
+  data: PlannedExpenseCreateInput,
+  source: PlanEntrySource
+) {
+  const cardDueDay = await getCardDueDay(userId, data)
+  const schedule = buildExpenseSchedule(data, cardDueDay)
+  const entryCount = schedule.length
+  const recurrenceKind = getRecurrenceKind(data)
+  const recurrenceGroupId =
+    entryCount > 1 ? data.recurrenceGroupId ?? randomUUID() : data.recurrenceGroupId
+  const rows: { id: string; paymentCardId: string | null; year: number; month: number }[] = []
+
+  for (const item of schedule) {
+    const plan = await getOrCreateMonthlyPlan(
+      userId,
+      item.year,
+      item.month
+    )
+
+    const row = await prisma.plannedExpense.create({
+      data: {
+        monthlyPlanId: plan.id,
+        name: data.name,
+        merchantName: data.merchantName ?? undefined,
+        description: data.description ?? undefined,
+        amount: new Prisma.Decimal(data.amount),
+        currency: data.currency,
+        expenseBucket: data.expenseBucket,
+        sortOrder: data.sortOrder,
+        purchaseDate: item.purchaseDate,
+        dueDate: item.dueDate,
+        paidAt: data.paidAt ?? undefined,
+        isPaid: data.isPaid,
+        source,
+        paymentMethodId: data.paymentMethodId ?? undefined,
+        paymentCardId: data.paymentCardId ?? undefined,
+        creditCardInvoiceId: data.creditCardInvoiceId ?? undefined,
+        subscriptionId: data.subscriptionId ?? undefined,
+        installmentPurchaseId: data.installmentPurchaseId ?? undefined,
+        installmentNumber: item.installmentNumber,
+        installmentTotal: data.installmentTotal ?? undefined,
+        recurrenceKind: recurrenceKind ?? undefined,
+        recurrenceGroupId: recurrenceGroupId ?? undefined,
+      },
+      select: { id: true },
+    })
+    rows.push({
+      ...row,
+      paymentCardId: data.paymentCardId ?? null,
+      year: item.year,
+      month: item.month,
+    })
+  }
+
+  return rows
+}
+
+async function getCardDueDay(userId: string, data: PlannedExpenseCreateInput) {
+  if (!isCreditCardExpense(data)) return null
+  const card = await prisma.paymentCard.findFirst({
+    where: { id: data.paymentCardId ?? undefined, userId },
+    select: { dueDay: true },
+  })
+  return card?.dueDay ?? null
+}
+
+function buildExpenseSchedule(
+  data: PlannedExpenseCreateInput,
+  cardDueDay: number | null
+) {
+  if (isCreditCardExpense(data)) {
+    return buildCreditCardExpenseSchedule(data, cardDueDay)
+  }
+
+  if (isInstallmentExpense(data)) {
+    return buildInstallmentExpenseSchedule(data)
+  }
+
+  const entryCount = getEntryCount(data)
+  const startDate = data.purchaseDate ?? data.dueDate ?? new Date(data.year, data.month - 1, 1)
+
+  return Array.from({ length: entryCount }, (_, index) => {
+    const planDate = addMonths(startDate, index)
+    return {
+      year: planDate.getFullYear(),
+      month: planDate.getMonth() + 1,
+      purchaseDate: addMonthsToOptionalDate(data.purchaseDate, index),
+      dueDate: addMonthsToOptionalDate(data.dueDate, index),
+      installmentNumber: data.installmentNumber ? data.installmentNumber + index : undefined,
+    }
+  })
+}
+
+function buildInstallmentExpenseSchedule(data: PlannedExpenseCreateInput) {
+  const currentInstallment = data.installmentNumber ?? 1
+  const totalInstallments = data.installmentTotal ?? currentInstallment
+  const firstInstallment = data.createPreviousInstallments ? 1 : currentInstallment
+
+  return Array.from(
+    { length: totalInstallments - firstInstallment + 1 },
+    (_, index) => {
+      const installmentNumber = firstInstallment + index
+      const planDate = addMonths(
+        new Date(data.year, data.month - 1, 1),
+        installmentNumber - currentInstallment
+      )
+      const year = planDate.getFullYear()
+      const month = planDate.getMonth() + 1
+
+      return {
+        year,
+        month,
+        purchaseDate: dateInMonth(data.purchaseDate, year, month),
+        dueDate: dateInMonth(data.dueDate, year, month),
+        installmentNumber,
+      }
+    }
+  )
+}
+
+function buildCreditCardExpenseSchedule(
+  data: PlannedExpenseCreateInput,
+  cardDueDay: number | null
+) {
+  const currentInstallment = data.installmentNumber ?? 1
+  const totalInstallments =
+    data.createFutureInstallments && data.installmentTotal
+      ? data.installmentTotal
+      : currentInstallment
+  const firstInstallment =
+    data.createFutureInstallments && data.createPreviousInstallments ? 1 : currentInstallment
+
+  return Array.from({ length: totalInstallments - firstInstallment + 1 }, (_, index) => {
+    const installmentNumber = firstInstallment + index
+    const planDate = addMonths(
+      new Date(data.year, data.month - 1, 1),
+      installmentNumber - currentInstallment
+    )
+    const year = planDate.getFullYear()
+    const month = planDate.getMonth() + 1
+
+    return {
+      year,
+      month,
+      purchaseDate: undefined,
+      dueDate: buildCardDueDate(year, month, cardDueDay),
+      installmentNumber:
+        data.createFutureInstallments && data.installmentTotal
+          ? installmentNumber
+          : data.installmentNumber ?? undefined,
+    }
+  })
+}
+
+function isCreditCardExpense(data: PlannedExpenseCreateInput) {
+  return data.expenseBucket === "CREDIT_CARD" && Boolean(data.paymentCardId)
+}
+
+function isInstallmentExpense(data: PlannedExpenseCreateInput) {
+  return Boolean(data.createFutureInstallments && data.installmentNumber && data.installmentTotal)
+}
+
+function getEntryCount(data: PlannedExpenseCreateInput) {
+  if (data.createMonthlyRecurring) return 12
+  if (!data.createFutureInstallments || !data.installmentNumber || !data.installmentTotal) {
+    return 1
+  }
+  return Math.max(1, data.installmentTotal - data.installmentNumber + 1)
+}
+
+function getRecurrenceKind(data: PlannedExpenseCreateInput) {
+  if (data.createMonthlyRecurring) return RecurrenceKind.MONTHLY_RECURRING
+  if (data.createFutureInstallments) return RecurrenceKind.INSTALLMENT
+  return data.recurrenceKind
+}
+
+function addMonthsToOptionalDate(value: Date | null | undefined, months: number) {
+  return value ? addMonths(value, months) : undefined
+}
+
+function dateInMonth(value: Date | null | undefined, year: number, month: number) {
+  if (!value) return undefined
+  const lastDayOfMonth = new Date(year, month, 0).getDate()
+  return new Date(year, month - 1, Math.min(value.getDate(), lastDayOfMonth))
 }
 
 function resolveExpenseSource(data: {

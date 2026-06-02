@@ -6,8 +6,9 @@ import { useLocale, useTranslations } from "next-intl"
 import type { FormEvent } from "react"
 import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CardCostsContent } from "./card-costs-content"
 import { emptyCardCostForm, emptyExpenseForm, emptyIncomeForm } from "./constants"
+import { DeleteExpenseDialog } from "./delete-expense-dialog"
+import { EditScopeDialog } from "./edit-scope-dialog"
 import { ExpenseContent } from "./expense-content"
 import { IncomeContent } from "./income-content"
 import { MonthSelector } from "./month-selector"
@@ -23,7 +24,7 @@ import type {
   PlannedIncome,
   ViewMode,
 } from "./types"
-import { toDateInput, toDateOrUndefined, toOptionalNumber } from "./utils"
+import { toCardDueDateInput, toDateInput, toDateOrUndefined, toOptionalNumber } from "./utils"
 import {
   createPlannedExpenseAction,
   createPlannedIncomeAction,
@@ -85,6 +86,12 @@ export function FinancePlannerBoard() {
   const [expenseForm, setExpenseForm] = useState<ExpenseForm>(emptyExpenseForm)
   const [cardCostForm, setCardCostForm] = useState<CardCostForm>(emptyCardCostForm)
   const [formError, setFormError] = useState<string | null>(null)
+  const [pendingDeleteExpense, setPendingDeleteExpense] = useState<PlannedExpense | null>(null)
+  const [pendingEdit, setPendingEdit] = useState<{
+    type: "income" | "expense"
+    id: string
+    data: unknown
+  } | null>(null)
 
   useEffect(() => {
     dispatch(fetchMonthlyPlan({ year: selectedYear, month: selectedMonth }))
@@ -111,6 +118,7 @@ export function FinancePlannerBoard() {
   }
 
   function openCreateDialog() {
+    const defaultCardMethod = cardMethods[0]
     setFormError(null)
     setEditingIncomeId(null)
     setEditingExpenseId(null)
@@ -118,7 +126,10 @@ export function FinancePlannerBoard() {
     setExpenseForm(emptyExpenseForm)
     setCardCostForm({
       ...emptyCardCostForm,
-      paymentMethodId: cardMethods[0]?.id ?? "",
+      paymentMethodId: defaultCardMethod?.id ?? "",
+      dueDate: defaultCardMethod?.paymentCard
+        ? toCardDueDateInput(selectedYear, selectedMonth, defaultCardMethod.paymentCard.dueDay)
+        : "",
     })
     setDialogOpen(true)
   }
@@ -130,10 +141,14 @@ export function FinancePlannerBoard() {
     setEditingExpenseId(null)
     setIncomeForm({
       name: row.name,
+      description: row.description ?? "",
       amount: row.amount,
       currency: row.currency,
       expectedDate: toDateInput(row.expectedDate),
       isReceived: row.isReceived,
+      isMonthlyRecurring: row.recurrenceKind === "MONTHLY_RECURRING",
+      isFixedRecurring: false,
+      recurrenceMonths: "",
     })
     setDialogOpen(true)
   }
@@ -146,20 +161,29 @@ export function FinancePlannerBoard() {
     setEditingIncomeId(null)
 
     if (isCardCost) {
+      const method = cardMethods.find((item) => item.id === row.paymentMethodId)
       setCardCostForm({
         name: row.name,
+        merchantName: row.merchantName ?? "",
+        description: row.description ?? "",
         amount: row.amount,
         currency: row.currency,
-        purchaseDate: toDateInput(row.purchaseDate),
-        dueDate: toDateInput(row.dueDate),
+        dueDate:
+          toDateInput(row.dueDate) ||
+          (method?.paymentCard
+            ? toCardDueDateInput(selectedYear, selectedMonth, method.paymentCard.dueDay)
+            : ""),
         paymentMethodId: row.paymentMethodId ?? "",
+        isInstallment: Boolean(row.installmentNumber && row.installmentTotal),
+        createPreviousInstallments: false,
         installmentNumber: row.installmentNumber?.toString() ?? "",
         installmentTotal: row.installmentTotal?.toString() ?? "",
-        isPaid: row.isPaid,
       })
     } else {
       setExpenseForm({
         name: row.name,
+        merchantName: row.merchantName ?? "",
+        description: row.description ?? "",
         amount: row.amount,
         currency: row.currency,
         expenseBucket: row.expenseBucket,
@@ -167,6 +191,11 @@ export function FinancePlannerBoard() {
         purchaseDate: toDateInput(row.purchaseDate),
         isPaid: row.isPaid,
         paymentMethodId: row.paymentMethodId ?? "",
+        isInstallment: Boolean(row.installmentNumber && row.installmentTotal),
+        isMonthlyRecurring: row.recurrenceKind === "MONTHLY_RECURRING",
+        createPreviousInstallments: false,
+        installmentNumber: row.installmentNumber?.toString() ?? "",
+        installmentTotal: row.installmentTotal?.toString() ?? "",
       })
     }
 
@@ -180,12 +209,20 @@ export function FinancePlannerBoard() {
       setFormError(t("form.validation"))
       return
     }
+    if (
+      incomeForm.isFixedRecurring &&
+      (!incomeForm.recurrenceMonths || Number(incomeForm.recurrenceMonths) <= 0)
+    ) {
+      setFormError(t("form.recurrenceValidation"))
+      return
+    }
 
     const current = incomes.find((income) => income.id === editingIncomeId)
     const data = {
       year: selectedYear,
       month: selectedMonth,
       name: incomeForm.name.trim(),
+      description: incomeForm.description.trim() || null,
       amount: Number(incomeForm.amount),
       currency: incomeForm.currency,
       expectedDate: toDateOrUndefined(incomeForm.expectedDate),
@@ -195,9 +232,20 @@ export function FinancePlannerBoard() {
           ? new Date(current.receivedAt)
           : new Date()
         : null,
+      createMonthlyRecurring:
+        !editingIncomeId && (incomeForm.isMonthlyRecurring || incomeForm.isFixedRecurring),
+      recurrenceMonths: incomeForm.isFixedRecurring
+        ? toOptionalNumber(incomeForm.recurrenceMonths)
+        : null,
     }
 
     if (editingIncomeId) {
+      const editingIncome = incomes.find((income) => income.id === editingIncomeId)
+      if (editingIncome?.recurrenceGroupId) {
+        setPendingEdit({ type: "income", id: editingIncomeId, data })
+        setDialogOpen(false)
+        return
+      }
       await dispatch(updatePlannedIncomeAction({ id: editingIncomeId, data })).unwrap()
     } else {
       await dispatch(createPlannedIncomeAction(data)).unwrap()
@@ -213,6 +261,13 @@ export function FinancePlannerBoard() {
       setFormError(t("form.validation"))
       return
     }
+    if (
+      expenseForm.isInstallment &&
+      (!expenseForm.installmentNumber || !expenseForm.installmentTotal)
+    ) {
+      setFormError(t("form.installmentValidation"))
+      return
+    }
 
     const current = manualExpenses.find((expense) => expense.id === editingExpenseId)
     const method = paymentMethods.find((item) => item.id === expenseForm.paymentMethodId)
@@ -220,6 +275,8 @@ export function FinancePlannerBoard() {
       year: selectedYear,
       month: selectedMonth,
       name: expenseForm.name.trim(),
+      merchantName: expenseForm.merchantName.trim() || null,
+      description: expenseForm.description.trim() || null,
       amount: Number(expenseForm.amount),
       currency: expenseForm.currency,
       expenseBucket: expenseForm.expenseBucket,
@@ -233,9 +290,25 @@ export function FinancePlannerBoard() {
         : null,
       paymentMethodId: method?.id ?? null,
       paymentCardId: method?.paymentCard?.id ?? null,
+      installmentNumber: expenseForm.isInstallment
+        ? toOptionalNumber(expenseForm.installmentNumber)
+        : null,
+      installmentTotal: expenseForm.isInstallment
+        ? toOptionalNumber(expenseForm.installmentTotal)
+        : null,
+      createFutureInstallments: !editingExpenseId && expenseForm.isInstallment,
+      createPreviousInstallments:
+        !editingExpenseId && expenseForm.isInstallment && expenseForm.createPreviousInstallments,
+      createMonthlyRecurring: !editingExpenseId && expenseForm.isMonthlyRecurring,
     }
 
     if (editingExpenseId) {
+      const editingExpense = manualExpenses.find((expense) => expense.id === editingExpenseId)
+      if (editingExpense?.recurrenceGroupId) {
+        setPendingEdit({ type: "expense", id: editingExpenseId, data })
+        setDialogOpen(false)
+        return
+      }
       await dispatch(updatePlannedExpenseAction({ id: editingExpenseId, data })).unwrap()
     } else {
       await dispatch(createPlannedExpenseAction(data)).unwrap()
@@ -251,6 +324,13 @@ export function FinancePlannerBoard() {
       setFormError(t("form.validation"))
       return
     }
+    if (
+      cardCostForm.isInstallment &&
+      (!cardCostForm.installmentNumber || !cardCostForm.installmentTotal)
+    ) {
+      setFormError(t("form.installmentValidation"))
+      return
+    }
 
     const method = cardMethods.find((item) => item.id === cardCostForm.paymentMethodId)
     if (!method?.paymentCard) {
@@ -258,29 +338,36 @@ export function FinancePlannerBoard() {
       return
     }
 
-    const current = cardCosts.find((expense) => expense.id === editingExpenseId)
     const data = {
       year: selectedYear,
       month: selectedMonth,
       name: cardCostForm.name.trim(),
+      merchantName: cardCostForm.merchantName.trim() || null,
+      description: cardCostForm.description.trim() || null,
       amount: Number(cardCostForm.amount),
       currency: cardCostForm.currency,
       expenseBucket: "CREDIT_CARD",
       paymentMethodId: method.id,
       paymentCardId: method.paymentCard.id,
-      purchaseDate: toDateOrUndefined(cardCostForm.purchaseDate),
       dueDate: toDateOrUndefined(cardCostForm.dueDate),
-      installmentNumber: toOptionalNumber(cardCostForm.installmentNumber),
-      installmentTotal: toOptionalNumber(cardCostForm.installmentTotal),
-      isPaid: cardCostForm.isPaid,
-      paidAt: cardCostForm.isPaid
-        ? current?.paidAt
-          ? new Date(current.paidAt)
-          : new Date()
+      installmentNumber: cardCostForm.isInstallment
+        ? toOptionalNumber(cardCostForm.installmentNumber)
         : null,
+      installmentTotal: cardCostForm.isInstallment
+        ? toOptionalNumber(cardCostForm.installmentTotal)
+        : null,
+      createFutureInstallments: !editingExpenseId && cardCostForm.isInstallment,
+      createPreviousInstallments:
+        !editingExpenseId && cardCostForm.isInstallment && cardCostForm.createPreviousInstallments,
     }
 
     if (editingExpenseId) {
+      const editingExpense = cardCosts.find((expense) => expense.id === editingExpenseId)
+      if (editingExpense?.recurrenceGroupId) {
+        setPendingEdit({ type: "expense", id: editingExpenseId, data })
+        setDialogOpen(false)
+        return
+      }
       await dispatch(updatePlannedExpenseAction({ id: editingExpenseId, data })).unwrap()
     } else {
       await dispatch(createPlannedExpenseAction(data)).unwrap()
@@ -313,8 +400,45 @@ export function FinancePlannerBoard() {
   }
 
   async function removeExpense(row: PlannedExpense) {
+    if (row.recurrenceGroupId) {
+      setPendingDeleteExpense(row)
+      return
+    }
     if (!window.confirm(t("form.confirmDelete"))) return
     await dispatch(deletePlannedExpenseAction(row.id)).unwrap()
+  }
+
+  async function confirmDeleteExpense(mode: "single" | "future") {
+    if (!pendingDeleteExpense) return
+    await dispatch(
+      deletePlannedExpenseAction({ id: pendingDeleteExpense.id, mode })
+    ).unwrap()
+    setPendingDeleteExpense(null)
+  }
+
+  async function confirmEditScope(mode: "single" | "future") {
+    if (!pendingEdit) return
+
+    if (pendingEdit.type === "income") {
+      await dispatch(
+        updatePlannedIncomeAction({
+          id: pendingEdit.id,
+          data: pendingEdit.data,
+          mode,
+        })
+      ).unwrap()
+    } else {
+      await dispatch(
+        updatePlannedExpenseAction({
+          id: pendingEdit.id,
+          data: pendingEdit.data,
+          mode,
+        })
+      ).unwrap()
+    }
+
+    setPendingEdit(null)
+    closeDialog()
   }
 
   function closeDialog() {
@@ -326,14 +450,16 @@ export function FinancePlannerBoard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <MonthSelector
           monthInput={monthInput}
           yearInput={yearInput}
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
           setMonthInput={setMonthInput}
           setYearInput={setYearInput}
           onApply={applyMonthFilter}
@@ -348,16 +474,18 @@ export function FinancePlannerBoard() {
         </p>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
         <SummaryCard title={t("summary.incomeTotal")} value={totals.income} />
         <SummaryCard title={t("summary.expenseTotal")} value={totals.expense} />
         <SummaryCard title={t("summary.subscriptionTotal")} value={totals.subscriptions} />
         <SummaryCard title={t("summary.creditCardTotal")} value={totals.cards} />
-        <SummaryCard
-          title={t("summary.balance")}
-          value={totals.balance}
-          positive={totals.balance >= 0}
-        />
+        <div className="col-span-2 lg:col-span-1">
+          <SummaryCard
+            title={t("summary.balance")}
+            value={totals.balance}
+            positive={totals.balance >= 0}
+          />
+        </div>
       </div>
 
       <Card>
@@ -371,6 +499,7 @@ export function FinancePlannerBoard() {
           <PlanningToolbar
             activeTab={activeTab}
             setActiveTab={setActiveTab}
+            tabs={["income", "expenses"]}
             viewMode={viewMode}
             setViewMode={setViewMode}
             onAdd={openCreateDialog}
@@ -399,17 +528,6 @@ export function FinancePlannerBoard() {
             />
           ) : null}
 
-          {activeTab === "cardCosts" ? (
-            <CardCostsContent
-              rows={cardCosts}
-              viewMode={viewMode}
-              onToggle={toggleExpense}
-              onEdit={openExpenseEdit}
-              onDelete={removeExpense}
-              t={t}
-              dateLocale={dateLocale}
-            />
-          ) : null}
         </CardContent>
       </Card>
 
@@ -427,10 +545,31 @@ export function FinancePlannerBoard() {
         setCardCostForm={setCardCostForm}
         paymentMethods={paymentMethods}
         cardMethods={cardMethods}
+        selectedYear={selectedYear}
+        selectedMonth={selectedMonth}
         onSaveIncome={saveIncome}
         onSaveExpense={saveExpense}
         onSaveCardCost={saveCardCost}
         isLoading={isLoading}
+        t={t}
+      />
+      <DeleteExpenseDialog
+        row={pendingDeleteExpense}
+        open={Boolean(pendingDeleteExpense)}
+        onOpenChange={(open) => {
+          if (!open) setPendingDeleteExpense(null)
+        }}
+        onDeleteSingle={() => confirmDeleteExpense("single")}
+        onDeleteFuture={() => confirmDeleteExpense("future")}
+        t={t}
+      />
+      <EditScopeDialog
+        open={Boolean(pendingEdit)}
+        onOpenChange={(open) => {
+          if (!open) setPendingEdit(null)
+        }}
+        onEditSingle={() => confirmEditScope("single")}
+        onEditFuture={() => confirmEditScope("future")}
         t={t}
       />
     </div>

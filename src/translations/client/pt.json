@@ -108,13 +108,32 @@
     "dashboard": "Dashboard",
     "subscriptions": "Assinaturas",
     "financePlanner": "Planejador Financeiro",
+    "cardInvoice": "Fatura do cartão",
     "paymentMethods": "Métodos de Pagamento",
     "settings": "Configurações",
     "profile": "Perfil",
     "language": "Idioma",
     "theme": "Tema",
     "notifications": "Notificações",
-    "logout": "Sair"
+    "logout": "Sair",
+    "sections": {
+      "main": "Principal",
+      "management": "Gestão",
+      "finance": "Financeiro",
+      "system": "Sistema"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "subscriptions": "Assinaturas",
+      "financePlanner": "Planejador Financeiro",
+      "cardInvoice": "Fatura do cartão",
+      "paymentMethods": "Métodos de Pagamento",
+      "settings": "Configurações",
+      "profile": "Perfil",
+      "auth": "Autenticação",
+      "login": "Entrar",
+      "register": "Criar conta"
+    }
   },
   "locale": {
     "en": "English",
@@ -265,6 +284,29 @@
         "BOTH": "Usar os dois canais para renovações importantes."
       }
     },
+    "darkThemeVariant": {
+      "title": "Tema escuro",
+      "description": "Escolha a aparência usada quando o modo escuro estiver ativo.",
+      "current": "Atual: {theme}",
+      "button": "Selecionar tema escuro",
+      "modalTitle": "Selecionar tema escuro",
+      "modalDescription": "Escolha entre o dark azul atual ou uma versão mais escura com tons de preto.",
+      "save": "Salvar tema",
+      "saving": "Salvando...",
+      "cancel": "Cancelar",
+      "success": "Tema escuro atualizado.",
+      "error": "Não foi possível atualizar o tema escuro.",
+      "options": {
+        "BLUE": {
+          "label": "Azul escuro",
+          "description": "Mantém o visual atual com fundo azul escuro e detalhes esverdeados."
+        },
+        "BLACK": {
+          "label": "Preto profundo",
+          "description": "Usa uma base mais escura com tons de preto e contraste mais intenso."
+        }
+      }
+    },
     "paymentMethods": {
       "title": "Métodos de pagamento",
       "description": "Gerencie cartões e métodos usados por assinaturas e saídas planejadas.",
@@ -277,6 +319,7 @@
         "createTitle": "Novo método de pagamento",
         "editTitle": "Editar método de pagamento",
         "name": "Nome",
+        "type": "Tipo",
         "cardNickname": "Apelido do cartão",
         "brand": "Bandeira",
         "last4": "Últimos 4 dígitos",
@@ -287,6 +330,14 @@
         "saving": "Salvando...",
         "cancel": "Cancelar",
         "edit": "Editar"
+      },
+      "tooltips": {
+        "type": "Define se este método será usado como cartão, PIX, boleto, dinheiro ou outra forma de pagamento.",
+        "cardNickname": "Nome curto usado para identificar este cartão nas listas e faturas.",
+        "last4": "Usado apenas para reconhecer visualmente o cartão. Não informe o número completo.",
+        "closingDay": "Dia do mês em que a fatura do cartão fecha.",
+        "dueDay": "Dia do mês usado para calcular o vencimento da fatura.",
+        "limitAmount": "Limite opcional do cartão para referência."
       },
       "types": {
         "CREDIT_CARD": "Cartão de crédito",
@@ -307,7 +358,10 @@
       "month": "Mês",
       "year": "Ano",
       "apply": "Aplicar",
-      "loading": "Carregando..."
+      "loading": "Carregando...",
+      "past": "Passado",
+      "current": "Atual",
+      "future": "Futuro"
     },
     "summary": {
       "incomeTotal": "Receber total",
@@ -319,14 +373,21 @@
     "form": {
       "name": "Nome",
       "amount": "Valor",
+      "currency": "Moeda",
+      "paymentMethod": "Método de pagamento",
+      "titleLabel": "Título",
+      "description": "Descrição",
       "namePlaceholder": "Nome",
       "amountPlaceholder": "Valor",
+      "descriptionPlaceholder": "Observações opcionais",
       "save": "Salvar",
       "saving": "Salvando...",
       "cancel": "Cancelar",
       "edit": "Editar",
       "delete": "Excluir",
       "validation": "Nome e valor positivo são obrigatórios.",
+      "installmentValidation": "Parcela atual e total de parcelas são obrigatórios.",
+      "recurrenceValidation": "Informe uma quantidade de meses válida para a recorrência.",
       "confirmDelete": "Excluir este item?",
       "noPaymentMethod": "Sem método de pagamento"
     },
@@ -341,12 +402,22 @@
     "add": {
       "income": "Adicionar Entrada",
       "expenses": "Adicionar Saída",
-      "cardCosts": "Adicionar Custo de Cartão"
+      "cardCosts": "Adicionar Custo"
     },
     "modal": {
       "incomeDescription": "Adicione ou edite entradas esperadas para o mês selecionado.",
       "expenseDescription": "Adicione ou edite saídas mensais fora das compras no cartão.",
       "cardCostDescription": "Adicione ou edite compras de cartão para o mês selecionado."
+    },
+    "tooltips": {
+      "purchaseDate": "Data em que a compra aconteceu. As próximas parcelas seguem este mês como referência.",
+      "dueDate": "Data em que este custo deve ser pago ou aparecer no planejamento mensal.",
+      "expensePurchaseDate": "Data em que a despesa foi contratada ou comprada.",
+      "expenseDueDate": "Data de vencimento desta despesa.",
+      "installmentNumber": "A parcela que você está adicionando agora. Exemplo: 3 se este é o terceiro pagamento.",
+      "installmentTotal": "Quantidade total de parcelas. Exemplo: 12 para um empréstimo de 12 meses.",
+      "incomeExpectedDate": "Data esperada para receber esta entrada. Recorrências futuras usam este mês como referência.",
+      "incomeRecurrenceMonths": "Quantidade total de meses em que esta entrada deve ser criada, incluindo o mês atual."
     },
     "view": {
       "cards": "Cards",
@@ -360,7 +431,12 @@
       "received": "Recebida",
       "pending": "Pendente",
       "markReceived": "Marcar como recebida",
-      "markPending": "Marcar como pendente"
+      "markPending": "Marcar como pendente",
+      "expectedDate": "Data esperada",
+      "isMonthlyRecurring": "Repetir mensalmente pelos próximos 12 meses",
+      "isFixedRecurring": "Receberei este valor por uma quantidade fixa de meses",
+      "recurrenceMonths": "Quantidade de meses",
+      "recurrenceMonthsPlaceholder": "Ex: 5"
     },
     "expense": {
       "columnTitle": "Saídas",
@@ -370,7 +446,14 @@
       "paid": "Paga",
       "pending": "Pendente",
       "markPaid": "Marcar como paga",
-      "markPending": "Marcar como pendente"
+      "markPending": "Marcar como pendente",
+      "merchantName": "Onde / fornecedor",
+      "merchantPlaceholder": "Loja, fornecedor ou credor",
+      "purchaseDate": "Data da compra",
+      "dueDate": "Data de vencimento",
+      "isInstallment": "Esta é uma saída parcelada",
+      "createPreviousInstallments": "Adicionar parcelas anteriores",
+      "isMonthlyRecurring": "Repetir mensalmente pelos próximos 12 meses"
     },
     "buckets": {
       "MONTHLY_BILLS": "Contas mensais",
@@ -399,7 +482,29 @@
       "noPurchaseDate": "Sem data de compra",
       "addCost": "Adicionar custo de cartão",
       "editCost": "Editar custo de cartão",
-      "selectCard": "Selecione um cartão"
+      "selectCard": "Selecione um cartão",
+      "card": "Cartão",
+      "merchantName": "Onde foi comprado",
+      "merchantPlaceholder": "Loja ou estabelecimento",
+      "purchaseDate": "Data da compra",
+      "dueDate": "Data de vencimento",
+      "isInstallment": "Esta é uma compra parcelada",
+      "createPreviousInstallments": "Adicionar parcelas anteriores"
+    },
+    "deleteDialog": {
+      "title": "Excluir item recorrente?",
+      "singleDescription": "Isso remove somente este item.",
+      "recurringDescription": "Este item faz parte de um grupo parcelado ou recorrente. Escolha quanto deseja remover.",
+      "single": "Remover apenas este item",
+      "future": "Remover este e os próximos"
+    },
+    "editScopeDialog": {
+      "title": "Aplicar edição em quais itens?",
+      "description": "Este item faz parte de uma sequência parcelada ou recorrente. Escolha se a alteração vale apenas para este registro ou para este e os próximos.",
+      "single": "Editar apenas este item",
+      "singleDescription": "Mantém as parcelas ou recorrências futuras sem alterações.",
+      "future": "Editar este e os próximos",
+      "futureDescription": "Aplica os novos dados a este mês e aos meses seguintes do mesmo grupo."
     },
     "table": {
       "date": "Data",
@@ -410,6 +515,17 @@
       "status": "Status",
       "actions": "Ações",
       "bucket": "Tipo"
+    }
+  },
+  "cardInvoicePage": {
+    "title": "Fatura do cartão",
+    "subtitle": "Acompanhe as compras registradas nos cartões e a fatura consolidada do mês.",
+    "monthTitle": "Fatura de {month}",
+    "description": "Veja os itens de cartão do mês selecionado. A fatura consolidada continua aparecendo como saída no Planejador Financeiro.",
+    "summary": {
+      "total": "Total da fatura",
+      "paid": "Compras pagas",
+      "pending": "Compras pendentes"
     }
   },
   "theme": {

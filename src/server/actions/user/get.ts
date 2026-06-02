@@ -23,6 +23,7 @@ export async function getUser() {
       language: true,
       preferredCurrency: true,
       theme: true,
+      darkThemeVariant: true,
       defaultReminderDays: true,
       defaultReminderChannel: true,
     },

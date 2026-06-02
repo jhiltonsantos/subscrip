@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   LogOut,
   DollarSign,
+  ReceiptText,
   WalletCards
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -32,31 +33,56 @@ export function Sidebar({ user }: SidebarProps) {
   const sidebarRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
-  const navItems = [
+  const navSections = [
     {
-      label: t("header.dashboard"),
-      href: "/dashboard",
-      icon: LayoutDashboard,
+      label: t("header.sections.main"),
+      items: [
+        {
+          label: t("header.dashboard"),
+          href: "/dashboard",
+          icon: LayoutDashboard,
+        },
+      ],
     },
     {
-      label: t("header.subscriptions"),
-      href: "/subscriptions",
-      icon: CreditCard,
+      label: t("header.sections.management"),
+      items: [
+        {
+          label: t("header.subscriptions"),
+          href: "/subscriptions",
+          icon: CreditCard,
+        },
+      ],
     },
     {
-      label: t("header.financePlanner"),
-      href: "/finance-planner",
-      icon: DollarSign,
+      label: t("header.sections.finance"),
+      items: [
+        {
+          label: t("header.financePlanner"),
+          href: "/finance-planner",
+          icon: DollarSign,
+        },
+        {
+          label: t("header.cardInvoice"),
+          href: "/card-invoice",
+          icon: ReceiptText,
+        },
+        {
+          label: t("header.paymentMethods"),
+          href: "/payment-methods",
+          icon: WalletCards,
+        },
+      ],
     },
     {
-      label: t("header.paymentMethods"),
-      href: "/payment-methods",
-      icon: WalletCards,
-    },
-    {
-      label: t("header.settings"),
-      href: "/settings",
-      icon: Settings,
+      label: t("header.sections.system"),
+      items: [
+        {
+          label: t("header.settings"),
+          href: "/settings",
+          icon: Settings,
+        },
+      ],
     },
   ]
 
@@ -109,7 +135,7 @@ export function Sidebar({ user }: SidebarProps) {
   return (
     <aside
       ref={sidebarRef}
-      className="fixed left-4 top-4 bottom-4 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl rounded-2xl border border-gray-200/80 dark:border-gray-800/80 flex flex-col shadow-lg"
+      className="fixed left-4 top-4 bottom-4 bg-[var(--chrome-bg)] backdrop-blur-xl rounded-2xl border border-[var(--chrome-border)] flex flex-col shadow-lg"
       style={{ width: 280 }}
     >
       {/* Header */}
@@ -130,36 +156,49 @@ export function Sidebar({ user }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
-        {navItems.map((item) => {
-          const Icon = item.icon
-          // Remove locale prefix for comparison
-          const pathnameWithoutLocale = pathname.replace(/^\/pt/, '')
-          const isActive = pathnameWithoutLocale === item.href || pathnameWithoutLocale.startsWith(`${item.href}/`)
-          
-          return (
-            <LocaleLink
-              key={item.href}
-              href={item.href}
-              className={`
-                flex items-center rounded-xl transition-all group
-                ${isCollapsed ? "justify-center px-3 py-4" : "gap-3 px-4 py-3"}
-                ${isActive 
-                  ? "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400" 
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-100"
-                }
-              `}
-            >
-              <Icon 
-                className={`shrink-0 transition-transform h-5 w-5 ${!isActive && "group-hover:scale-105"}`}
-                strokeWidth={isActive ? 2.5 : 2}
-              />
-              {!isCollapsed && (
-                <span className="text-sm font-medium">{item.label}</span>
-              )}
-            </LocaleLink>
-          )
-        })}
+      <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-6">
+        {navSections.map((section) => (
+          <div key={section.label} className="space-y-2">
+            {!isCollapsed ? (
+              <p className="px-4 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                {section.label}
+              </p>
+            ) : null}
+            <div className="space-y-2">
+              {section.items.map((item) => {
+                const Icon = item.icon
+                // Remove locale prefix for comparison
+                const pathnameWithoutLocale = pathname.replace(/^\/pt/, '')
+                const isActive =
+                  pathnameWithoutLocale === item.href ||
+                  pathnameWithoutLocale.startsWith(`${item.href}/`)
+
+                return (
+                  <LocaleLink
+                    key={item.href}
+                    href={item.href}
+                    className={`
+                      flex items-center rounded-xl transition-all group
+                      ${isCollapsed ? "justify-center px-3 py-4" : "gap-3 px-4 py-3"}
+                      ${isActive
+                        ? "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400"
+                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-100"
+                      }
+                    `}
+                  >
+                    <Icon
+                      className={`shrink-0 transition-transform h-5 w-5 ${!isActive && "group-hover:scale-105"}`}
+                      strokeWidth={isActive ? 2.5 : 2}
+                    />
+                    {!isCollapsed && (
+                      <span className="text-sm font-medium">{item.label}</span>
+                    )}
+                  </LocaleLink>
+                )
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       {/* User Section */}

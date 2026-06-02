@@ -7,6 +7,9 @@ import {
   getUserIdOrNull,
   type FinancePlannerActionResult,
 } from "./shared"
+import { syncCreditCardInvoices, type CardMonthRef } from "./card-invoices"
+
+type DeleteExpenseMode = "single" | "future"
 
 export async function deletePlannedIncome(
   id: string
@@ -33,8 +36,9 @@ export async function deletePlannedIncome(
 }
 
 export async function deletePlannedExpense(
-  id: string
-): Promise<FinancePlannerActionResult<{ id: string }>> {
+  id: string,
+  mode: DeleteExpenseMode = "single"
+): Promise<FinancePlannerActionResult<{ id: string; count?: number }>> {
   const t = await getTranslations()
 
   const userId = await getUserIdOrNull()
@@ -44,16 +48,77 @@ export async function deletePlannedExpense(
 
   const existing = await prisma.plannedExpense.findFirst({
     where: { id, monthlyPlan: { userId } },
-    select: { id: true },
+    select: {
+      id: true,
+      expenseBucket: true,
+      paymentCardId: true,
+      recurrenceGroupId: true,
+      monthlyPlan: { select: { year: true, month: true } },
+    },
   })
   if (!existing) {
     return { success: false, error: t("common.notFound") }
   }
 
+  if (mode === "future" && existing.recurrenceGroupId) {
+    const rows = await prisma.plannedExpense.findMany({
+      where: {
+        recurrenceGroupId: existing.recurrenceGroupId,
+        monthlyPlan: {
+          userId,
+          OR: [
+            { year: { gt: existing.monthlyPlan.year } },
+            {
+              year: existing.monthlyPlan.year,
+              month: { gte: existing.monthlyPlan.month },
+            },
+          ],
+        },
+      },
+      select: {
+        paymentCardId: true,
+        expenseBucket: true,
+        monthlyPlan: { select: { year: true, month: true } },
+      },
+    })
+    const result = await prisma.plannedExpense.deleteMany({
+      where: {
+        recurrenceGroupId: existing.recurrenceGroupId,
+        monthlyPlan: {
+          userId,
+          OR: [
+            { year: { gt: existing.monthlyPlan.year } },
+            {
+              year: existing.monthlyPlan.year,
+              month: { gte: existing.monthlyPlan.month },
+            },
+          ],
+        },
+      },
+    })
+
+    await syncCreditCardInvoices(userId, rows.map(toCardMonthRef))
+    revalidatePlannerPaths()
+    return { success: true, data: { id, count: result.count } }
+  }
+
   await prisma.plannedExpense.delete({ where: { id } })
+  await syncCreditCardInvoices(userId, [toCardMonthRef(existing)])
 
   revalidatePlannerPaths()
   return { success: true, data: { id } }
+}
+
+function toCardMonthRef(row: {
+  paymentCardId?: string | null
+  expenseBucket?: string | null
+  monthlyPlan: { year: number; month: number }
+}): CardMonthRef {
+  return {
+    paymentCardId: row.expenseBucket === "CREDIT_CARD" ? row.paymentCardId : null,
+    year: row.monthlyPlan.year,
+    month: row.monthlyPlan.month,
+  }
 }
 
 function revalidatePlannerPaths() {

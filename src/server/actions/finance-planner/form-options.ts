@@ -18,6 +18,7 @@ export type FinancePlannerFormOptions = {
       nickname: string
       brand: string | null
       last4: string | null
+      dueDay: number | null
     } | null
   }[]
   subscriptions: {
@@ -70,6 +71,7 @@ export async function getFinancePlannerFormOptions(): Promise<
             nickname: true,
             brand: true,
             last4: true,
+            dueDay: true,
           },
         },
       },

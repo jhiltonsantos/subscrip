@@ -108,13 +108,32 @@
     "dashboard": "Dashboard",
     "subscriptions": "Subscriptions",
     "financePlanner": "Finance Planner",
+    "cardInvoice": "Card Invoice",
     "paymentMethods": "Payment Methods",
     "settings": "Settings",
     "profile": "Profile",
     "language": "Language",
     "theme": "Theme",
     "notifications": "Notifications",
-    "logout": "Logout"
+    "logout": "Logout",
+    "sections": {
+      "main": "Main",
+      "management": "Management",
+      "finance": "Finance",
+      "system": "System"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "subscriptions": "Subscriptions",
+      "financePlanner": "Finance Planner",
+      "cardInvoice": "Card Invoice",
+      "paymentMethods": "Payment Methods",
+      "settings": "Settings",
+      "profile": "Profile",
+      "auth": "Authentication",
+      "login": "Sign in",
+      "register": "Create account"
+    }
   },
   "locale": {
     "en": "English",
@@ -265,6 +284,29 @@
         "BOTH": "Use both channels for important renewals."
       }
     },
+    "darkThemeVariant": {
+      "title": "Dark theme",
+      "description": "Choose the appearance used when dark mode is active.",
+      "current": "Current: {theme}",
+      "button": "Select dark theme",
+      "modalTitle": "Select dark theme",
+      "modalDescription": "Choose between the current blue dark theme or a darker version with black tones.",
+      "save": "Save theme",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "success": "Dark theme updated.",
+      "error": "Could not update the dark theme.",
+      "options": {
+        "BLUE": {
+          "label": "Dark blue",
+          "description": "Keeps the current look with a dark blue background and emerald accents."
+        },
+        "BLACK": {
+          "label": "Deep black",
+          "description": "Uses a darker base with black tones and stronger contrast."
+        }
+      }
+    },
     "paymentMethods": {
       "title": "Payment methods",
       "description": "Manage cards and payment methods used by subscriptions and planned expenses.",
@@ -277,6 +319,7 @@
         "createTitle": "New payment method",
         "editTitle": "Edit payment method",
         "name": "Name",
+        "type": "Type",
         "cardNickname": "Card nickname",
         "brand": "Brand",
         "last4": "Last 4 digits",
@@ -287,6 +330,14 @@
         "saving": "Saving...",
         "cancel": "Cancel",
         "edit": "Edit"
+      },
+      "tooltips": {
+        "type": "Defines whether this method is used as a card, PIX, boleto, cash, or another payment type.",
+        "cardNickname": "Short name used to identify this card in lists and invoices.",
+        "last4": "Used only to visually recognize the card. Do not enter the full card number.",
+        "closingDay": "Day of the month when the card invoice closes.",
+        "dueDay": "Day of the month used to calculate the invoice due date.",
+        "limitAmount": "Optional card limit for reference."
       },
       "types": {
         "CREDIT_CARD": "Credit card",
@@ -307,7 +358,10 @@
       "month": "Month",
       "year": "Year",
       "apply": "Apply",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "past": "Past",
+      "current": "Current",
+      "future": "Future"
     },
     "summary": {
       "incomeTotal": "Income total",
@@ -319,14 +373,21 @@
     "form": {
       "name": "Name",
       "amount": "Amount",
+      "currency": "Currency",
+      "paymentMethod": "Payment method",
+      "titleLabel": "Title",
+      "description": "Description",
       "namePlaceholder": "Name",
       "amountPlaceholder": "Amount",
+      "descriptionPlaceholder": "Optional notes",
       "save": "Save",
       "saving": "Saving...",
       "cancel": "Cancel",
       "edit": "Edit",
       "delete": "Delete",
       "validation": "Name and a positive amount are required.",
+      "installmentValidation": "Current installment and total installments are required.",
+      "recurrenceValidation": "Enter a valid number of months for the recurrence.",
       "confirmDelete": "Delete this item?",
       "noPaymentMethod": "No payment method"
     },
@@ -348,6 +409,16 @@
       "expenseDescription": "Add or edit monthly expenses outside credit card purchases.",
       "cardCostDescription": "Add or edit credit card purchases for the selected month."
     },
+    "tooltips": {
+      "purchaseDate": "Date when the purchase happened. Future installments will follow this month.",
+      "dueDate": "Date when this cost should be paid or appear in the monthly plan.",
+      "expensePurchaseDate": "Date when the expense was contracted or purchased.",
+      "expenseDueDate": "Date when this expense is due.",
+      "installmentNumber": "The installment you are adding now. Example: 3 if this is the 3rd payment.",
+      "installmentTotal": "Total number of installments. Example: 12 for a 12-month loan.",
+      "incomeExpectedDate": "Expected date to receive this income. Future recurrences use this month as reference.",
+      "incomeRecurrenceMonths": "Total number of months this income should be created for, including the current month."
+    },
     "view": {
       "cards": "Cards",
       "list": "List"
@@ -360,7 +431,12 @@
       "received": "Received",
       "pending": "Pending",
       "markReceived": "Mark as received",
-      "markPending": "Mark as pending"
+      "markPending": "Mark as pending",
+      "expectedDate": "Expected date",
+      "isMonthlyRecurring": "Repeat monthly for the next 12 months",
+      "isFixedRecurring": "I will receive this amount for a fixed number of months",
+      "recurrenceMonths": "Number of months",
+      "recurrenceMonthsPlaceholder": "Ex: 5"
     },
     "expense": {
       "columnTitle": "Expenses",
@@ -370,7 +446,14 @@
       "paid": "Paid",
       "pending": "Pending",
       "markPaid": "Mark as paid",
-      "markPending": "Mark as pending"
+      "markPending": "Mark as pending",
+      "merchantName": "Where / provider",
+      "merchantPlaceholder": "Store, provider, or creditor",
+      "purchaseDate": "Purchase date",
+      "dueDate": "Due date",
+      "isInstallment": "This is an installment expense",
+      "createPreviousInstallments": "Add previous installments",
+      "isMonthlyRecurring": "Repeat monthly for the next 12 months"
     },
     "buckets": {
       "MONTHLY_BILLS": "Monthly bills",
@@ -399,7 +482,29 @@
       "noPurchaseDate": "No purchase date",
       "addCost": "Add card cost",
       "editCost": "Edit card cost",
-      "selectCard": "Select a card"
+      "selectCard": "Select a card",
+      "card": "Card",
+      "merchantName": "Where bought",
+      "merchantPlaceholder": "Store or merchant",
+      "purchaseDate": "Purchase date",
+      "dueDate": "Due date",
+      "isInstallment": "This is an installment purchase",
+      "createPreviousInstallments": "Add previous installments"
+    },
+    "deleteDialog": {
+      "title": "Delete recurring item?",
+      "singleDescription": "This will remove only this item.",
+      "recurringDescription": "This item belongs to an installment or recurring group. Choose how much you want to remove.",
+      "single": "Remove only this item",
+      "future": "Remove this and future items"
+    },
+    "editScopeDialog": {
+      "title": "Apply edit to which items?",
+      "description": "This item belongs to an installment or recurring sequence. Choose whether this change applies only to this record or to this and future records.",
+      "single": "Edit only this item",
+      "singleDescription": "Keeps future installments or recurring records unchanged.",
+      "future": "Edit this and future items",
+      "futureDescription": "Applies the new values to this month and future months in the same group."
     },
     "table": {
       "date": "Date",
@@ -410,6 +515,17 @@
       "status": "Status",
       "actions": "Actions",
       "bucket": "Bucket"
+    }
+  },
+  "cardInvoicePage": {
+    "title": "Card Invoice",
+    "subtitle": "Track card purchases and the consolidated invoice for the month.",
+    "monthTitle": "Invoice for {month}",
+    "description": "Review card items for the selected month. The consolidated invoice still appears as an expense in the Finance Planner.",
+    "summary": {
+      "total": "Invoice total",
+      "paid": "Paid purchases",
+      "pending": "Pending purchases"
     }
   },
   "theme": {

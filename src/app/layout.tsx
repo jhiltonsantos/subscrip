@@ -35,7 +35,7 @@ export default async function RootLayout({
       >
         <ReduxProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <NextIntlClientProvider messages={messages}>
+            <NextIntlClientProvider key={locale} messages={messages}>
               {children}
             </NextIntlClientProvider>
           </ThemeProvider>
