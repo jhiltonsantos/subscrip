@@ -41,6 +41,7 @@ export function Breadcrumb() {
     <nav className="flex items-center gap-2 text-sm">
       <LocaleLink 
         href="/dashboard" 
+        aria-label={t("dashboard")}
         className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors"
       >
         <Home className="h-4 w-4" />
@@ -48,25 +49,18 @@ export function Breadcrumb() {
       
       {segments.map((segment, index) => {
         const href = "/" + segments.slice(0, index + 1).join("/")
-        const isLast = index === segments.length - 1
         const labelKey = BREADCRUMB_LABEL_KEYS[segment]
         const label = labelKey ? t(labelKey) : formatSegmentFallback(segment)
 
         return (
-          <div key={segment} className="flex items-center gap-2">
+          <div key={href} className="flex items-center gap-2">
             <ChevronRight className="h-4 w-4 text-gray-400 hidden md:block" />
-            {isLast ? (
-              <span className="font-medium text-gray-900 dark:text-gray-100 hidden md:inline">
-                {label}
-              </span>
-            ) : (
-              <LocaleLink 
-                href={href}
-                className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors hidden md:inline"
-              >
-                {label}
-              </LocaleLink>
-            )}
+            <LocaleLink 
+              href={href}
+              className="font-medium text-gray-900 transition-colors hover:text-emerald-600 dark:text-gray-100 dark:hover:text-emerald-300 hidden md:inline"
+            >
+              {label}
+            </LocaleLink>
           </div>
         )
       })}
