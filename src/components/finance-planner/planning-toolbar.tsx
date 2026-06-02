@@ -6,6 +6,7 @@ import { ViewToggle } from "./view-toggle"
 export function PlanningToolbar({
   activeTab,
   setActiveTab,
+  tabs = ["income", "expenses", "cardCosts"],
   viewMode,
   setViewMode,
   onAdd,
@@ -13,13 +14,12 @@ export function PlanningToolbar({
 }: {
   activeTab: ActiveTab
   setActiveTab: (tab: ActiveTab) => void
+  tabs?: ActiveTab[]
   viewMode: ViewMode
   setViewMode: (mode: ViewMode) => void
   onAdd: () => void
   t: TranslationFn
 }) {
-  const tabs: ActiveTab[] = ["income", "expenses", "cardCosts"]
-
   return (
     <div className="flex flex-col gap-3 border-b pb-4 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex flex-wrap gap-2">

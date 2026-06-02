@@ -6,7 +6,6 @@ import { useLocale, useTranslations } from "next-intl"
 import type { FormEvent } from "react"
 import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CardCostsContent } from "./card-costs-content"
 import { emptyCardCostForm, emptyExpenseForm, emptyIncomeForm } from "./constants"
 import { DeleteExpenseDialog } from "./delete-expense-dialog"
 import { EditScopeDialog } from "./edit-scope-dialog"
@@ -498,6 +497,7 @@ export function FinancePlannerBoard() {
           <PlanningToolbar
             activeTab={activeTab}
             setActiveTab={setActiveTab}
+            tabs={["income", "expenses"]}
             viewMode={viewMode}
             setViewMode={setViewMode}
             onAdd={openCreateDialog}
@@ -526,16 +526,6 @@ export function FinancePlannerBoard() {
             />
           ) : null}
 
-          {activeTab === "cardCosts" ? (
-            <CardCostsContent
-              rows={cardCosts}
-              viewMode={viewMode}
-              onEdit={openExpenseEdit}
-              onDelete={removeExpense}
-              t={t}
-              dateLocale={dateLocale}
-            />
-          ) : null}
         </CardContent>
       </Card>
 

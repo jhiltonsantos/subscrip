@@ -108,13 +108,20 @@
     "dashboard": "Dashboard",
     "subscriptions": "Assinaturas",
     "financePlanner": "Planejador Financeiro",
+    "cardInvoice": "Fatura do cartão",
     "paymentMethods": "Métodos de Pagamento",
     "settings": "Configurações",
     "profile": "Perfil",
     "language": "Idioma",
     "theme": "Tema",
     "notifications": "Notificações",
-    "logout": "Sair"
+    "logout": "Sair",
+    "sections": {
+      "main": "Principal",
+      "management": "Gestão",
+      "finance": "Financeiro",
+      "system": "Sistema"
+    }
   },
   "locale": {
     "en": "English",
@@ -464,6 +471,17 @@
       "status": "Status",
       "actions": "Ações",
       "bucket": "Tipo"
+    }
+  },
+  "cardInvoicePage": {
+    "title": "Fatura do cartão",
+    "subtitle": "Acompanhe as compras registradas nos cartões e a fatura consolidada do mês.",
+    "monthTitle": "Fatura de {month}",
+    "description": "Veja os itens de cartão do mês selecionado. A fatura consolidada continua aparecendo como saída no Planejador Financeiro.",
+    "summary": {
+      "total": "Total da fatura",
+      "paid": "Compras pagas",
+      "pending": "Compras pendentes"
     }
   },
   "theme": {

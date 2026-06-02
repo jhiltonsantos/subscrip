@@ -108,13 +108,20 @@
     "dashboard": "Dashboard",
     "subscriptions": "Subscriptions",
     "financePlanner": "Finance Planner",
+    "cardInvoice": "Card Invoice",
     "paymentMethods": "Payment Methods",
     "settings": "Settings",
     "profile": "Profile",
     "language": "Language",
     "theme": "Theme",
     "notifications": "Notifications",
-    "logout": "Logout"
+    "logout": "Logout",
+    "sections": {
+      "main": "Main",
+      "management": "Management",
+      "finance": "Finance",
+      "system": "System"
+    }
   },
   "locale": {
     "en": "English",
@@ -464,6 +471,17 @@
       "status": "Status",
       "actions": "Actions",
       "bucket": "Bucket"
+    }
+  },
+  "cardInvoicePage": {
+    "title": "Card Invoice",
+    "subtitle": "Track card purchases and the consolidated invoice for the month.",
+    "monthTitle": "Invoice for {month}",
+    "description": "Review card items for the selected month. The consolidated invoice still appears as an expense in the Finance Planner.",
+    "summary": {
+      "total": "Invoice total",
+      "paid": "Paid purchases",
+      "pending": "Pending purchases"
     }
   },
   "theme": {
