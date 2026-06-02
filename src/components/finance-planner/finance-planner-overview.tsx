@@ -25,7 +25,7 @@ import type {
   PlannedIncome,
   ViewMode,
 } from "./types"
-import { toDateInput, toDateOrUndefined, toOptionalNumber } from "./utils"
+import { toCardDueDateInput, toDateInput, toDateOrUndefined, toOptionalNumber } from "./utils"
 import {
   createPlannedExpenseAction,
   createPlannedIncomeAction,
@@ -119,6 +119,7 @@ export function FinancePlannerBoard() {
   }
 
   function openCreateDialog() {
+    const defaultCardMethod = cardMethods[0]
     setFormError(null)
     setEditingIncomeId(null)
     setEditingExpenseId(null)
@@ -126,7 +127,10 @@ export function FinancePlannerBoard() {
     setExpenseForm(emptyExpenseForm)
     setCardCostForm({
       ...emptyCardCostForm,
-      paymentMethodId: cardMethods[0]?.id ?? "",
+      paymentMethodId: defaultCardMethod?.id ?? "",
+      dueDate: defaultCardMethod?.paymentCard
+        ? toCardDueDateInput(selectedYear, selectedMonth, defaultCardMethod.paymentCard.dueDay)
+        : "",
     })
     setDialogOpen(true)
   }
@@ -158,19 +162,22 @@ export function FinancePlannerBoard() {
     setEditingIncomeId(null)
 
     if (isCardCost) {
+      const method = cardMethods.find((item) => item.id === row.paymentMethodId)
       setCardCostForm({
         name: row.name,
         merchantName: row.merchantName ?? "",
         description: row.description ?? "",
         amount: row.amount,
         currency: row.currency,
-        purchaseDate: toDateInput(row.purchaseDate),
-        dueDate: toDateInput(row.dueDate),
+        dueDate:
+          toDateInput(row.dueDate) ||
+          (method?.paymentCard
+            ? toCardDueDateInput(selectedYear, selectedMonth, method.paymentCard.dueDay)
+            : ""),
         paymentMethodId: row.paymentMethodId ?? "",
         isInstallment: Boolean(row.installmentNumber && row.installmentTotal),
         installmentNumber: row.installmentNumber?.toString() ?? "",
         installmentTotal: row.installmentTotal?.toString() ?? "",
-        isPaid: row.isPaid,
       })
     } else {
       setExpenseForm({
@@ -228,9 +235,7 @@ export function FinancePlannerBoard() {
         !editingIncomeId && (incomeForm.isMonthlyRecurring || incomeForm.isFixedRecurring),
       recurrenceMonths: incomeForm.isFixedRecurring
         ? toOptionalNumber(incomeForm.recurrenceMonths)
-        : incomeForm.isMonthlyRecurring
-          ? 12
-          : null,
+        : null,
     }
 
     if (editingIncomeId) {
@@ -330,7 +335,6 @@ export function FinancePlannerBoard() {
       return
     }
 
-    const current = cardCosts.find((expense) => expense.id === editingExpenseId)
     const data = {
       year: selectedYear,
       month: selectedMonth,
@@ -342,7 +346,6 @@ export function FinancePlannerBoard() {
       expenseBucket: "CREDIT_CARD",
       paymentMethodId: method.id,
       paymentCardId: method.paymentCard.id,
-      purchaseDate: toDateOrUndefined(cardCostForm.purchaseDate),
       dueDate: toDateOrUndefined(cardCostForm.dueDate),
       installmentNumber: cardCostForm.isInstallment
         ? toOptionalNumber(cardCostForm.installmentNumber)
@@ -351,12 +354,6 @@ export function FinancePlannerBoard() {
         ? toOptionalNumber(cardCostForm.installmentTotal)
         : null,
       createFutureInstallments: !editingExpenseId && cardCostForm.isInstallment,
-      isPaid: cardCostForm.isPaid,
-      paidAt: cardCostForm.isPaid
-        ? current?.paidAt
-          ? new Date(current.paidAt)
-          : new Date()
-        : null,
     }
 
     if (editingExpenseId) {
@@ -525,7 +522,6 @@ export function FinancePlannerBoard() {
             <CardCostsContent
               rows={cardCosts}
               viewMode={viewMode}
-              onToggle={toggleExpense}
               onEdit={openExpenseEdit}
               onDelete={removeExpense}
               t={t}
@@ -549,6 +545,8 @@ export function FinancePlannerBoard() {
         setCardCostForm={setCardCostForm}
         paymentMethods={paymentMethods}
         cardMethods={cardMethods}
+        selectedYear={selectedYear}
+        selectedMonth={selectedMonth}
         onSaveIncome={saveIncome}
         onSaveExpense={saveExpense}
         onSaveCardCost={saveCardCost}

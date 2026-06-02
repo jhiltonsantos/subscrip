@@ -8,7 +8,7 @@ import {
   type PlannedIncomeUpdateInput,
 } from "@/lib/validations/finance-planner"
 import { addMonths } from "date-fns"
-import { Prisma, PlanEntrySource } from "@prisma/client"
+import { InvoiceStatus, Prisma, PlanEntrySource } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 import { getTranslations } from "next-intl/server"
 import {
@@ -22,6 +22,7 @@ import {
   validateExpenseRelations,
   type FinancePlannerActionResult,
 } from "./shared"
+import { syncCreditCardInvoices, type CardMonthRef } from "./card-invoices"
 
 type UpdateMode = "single" | "future"
 
@@ -107,6 +108,9 @@ export async function updatePlannedExpense(
     where: { id, monthlyPlan: { userId } },
     select: {
       id: true,
+      expenseBucket: true,
+      paymentCardId: true,
+      creditCardInvoiceId: true,
       recurrenceGroupId: true,
       monthlyPlan: { select: { year: true, month: true } },
     },
@@ -130,13 +134,24 @@ export async function updatePlannedExpense(
   if (relationError) return relationError
 
   if (mode === "future" && existing.recurrenceGroupId) {
-    await updateFuturePlannedExpenses(userId, existing, data)
+    const refs = await updateFuturePlannedExpenses(userId, existing, data)
+    await syncCreditCardInvoices(userId, refs)
   } else {
     await prisma.plannedExpense.update({
       where: { id },
       data: buildExpenseUpdateData(data),
       select: { id: true },
     })
+    await syncInvoicePaymentState(userId, existing, data)
+    await syncCreditCardInvoices(userId, [
+      toCardMonthRef(existing),
+      {
+        paymentCardId:
+          data.paymentCardId !== undefined ? data.paymentCardId : existing.paymentCardId,
+        year: existing.monthlyPlan.year,
+        month: existing.monthlyPlan.month,
+      },
+    ])
   }
 
   revalidatePlannerPaths()
@@ -161,6 +176,11 @@ function buildIncomeUpdateData(
   if (data.recurrenceKind !== undefined) updateData.recurrenceKind = data.recurrenceKind
   if (data.recurrenceGroupId !== undefined)
     updateData.recurrenceGroupId = data.recurrenceGroupId
+  if (data.recurrenceNumber !== undefined)
+    updateData.recurrenceNumber =
+      data.recurrenceNumber === null ? null : data.recurrenceNumber + monthOffset
+  if (data.recurrenceTotal !== undefined)
+    updateData.recurrenceTotal = data.recurrenceTotal
   return updateData
 }
 
@@ -251,6 +271,7 @@ async function updateFuturePlannedExpenses(
   userId: string,
   existing: {
     recurrenceGroupId: string | null
+    paymentCardId?: string | null
     monthlyPlan: { year: number; month: number }
   },
   data: PlannedExpenseUpdateInput
@@ -260,7 +281,12 @@ async function updateFuturePlannedExpenses(
       recurrenceGroupId: existing.recurrenceGroupId,
       monthlyPlan: futurePlanWhere(userId, existing.monthlyPlan),
     },
-    select: { id: true, monthlyPlan: { select: { year: true, month: true } } },
+    select: {
+      id: true,
+      paymentCardId: true,
+      expenseBucket: true,
+      monthlyPlan: { select: { year: true, month: true } },
+    },
   })
 
   await prisma.$transaction(
@@ -274,6 +300,73 @@ async function updateFuturePlannedExpenses(
       })
     )
   )
+
+  return rows.flatMap((row) => [
+    toCardMonthRef(row),
+    {
+      paymentCardId: data.paymentCardId !== undefined ? data.paymentCardId : row.paymentCardId,
+      year: row.monthlyPlan.year,
+      month: row.monthlyPlan.month,
+    },
+  ])
+}
+
+async function syncInvoicePaymentState(
+  userId: string,
+  existing: {
+    expenseBucket?: string | null
+    paymentCardId?: string | null
+    creditCardInvoiceId?: string | null
+    monthlyPlan: { year: number; month: number }
+  },
+  data: PlannedExpenseUpdateInput
+) {
+  if (
+    existing.expenseBucket !== "FIXED_CARD" ||
+    !existing.paymentCardId ||
+    !existing.creditCardInvoiceId ||
+    data.isPaid === undefined
+  ) {
+    return
+  }
+
+  const paidAt = data.isPaid ? data.paidAt ?? new Date() : null
+
+  await prisma.creditCardInvoice.update({
+    where: { id: existing.creditCardInvoiceId },
+    data: {
+      status: data.isPaid ? InvoiceStatus.PAID : InvoiceStatus.OPEN,
+      paidAt,
+    },
+  })
+
+  await prisma.plannedExpense.updateMany({
+    where: {
+      expenseBucket: "CREDIT_CARD",
+      paymentCardId: existing.paymentCardId,
+      monthlyPlan: {
+        userId,
+        year: existing.monthlyPlan.year,
+        month: existing.monthlyPlan.month,
+      },
+    },
+    data: {
+      isPaid: data.isPaid,
+      paidAt,
+    },
+  })
+}
+
+function toCardMonthRef(row: {
+  paymentCardId?: string | null
+  expenseBucket?: string | null
+  monthlyPlan: { year: number; month: number }
+}): CardMonthRef {
+  return {
+    paymentCardId: row.expenseBucket === "CREDIT_CARD" ? row.paymentCardId : null,
+    year: row.monthlyPlan.year,
+    month: row.monthlyPlan.month,
+  }
 }
 
 function futurePlanWhere(userId: string, from: { year: number; month: number }) {

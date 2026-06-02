@@ -46,11 +46,9 @@ export type CardCostForm = {
   description: string
   amount: string
   currency: string
-  purchaseDate: string
   dueDate: string
   paymentMethodId: string
   isInstallment: boolean
   installmentNumber: string
   installmentTotal: string
-  isPaid: boolean
 }

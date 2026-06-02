@@ -1,5 +1,5 @@
 import { format } from "date-fns"
-import type { ActiveTab, PlannedExpense, TranslationFn } from "./types"
+import type { ActiveTab, PlannedExpense, PlannedIncome, TranslationFn } from "./types"
 
 export function getDialogTitle(tab: ActiveTab, isEditing: boolean, t: TranslationFn) {
   if (tab === "income") return isEditing ? t("income.editTitle") : t("income.createTitle")
@@ -19,10 +19,16 @@ export function getDialogFormId(tab: ActiveTab) {
   return "finance-card-cost-form"
 }
 
-export function formatInstallment(row: PlannedExpense) {
+export function formatExpenseInstallment(row: PlannedExpense) {
   return row.installmentNumber && row.installmentTotal
     ? `${row.installmentNumber}/${row.installmentTotal}`
-    : "-"
+    : null
+}
+
+export function formatIncomeRecurrence(row: PlannedIncome) {
+  return row.recurrenceNumber && row.recurrenceTotal
+    ? `${row.recurrenceNumber}/${row.recurrenceTotal}`
+    : null
 }
 
 export function toDateInput(value: string | null) {
@@ -35,4 +41,10 @@ export function toDateOrUndefined(value: string) {
 
 export function toOptionalNumber(value: string) {
   return value ? Number(value) : undefined
+}
+
+export function toCardDueDateInput(year: number, month: number, dueDay: number | null | undefined) {
+  const day = dueDay ?? 1
+  const lastDayOfMonth = new Date(year, month, 0).getDate()
+  return format(new Date(year, month - 1, Math.min(day, lastDayOfMonth)), "yyyy-MM-dd")
 }

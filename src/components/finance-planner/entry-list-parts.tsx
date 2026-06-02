@@ -113,17 +113,19 @@ export function RowActions({
   onDelete,
   t,
 }: {
-  toggleLabel: string
-  onToggle: () => void
+  toggleLabel?: string
+  onToggle?: () => void
   onEdit: () => void
   onDelete: () => void
   t: TranslationFn
 }) {
   return (
     <div className="flex flex-wrap justify-end gap-2">
-      <Button type="button" size="sm" variant="outline" onClick={onToggle}>
-        {toggleLabel}
-      </Button>
+      {toggleLabel && onToggle ? (
+        <Button type="button" size="sm" variant="outline" onClick={onToggle}>
+          {toggleLabel}
+        </Button>
+      ) : null}
       <Button type="button" size="sm" variant="ghost" onClick={onEdit}>
         {t("form.edit")}
       </Button>

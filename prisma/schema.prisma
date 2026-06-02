@@ -311,6 +311,8 @@ model PlannedIncome {
 
   recurrenceKind    RecurrenceKind?
   recurrenceGroupId String?
+  recurrenceNumber  Int?
+  recurrenceTotal   Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

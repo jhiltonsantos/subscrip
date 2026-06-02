@@ -38,11 +38,9 @@ export const emptyCardCostForm: CardCostForm = {
   description: "",
   amount: "",
   currency: "BRL",
-  purchaseDate: "",
   dueDate: "",
   paymentMethodId: "",
   isInstallment: false,
   installmentNumber: "",
   installmentTotal: "",
-  isPaid: false,
 }

@@ -321,11 +321,15 @@ export function buildMonthSummary(row: MonthlyPlanWithRelations) {
     new Prisma.Decimal(0)
   )
   const expenseTotal = row.expenses.reduce(
-    (total, expense) => total.plus(expense.amount),
+    (total, expense) =>
+      expense.expenseBucket === "CREDIT_CARD" ? total : total.plus(expense.amount),
     new Prisma.Decimal(0)
   )
   const paidTotal = row.expenses.reduce(
-    (total, expense) => (expense.isPaid ? total.plus(expense.amount) : total),
+    (total, expense) =>
+      expense.expenseBucket !== "CREDIT_CARD" && expense.isPaid
+        ? total.plus(expense.amount)
+        : total,
     new Prisma.Decimal(0)
   )
   const subscriptionTotal = row.expenses.reduce(

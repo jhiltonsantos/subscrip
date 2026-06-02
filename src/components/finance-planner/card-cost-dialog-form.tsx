@@ -2,17 +2,22 @@ import type { FormEvent } from "react"
 import { Input } from "@/components/ui/input"
 import { CheckboxLine, CurrencySelect, Field } from "./form-controls"
 import type { CardCostForm, PaymentMethodOption, TranslationFn } from "./types"
+import { toCardDueDateInput } from "./utils"
 
 export function CardCostDialogForm({
   form,
   setForm,
   cardMethods,
+  selectedYear,
+  selectedMonth,
   onSubmit,
   t,
 }: {
   form: CardCostForm
   setForm: (form: CardCostForm) => void
   cardMethods: PaymentMethodOption[]
+  selectedYear: number
+  selectedMonth: number
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
   t: TranslationFn
 }) {
@@ -45,7 +50,17 @@ export function CardCostDialogForm({
       <Field label={t("cards.card")}>
         <select
           value={form.paymentMethodId}
-          onChange={(event) => setForm({ ...form, paymentMethodId: event.target.value })}
+          onChange={(event) => {
+            const paymentMethodId = event.target.value
+            const method = cardMethods.find((item) => item.id === paymentMethodId)
+            setForm({
+              ...form,
+              paymentMethodId,
+              dueDate: method?.paymentCard
+                ? toCardDueDateInput(selectedYear, selectedMonth, method.paymentCard.dueDay)
+                : "",
+            })
+          }}
           className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
         >
           <option value="">{t("cards.selectCard")}</option>
@@ -62,18 +77,12 @@ export function CardCostDialogForm({
           onChange={(currency) => setForm({ ...form, currency })}
         />
       </Field>
-      <Field label={t("cards.purchaseDate")} tooltip={t("tooltips.purchaseDate")}>
-        <Input
-          type="date"
-          value={form.purchaseDate}
-          onChange={(event) => setForm({ ...form, purchaseDate: event.target.value })}
-        />
-      </Field>
       <Field label={t("cards.dueDate")} tooltip={t("tooltips.dueDate")}>
         <Input
           type="date"
           value={form.dueDate}
-          onChange={(event) => setForm({ ...form, dueDate: event.target.value })}
+          readOnly
+          className="bg-muted/40"
         />
       </Field>
       <Field label={t("form.description")} className="sm:col-span-2">
@@ -117,12 +126,6 @@ export function CardCostDialogForm({
           </Field>
         </>
       ) : null}
-      <CheckboxLine
-        checked={form.isPaid}
-        onChange={(checked) => setForm({ ...form, isPaid: checked })}
-      >
-        {t("expense.markPaid")}
-      </CheckboxLine>
     </form>
   )
 }

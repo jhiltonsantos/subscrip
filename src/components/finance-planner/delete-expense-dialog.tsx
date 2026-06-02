@@ -35,15 +35,17 @@ export function DeleteExpenseDialog({
               : t("deleteDialog.singleDescription")}
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            {t("form.cancel")}
-          </Button>
-          <Button type="button" variant="outline" onClick={onDeleteSingle}>
+        <DialogFooter className="flex w-full flex-row items-center gap-4">
+          <Button type="button" variant="outline" className="flex-1" onClick={onDeleteSingle}>
             {t("deleteDialog.single")}
           </Button>
           {row?.recurrenceGroupId ? (
-            <Button type="button" variant="destructive" onClick={onDeleteFuture}>
+            <Button
+              type="button"
+              variant="destructive"
+              className="flex-1"
+              onClick={onDeleteFuture}
+            >
               {t("deleteDialog.future")}
             </Button>
           ) : null}

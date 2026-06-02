@@ -1,6 +1,7 @@
 import { formatCurrency } from "@/lib/utils/formatters"
 import { CardGrid, EmptyState, EntryCard, RowActions, TableView } from "./entry-list-parts"
 import type { PlannedExpense, TranslationFn, ViewMode } from "./types"
+import { formatExpenseInstallment } from "./utils"
 
 export function ExpenseContent({
   rows,
@@ -18,6 +19,7 @@ export function ExpenseContent({
   t: TranslationFn
 }) {
   if (rows.length === 0) return <EmptyState>{t("expense.empty")}</EmptyState>
+  const hasInstallments = rows.some((row) => formatExpenseInstallment(row))
   if (viewMode === "list") {
     return (
       <TableView
@@ -29,6 +31,15 @@ export function ExpenseContent({
             label: t("table.bucket"),
             render: (row) => t(`buckets.${row.expenseBucket}`),
           },
+          ...(hasInstallments
+            ? [
+                {
+                  key: "installment",
+                  label: t("table.installment"),
+                  render: (row: PlannedExpense) => formatExpenseInstallment(row) ?? "-",
+                },
+              ]
+            : []),
           {
             key: "amount",
             label: t("table.amount"),
@@ -61,6 +72,7 @@ export function ExpenseContent({
             formatCurrency(Number(row.amount), row.currency),
             t(`buckets.${row.expenseBucket}`),
             row.merchantName,
+            formatExpenseInstallment(row),
           ].filter(Boolean).join(" · ")}
           status={row.isPaid ? t("expense.paid") : t("expense.pending")}
           tone={row.isPaid ? "paid" : "default"}
