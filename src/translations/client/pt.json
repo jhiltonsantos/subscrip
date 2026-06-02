@@ -284,6 +284,7 @@
         "createTitle": "Novo método de pagamento",
         "editTitle": "Editar método de pagamento",
         "name": "Nome",
+        "type": "Tipo",
         "cardNickname": "Apelido do cartão",
         "brand": "Bandeira",
         "last4": "Últimos 4 dígitos",
@@ -294,6 +295,14 @@
         "saving": "Salvando...",
         "cancel": "Cancelar",
         "edit": "Editar"
+      },
+      "tooltips": {
+        "type": "Define se este método será usado como cartão, PIX, boleto, dinheiro ou outra forma de pagamento.",
+        "cardNickname": "Nome curto usado para identificar este cartão nas listas e faturas.",
+        "last4": "Usado apenas para reconhecer visualmente o cartão. Não informe o número completo.",
+        "closingDay": "Dia do mês em que a fatura do cartão fecha.",
+        "dueDay": "Dia do mês usado para calcular o vencimento da fatura.",
+        "limitAmount": "Limite opcional do cartão para referência."
       },
       "types": {
         "CREDIT_CARD": "Cartão de crédito",

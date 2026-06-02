@@ -284,6 +284,7 @@
         "createTitle": "New payment method",
         "editTitle": "Edit payment method",
         "name": "Name",
+        "type": "Type",
         "cardNickname": "Card nickname",
         "brand": "Brand",
         "last4": "Last 4 digits",
@@ -294,6 +295,14 @@
         "saving": "Saving...",
         "cancel": "Cancel",
         "edit": "Edit"
+      },
+      "tooltips": {
+        "type": "Defines whether this method is used as a card, PIX, boleto, cash, or another payment type.",
+        "cardNickname": "Short name used to identify this card in lists and invoices.",
+        "last4": "Used only to visually recognize the card. Do not enter the full card number.",
+        "closingDay": "Day of the month when the card invoice closes.",
+        "dueDay": "Day of the month used to calculate the invoice due date.",
+        "limitAmount": "Optional card limit for reference."
       },
       "types": {
         "CREDIT_CARD": "Credit card",
