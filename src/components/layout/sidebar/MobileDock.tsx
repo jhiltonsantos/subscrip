@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { LocaleLink } from "@/components/global"
 import { useTranslations } from "next-intl"
-import { LayoutDashboard, CreditCard, Settings, WalletCards } from "lucide-react"
+import { CreditCard, DollarSign, LayoutDashboard, ReceiptText } from "lucide-react"
 
 export function MobileDock() {
   const t = useTranslations()
@@ -24,14 +24,14 @@ export function MobileDock() {
       icon: CreditCard,
     },
     {
-      label: t("header.paymentMethods"),
-      href: "/payment-methods",
-      icon: WalletCards,
+      label: t("header.financePlanner"),
+      href: "/finance-planner",
+      icon: DollarSign,
     },
     {
-      label: t("header.settings"),
-      href: "/settings",
-      icon: Settings,
+      label: t("header.cardInvoice"),
+      href: "/card-invoice",
+      icon: ReceiptText,
     },
   ]
 
@@ -69,10 +69,12 @@ export function MobileDock() {
               <LocaleLink
                 key={item.href}
                 href={item.href}
-                className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition-colors"
+                aria-label={item.label}
+                title={item.label}
+                className="flex items-center justify-center rounded-xl p-1 transition-colors"
               >
                 <div
-                  className={`p-1.5 rounded-xl transition-all ${
+                  className={`p-3 rounded-xl transition-all ${
                     isActive
                       ? "bg-emerald-500 text-white"
                       : "text-gray-500 dark:text-gray-400"
@@ -80,15 +82,6 @@ export function MobileDock() {
                 >
                   <Icon className="h-5 w-5" />
                 </div>
-                <span
-                  className={`text-xs font-medium ${
-                    isActive
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-gray-500 dark:text-gray-400"
-                  }`}
-                >
-                  {item.label}
-                </span>
               </LocaleLink>
             )
           })}

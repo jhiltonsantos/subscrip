@@ -26,10 +26,10 @@ export function MonthSelector({
   const monthStatus = getMonthStatus(selectedMonth, selectedYear)
 
   return (
-    <div className="flex items-end gap-2">
+    <div className="grid w-full grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto] items-end gap-2 sm:w-auto">
       <span
         className={[
-          "mb-1 rounded-full border px-3 py-1.5 text-xs font-medium",
+          "mb-1 flex h-9 items-center rounded-full border px-3 text-xs font-medium",
           getMonthStatusClasses(monthStatus),
         ].join(" ")}
       >
@@ -37,7 +37,7 @@ export function MonthSelector({
       </span>
       <NumberField label={t("filters.month")} value={monthInput} onChange={setMonthInput} />
       <NumberField label={t("filters.year")} value={yearInput} onChange={setYearInput} />
-      <Button onClick={onApply} disabled={isLoading}>
+      <Button className="h-9 px-4" onClick={onApply} disabled={isLoading}>
         {isLoading ? t("filters.loading") : t("filters.apply")}
       </Button>
     </div>
@@ -74,13 +74,13 @@ function NumberField({
   onChange: (value: string) => void
 }) {
   return (
-    <div>
+    <div className="min-w-0">
       <label className="mb-1 block text-xs text-muted-foreground">{label}</label>
       <Input
         type="number"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-24"
+        className="w-full min-w-0"
       />
     </div>
   )

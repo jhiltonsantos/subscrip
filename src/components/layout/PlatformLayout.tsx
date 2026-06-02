@@ -20,7 +20,7 @@ function PlatformLayoutContent({ children, user }: PlatformLayoutProps) {
   return (
     <>
       {/* Mobile Layout */}
-      <div className="md:hidden min-h-screen bg-linear-to-br from-emerald-50/50 via-background to-emerald-100/30 dark:from-emerald-950/20 dark:via-background dark:to-emerald-900/10">
+      <div className="min-h-screen bg-linear-to-br from-emerald-50/50 via-background to-emerald-100/30 dark:from-emerald-950/20 dark:via-background dark:to-emerald-900/10 lg:hidden">
         <MobileNavbar user={user} />
         <main className="pt-20">
           {children}
@@ -28,8 +28,8 @@ function PlatformLayoutContent({ children, user }: PlatformLayoutProps) {
         <MobileDock />
       </div>
 
-      {/* Tablet & Desktop Layout */}
-      <div className="hidden md:flex min-h-screen bg-linear-to-br from-emerald-50/50 via-background to-emerald-100/30 dark:from-emerald-950/20 dark:via-background dark:to-emerald-900/10">
+      {/* Desktop Layout */}
+      <div className="hidden min-h-screen bg-linear-to-br from-emerald-50/50 via-background to-emerald-100/30 dark:from-emerald-950/20 dark:via-background dark:to-emerald-900/10 lg:flex">
         <Sidebar user={user} />
         <div 
           className="flex flex-col flex-1 transition-all duration-300"

@@ -358,7 +358,7 @@
     "add": {
       "income": "Adicionar Entrada",
       "expenses": "Adicionar Saída",
-      "cardCosts": "Adicionar Custo de Cartão"
+      "cardCosts": "Adicionar Custo"
     },
     "modal": {
       "incomeDescription": "Adicione ou edite entradas esperadas para o mês selecionado.",

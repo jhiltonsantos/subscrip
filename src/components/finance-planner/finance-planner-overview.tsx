@@ -450,8 +450,8 @@ export function FinancePlannerBoard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
@@ -474,16 +474,18 @@ export function FinancePlannerBoard() {
         </p>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
         <SummaryCard title={t("summary.incomeTotal")} value={totals.income} />
         <SummaryCard title={t("summary.expenseTotal")} value={totals.expense} />
         <SummaryCard title={t("summary.subscriptionTotal")} value={totals.subscriptions} />
         <SummaryCard title={t("summary.creditCardTotal")} value={totals.cards} />
-        <SummaryCard
-          title={t("summary.balance")}
-          value={totals.balance}
-          positive={totals.balance >= 0}
-        />
+        <div className="col-span-2 lg:col-span-1">
+          <SummaryCard
+            title={t("summary.balance")}
+            value={totals.balance}
+            positive={totals.balance >= 0}
+          />
+        </div>
       </div>
 
       <Card>

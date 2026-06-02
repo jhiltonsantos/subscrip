@@ -237,8 +237,8 @@ export function CardInvoiceBoard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-3xl font-bold tracking-tight">{pageT("title")}</h1>
           <p className="text-muted-foreground">{pageT("subtitle")}</p>
         </div>
@@ -261,10 +261,12 @@ export function CardInvoiceBoard() {
         </p>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
         <SummaryCard title={pageT("summary.total")} value={cardTotal} />
         <SummaryCard title={pageT("summary.paid")} value={paidTotal} positive />
-        <SummaryCard title={pageT("summary.pending")} value={pendingTotal} />
+        <div className="col-span-2 sm:col-span-1">
+          <SummaryCard title={pageT("summary.pending")} value={pendingTotal} />
+        </div>
       </div>
 
       <Card>
@@ -275,9 +277,15 @@ export function CardInvoiceBoard() {
           </p>
         </CardHeader>
         <CardContent className="space-y-5">
-          <div className="flex flex-col gap-3 border-b pb-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="grid grid-cols-2 gap-2 border-b pb-4 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
             <ViewToggle value={viewMode} onChange={setViewMode} t={t} />
-            <Button type="button" size="sm" variant="outline" className="h-9" onClick={openCreateDialog}>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-9 w-full sm:w-auto"
+              onClick={openCreateDialog}
+            >
               <Plus className="size-4" />
               {t("add.cardCosts")}
             </Button>

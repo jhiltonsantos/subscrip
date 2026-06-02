@@ -12,12 +12,12 @@ export function ViewToggle({
   t: TranslationFn
 }) {
   return (
-    <div className="inline-flex h-9 overflow-hidden rounded-md border bg-background">
+    <div className="inline-flex h-9 w-full overflow-hidden rounded-md border bg-background sm:w-auto">
       <Button
         type="button"
         size="sm"
         variant={value === "cards" ? "default" : "ghost"}
-        className="h-full rounded-none px-3"
+        className="h-full flex-1 rounded-none px-3 sm:flex-none"
         onClick={() => onChange("cards")}
       >
         <LayoutGrid className="size-4" />
@@ -27,7 +27,7 @@ export function ViewToggle({
         type="button"
         size="sm"
         variant={value === "list" ? "default" : "ghost"}
-        className="h-full rounded-none px-3"
+        className="h-full flex-1 rounded-none px-3 sm:flex-none"
         onClick={() => onChange("list")}
       >
         <List className="size-4" />

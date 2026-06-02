@@ -91,13 +91,13 @@ export function EntryCard({
 }) {
   const toneClasses = getToneClasses(tone)
   return (
-    <div className={["rounded-xl border p-4", toneClasses.card].join(" ")}>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
+    <div className={["rounded-xl border p-4 shadow-sm sm:shadow-none", toneClasses.card].join(" ")}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
           <p className="font-medium">{title}</p>
           <p className="mt-1 text-sm text-muted-foreground">{meta}</p>
         </div>
-        <span className={["rounded-full px-2 py-1 text-xs", toneClasses.badge].join(" ")}>
+        <span className={["mt-0.5 shrink-0 rounded-full px-2.5 py-1 text-xs", toneClasses.badge].join(" ")}>
           {status}
         </span>
       </div>
@@ -120,16 +120,22 @@ export function RowActions({
   t: TranslationFn
 }) {
   return (
-    <div className="flex flex-wrap justify-end gap-2">
+    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
       {toggleLabel && onToggle ? (
-        <Button type="button" size="sm" variant="outline" onClick={onToggle}>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="col-span-2 w-full sm:col-span-1 sm:w-auto"
+          onClick={onToggle}
+        >
           {toggleLabel}
         </Button>
       ) : null}
-      <Button type="button" size="sm" variant="ghost" onClick={onEdit}>
+      <Button type="button" size="sm" variant="ghost" className="w-full sm:w-auto" onClick={onEdit}>
         {t("form.edit")}
       </Button>
-      <Button type="button" size="sm" variant="ghost" onClick={onDelete}>
+      <Button type="button" size="sm" variant="ghost" className="w-full sm:w-auto" onClick={onDelete}>
         {t("form.delete")}
       </Button>
     </div>
