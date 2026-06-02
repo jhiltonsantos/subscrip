@@ -36,6 +36,7 @@ export type ExpenseForm = {
   paymentMethodId: string
   isInstallment: boolean
   isMonthlyRecurring: boolean
+  createPreviousInstallments: boolean
   installmentNumber: string
   installmentTotal: string
 }
@@ -49,6 +50,7 @@ export type CardCostForm = {
   dueDate: string
   paymentMethodId: string
   isInstallment: boolean
+  createPreviousInstallments: boolean
   installmentNumber: string
   installmentTotal: string
 }

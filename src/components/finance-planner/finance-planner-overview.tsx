@@ -176,6 +176,7 @@ export function FinancePlannerBoard() {
             : ""),
         paymentMethodId: row.paymentMethodId ?? "",
         isInstallment: Boolean(row.installmentNumber && row.installmentTotal),
+        createPreviousInstallments: false,
         installmentNumber: row.installmentNumber?.toString() ?? "",
         installmentTotal: row.installmentTotal?.toString() ?? "",
       })
@@ -193,6 +194,7 @@ export function FinancePlannerBoard() {
         paymentMethodId: row.paymentMethodId ?? "",
         isInstallment: Boolean(row.installmentNumber && row.installmentTotal),
         isMonthlyRecurring: row.recurrenceKind === "MONTHLY_RECURRING",
+        createPreviousInstallments: false,
         installmentNumber: row.installmentNumber?.toString() ?? "",
         installmentTotal: row.installmentTotal?.toString() ?? "",
       })
@@ -296,6 +298,8 @@ export function FinancePlannerBoard() {
         ? toOptionalNumber(expenseForm.installmentTotal)
         : null,
       createFutureInstallments: !editingExpenseId && expenseForm.isInstallment,
+      createPreviousInstallments:
+        !editingExpenseId && expenseForm.isInstallment && expenseForm.createPreviousInstallments,
       createMonthlyRecurring: !editingExpenseId && expenseForm.isMonthlyRecurring,
     }
 
@@ -354,6 +358,8 @@ export function FinancePlannerBoard() {
         ? toOptionalNumber(cardCostForm.installmentTotal)
         : null,
       createFutureInstallments: !editingExpenseId && cardCostForm.isInstallment,
+      createPreviousInstallments:
+        !editingExpenseId && cardCostForm.isInstallment && cardCostForm.createPreviousInstallments,
     }
 
     if (editingExpenseId) {
@@ -453,6 +459,8 @@ export function FinancePlannerBoard() {
         <MonthSelector
           monthInput={monthInput}
           yearInput={yearInput}
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
           setMonthInput={setMonthInput}
           setYearInput={setYearInput}
           onApply={applyMonthFilter}

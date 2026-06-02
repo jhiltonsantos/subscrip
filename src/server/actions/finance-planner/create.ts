@@ -227,6 +227,10 @@ function buildExpenseSchedule(
     return buildCreditCardExpenseSchedule(data, cardDueDay)
   }
 
+  if (isInstallmentExpense(data)) {
+    return buildInstallmentExpenseSchedule(data)
+  }
+
   const entryCount = getEntryCount(data)
   const startDate = data.purchaseDate ?? data.dueDate ?? new Date(data.year, data.month - 1, 1)
 
@@ -242,6 +246,33 @@ function buildExpenseSchedule(
   })
 }
 
+function buildInstallmentExpenseSchedule(data: PlannedExpenseCreateInput) {
+  const currentInstallment = data.installmentNumber ?? 1
+  const totalInstallments = data.installmentTotal ?? currentInstallment
+  const firstInstallment = data.createPreviousInstallments ? 1 : currentInstallment
+
+  return Array.from(
+    { length: totalInstallments - firstInstallment + 1 },
+    (_, index) => {
+      const installmentNumber = firstInstallment + index
+      const planDate = addMonths(
+        new Date(data.year, data.month - 1, 1),
+        installmentNumber - currentInstallment
+      )
+      const year = planDate.getFullYear()
+      const month = planDate.getMonth() + 1
+
+      return {
+        year,
+        month,
+        purchaseDate: dateInMonth(data.purchaseDate, year, month),
+        dueDate: dateInMonth(data.dueDate, year, month),
+        installmentNumber,
+      }
+    }
+  )
+}
+
 function buildCreditCardExpenseSchedule(
   data: PlannedExpenseCreateInput,
   cardDueDay: number | null
@@ -251,9 +282,11 @@ function buildCreditCardExpenseSchedule(
     data.createFutureInstallments && data.installmentTotal
       ? data.installmentTotal
       : currentInstallment
+  const firstInstallment =
+    data.createFutureInstallments && data.createPreviousInstallments ? 1 : currentInstallment
 
-  return Array.from({ length: totalInstallments }, (_, index) => {
-    const installmentNumber = index + 1
+  return Array.from({ length: totalInstallments - firstInstallment + 1 }, (_, index) => {
+    const installmentNumber = firstInstallment + index
     const planDate = addMonths(
       new Date(data.year, data.month - 1, 1),
       installmentNumber - currentInstallment
@@ -278,6 +311,10 @@ function isCreditCardExpense(data: PlannedExpenseCreateInput) {
   return data.expenseBucket === "CREDIT_CARD" && Boolean(data.paymentCardId)
 }
 
+function isInstallmentExpense(data: PlannedExpenseCreateInput) {
+  return Boolean(data.createFutureInstallments && data.installmentNumber && data.installmentTotal)
+}
+
 function getEntryCount(data: PlannedExpenseCreateInput) {
   if (data.createMonthlyRecurring) return 12
   if (!data.createFutureInstallments || !data.installmentNumber || !data.installmentTotal) {
@@ -294,6 +331,12 @@ function getRecurrenceKind(data: PlannedExpenseCreateInput) {
 
 function addMonthsToOptionalDate(value: Date | null | undefined, months: number) {
   return value ? addMonths(value, months) : undefined
+}
+
+function dateInMonth(value: Date | null | undefined, year: number, month: number) {
+  if (!value) return undefined
+  const lastDayOfMonth = new Date(year, month, 0).getDate()
+  return new Date(year, month - 1, Math.min(value.getDate(), lastDayOfMonth))
 }
 
 function resolveExpenseSource(data: {

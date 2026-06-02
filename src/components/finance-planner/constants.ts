@@ -28,6 +28,7 @@ export const emptyExpenseForm: ExpenseForm = {
   paymentMethodId: "",
   isInstallment: false,
   isMonthlyRecurring: false,
+  createPreviousInstallments: false,
   installmentNumber: "",
   installmentTotal: "",
 }
@@ -41,6 +42,7 @@ export const emptyCardCostForm: CardCostForm = {
   dueDate: "",
   paymentMethodId: "",
   isInstallment: false,
+  createPreviousInstallments: false,
   installmentNumber: "",
   installmentTotal: "",
 }

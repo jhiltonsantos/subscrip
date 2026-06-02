@@ -107,6 +107,7 @@ export function ExpenseDialogForm({
             ...form,
             isInstallment: checked,
             isMonthlyRecurring: checked ? false : form.isMonthlyRecurring,
+            createPreviousInstallments: checked ? form.createPreviousInstallments : false,
             installmentNumber: checked ? form.installmentNumber : "",
             installmentTotal: checked ? form.installmentTotal : "",
           })
@@ -121,6 +122,7 @@ export function ExpenseDialogForm({
             ...form,
             isMonthlyRecurring: checked,
             isInstallment: checked ? false : form.isInstallment,
+            createPreviousInstallments: checked ? false : form.createPreviousInstallments,
             installmentNumber: checked ? "" : form.installmentNumber,
             installmentTotal: checked ? "" : form.installmentTotal,
           })
@@ -146,6 +148,16 @@ export function ExpenseDialogForm({
               onChange={(event) => setForm({ ...form, installmentTotal: event.target.value })}
             />
           </Field>
+          <div className="sm:col-span-2">
+            <CheckboxLine
+              checked={form.createPreviousInstallments}
+              onChange={(checked) =>
+                setForm({ ...form, createPreviousInstallments: checked })
+              }
+            >
+              {t("expense.createPreviousInstallments")}
+            </CheckboxLine>
+          </div>
         </>
       ) : null}
       <CheckboxLine

@@ -307,7 +307,10 @@
       "month": "Mês",
       "year": "Ano",
       "apply": "Aplicar",
-      "loading": "Carregando..."
+      "loading": "Carregando...",
+      "past": "Passado",
+      "current": "Atual",
+      "future": "Futuro"
     },
     "summary": {
       "incomeTotal": "Receber total",
@@ -398,6 +401,7 @@
       "purchaseDate": "Data da compra",
       "dueDate": "Data de vencimento",
       "isInstallment": "Esta é uma saída parcelada",
+      "createPreviousInstallments": "Adicionar parcelas anteriores",
       "isMonthlyRecurring": "Repetir mensalmente pelos próximos 12 meses"
     },
     "buckets": {
@@ -433,7 +437,8 @@
       "merchantPlaceholder": "Loja ou estabelecimento",
       "purchaseDate": "Data da compra",
       "dueDate": "Data de vencimento",
-      "isInstallment": "Esta é uma compra parcelada"
+      "isInstallment": "Esta é uma compra parcelada",
+      "createPreviousInstallments": "Adicionar parcelas anteriores"
     },
     "deleteDialog": {
       "title": "Excluir item recorrente?",

@@ -307,7 +307,10 @@
       "month": "Month",
       "year": "Year",
       "apply": "Apply",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "past": "Past",
+      "current": "Current",
+      "future": "Future"
     },
     "summary": {
       "incomeTotal": "Income total",
@@ -398,6 +401,7 @@
       "purchaseDate": "Purchase date",
       "dueDate": "Due date",
       "isInstallment": "This is an installment expense",
+      "createPreviousInstallments": "Add previous installments",
       "isMonthlyRecurring": "Repeat monthly for the next 12 months"
     },
     "buckets": {
@@ -433,7 +437,8 @@
       "merchantPlaceholder": "Store or merchant",
       "purchaseDate": "Purchase date",
       "dueDate": "Due date",
-      "isInstallment": "This is an installment purchase"
+      "isInstallment": "This is an installment purchase",
+      "createPreviousInstallments": "Add previous installments"
     },
     "deleteDialog": {
       "title": "Delete recurring item?",

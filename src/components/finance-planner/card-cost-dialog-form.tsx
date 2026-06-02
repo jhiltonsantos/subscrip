@@ -99,6 +99,7 @@ export function CardCostDialogForm({
           setForm({
             ...form,
             isInstallment: checked,
+            createPreviousInstallments: checked ? form.createPreviousInstallments : false,
             installmentNumber: checked ? form.installmentNumber : "",
             installmentTotal: checked ? form.installmentTotal : "",
           })
@@ -124,6 +125,16 @@ export function CardCostDialogForm({
               onChange={(event) => setForm({ ...form, installmentTotal: event.target.value })}
             />
           </Field>
+          <div className="sm:col-span-2">
+            <CheckboxLine
+              checked={form.createPreviousInstallments}
+              onChange={(checked) =>
+                setForm({ ...form, createPreviousInstallments: checked })
+              }
+            >
+              {t("cards.createPreviousInstallments")}
+            </CheckboxLine>
+          </div>
         </>
       ) : null}
     </form>

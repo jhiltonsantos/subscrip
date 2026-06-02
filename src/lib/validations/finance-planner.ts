@@ -66,6 +66,7 @@ export const plannedExpenseCreateSchema = z.object({
   recurrenceKind: z.nativeEnum(RecurrenceKind).optional().nullable(),
   recurrenceGroupId: z.string().uuid().optional().nullable(),
   createFutureInstallments: z.boolean().optional(),
+  createPreviousInstallments: z.boolean().optional(),
   createMonthlyRecurring: z.boolean().optional(),
 })
 
@@ -91,6 +92,7 @@ export const plannedExpenseUpdateSchema = z.object({
   recurrenceKind: z.nativeEnum(RecurrenceKind).optional().nullable(),
   recurrenceGroupId: z.string().uuid().optional().nullable(),
   createFutureInstallments: z.boolean().optional(),
+  createPreviousInstallments: z.boolean().optional(),
   createMonthlyRecurring: z.boolean().optional(),
 })
 
