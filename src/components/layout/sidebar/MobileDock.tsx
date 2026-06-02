@@ -59,7 +59,7 @@ export function MobileDock() {
       }`}
     >
       <div className="mx-3 mb-3">
-        <div className="flex items-center justify-around px-2 py-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-200/80 dark:border-gray-800/80 shadow-lg">
+        <div className="flex items-center justify-around px-2 py-2 bg-[var(--chrome-bg)] backdrop-blur-xl rounded-2xl border border-[var(--chrome-border)] shadow-lg">
           {navItems.map((item) => {
             const Icon = item.icon
             const pathnameWithoutLocale = pathname.replace(/^\/pt/, '')

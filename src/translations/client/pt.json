@@ -121,6 +121,18 @@
       "management": "Gestão",
       "finance": "Financeiro",
       "system": "Sistema"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "subscriptions": "Assinaturas",
+      "financePlanner": "Planejador Financeiro",
+      "cardInvoice": "Fatura do cartão",
+      "paymentMethods": "Métodos de Pagamento",
+      "settings": "Configurações",
+      "profile": "Perfil",
+      "auth": "Autenticação",
+      "login": "Entrar",
+      "register": "Criar conta"
     }
   },
   "locale": {
@@ -270,6 +282,29 @@
         "EMAIL": "Enviar lembretes por email.",
         "PUSH": "Usar notificações push quando disponíveis.",
         "BOTH": "Usar os dois canais para renovações importantes."
+      }
+    },
+    "darkThemeVariant": {
+      "title": "Tema escuro",
+      "description": "Escolha a aparência usada quando o modo escuro estiver ativo.",
+      "current": "Atual: {theme}",
+      "button": "Selecionar tema escuro",
+      "modalTitle": "Selecionar tema escuro",
+      "modalDescription": "Escolha entre o dark azul atual ou uma versão mais escura com tons de preto.",
+      "save": "Salvar tema",
+      "saving": "Salvando...",
+      "cancel": "Cancelar",
+      "success": "Tema escuro atualizado.",
+      "error": "Não foi possível atualizar o tema escuro.",
+      "options": {
+        "BLUE": {
+          "label": "Azul escuro",
+          "description": "Mantém o visual atual com fundo azul escuro e detalhes esverdeados."
+        },
+        "BLACK": {
+          "label": "Preto profundo",
+          "description": "Usa uma base mais escura com tons de preto e contraste mais intenso."
+        }
       }
     },
     "paymentMethods": {

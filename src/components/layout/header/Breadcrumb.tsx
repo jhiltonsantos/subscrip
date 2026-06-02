@@ -2,13 +2,36 @@
 
 import { ChevronRight, Home } from "lucide-react"
 import { LocaleLink } from "@/components/global"
+import { useTranslations } from "next-intl"
 import { usePathname } from "next/navigation"
 
+const BREADCRUMB_LABEL_KEYS: Record<string, string> = {
+  dashboard: "dashboard",
+  subscriptions: "subscriptions",
+  "finance-planner": "financePlanner",
+  "card-invoice": "cardInvoice",
+  "payment-methods": "paymentMethods",
+  settings: "settings",
+  profile: "profile",
+  auth: "auth",
+  login: "login",
+  register: "register",
+}
+
+function formatSegmentFallback(segment: string) {
+  return segment
+    .split("-")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+}
+
 export function Breadcrumb() {
+  const t = useTranslations("header.breadcrumbs")
   const pathname = usePathname()
   
   const segments = pathname
-    .replace(/^\/(pt\/)?/, "")
+    .replace(/^\/pt(?=\/|$)/, "")
     .split("/")
     .filter(Boolean)
 
@@ -26,19 +49,20 @@ export function Breadcrumb() {
       {segments.map((segment, index) => {
         const href = "/" + segments.slice(0, index + 1).join("/")
         const isLast = index === segments.length - 1
-        const label = segment.charAt(0).toUpperCase() + segment.slice(1)
+        const labelKey = BREADCRUMB_LABEL_KEYS[segment]
+        const label = labelKey ? t(labelKey) : formatSegmentFallback(segment)
 
         return (
           <div key={segment} className="flex items-center gap-2">
             <ChevronRight className="h-4 w-4 text-gray-400 hidden md:block" />
             {isLast ? (
-              <span className="font-medium text-gray-900 dark:text-gray-100 capitalize hidden md:inline">
+              <span className="font-medium text-gray-900 dark:text-gray-100 hidden md:inline">
                 {label}
               </span>
             ) : (
               <LocaleLink 
                 href={href}
-                className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors capitalize hidden md:inline"
+                className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors hidden md:inline"
               >
                 {label}
               </LocaleLink>

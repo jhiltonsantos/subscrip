@@ -7,6 +7,7 @@ interface PlatformLayoutClientProps {
   user: {
     name?: string | null
     email: string
+    darkThemeVariant?: "BLUE" | "BLACK"
   }
 }
 

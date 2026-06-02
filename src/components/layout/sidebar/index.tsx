@@ -135,7 +135,7 @@ export function Sidebar({ user }: SidebarProps) {
   return (
     <aside
       ref={sidebarRef}
-      className="fixed left-4 top-4 bottom-4 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl rounded-2xl border border-gray-200/80 dark:border-gray-800/80 flex flex-col shadow-lg"
+      className="fixed left-4 top-4 bottom-4 bg-[var(--chrome-bg)] backdrop-blur-xl rounded-2xl border border-[var(--chrome-border)] flex flex-col shadow-lg"
       style={{ width: 280 }}
     >
       {/* Header */}

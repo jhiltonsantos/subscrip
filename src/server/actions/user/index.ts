@@ -1,3 +1,3 @@
 export { changeUserLanguage } from "./change-language"
 export { getUser } from "./get"
-export { updateUserSettings } from "./update-settings"
+export { updateDarkThemeVariant, updateUserSettings } from "./update-settings"

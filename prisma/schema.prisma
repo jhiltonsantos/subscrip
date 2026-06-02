@@ -42,6 +42,11 @@ enum Theme {
   SYSTEM
 }
 
+enum DarkThemeVariant {
+  BLUE
+  BLACK
+}
+
 enum ExpenseBucket {
   MONTHLY_BILLS
   CREDIT_CARD
@@ -88,6 +93,7 @@ model User {
   // Preferences
   preferredCurrency      Currency        @default(BRL)
   theme                  Theme           @default(SYSTEM)
+  darkThemeVariant       DarkThemeVariant @default(BLUE)
   defaultReminderDays    Int             @default(3)
   defaultReminderChannel ReminderChannel @default(EMAIL)
   language               String          @default("en-US")

@@ -5,6 +5,13 @@ export type UserSettingsCurrency =
 export const USER_SETTINGS_THEME_VALUES = ["LIGHT", "DARK", "SYSTEM"] as const
 export type UserSettingsTheme = (typeof USER_SETTINGS_THEME_VALUES)[number]
 
+export const USER_SETTINGS_DARK_THEME_VARIANT_VALUES = [
+  "BLUE",
+  "BLACK",
+] as const
+export type UserSettingsDarkThemeVariant =
+  (typeof USER_SETTINGS_DARK_THEME_VARIANT_VALUES)[number]
+
 export const USER_SETTINGS_REMINDER_CHANNEL_VALUES = [
   "EMAIL",
   "PUSH",

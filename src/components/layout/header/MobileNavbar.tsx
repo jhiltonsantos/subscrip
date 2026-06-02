@@ -124,7 +124,7 @@ export function MobileNavbar({ user }: MobileNavbarProps) {
         }`}
       >
         <div className="mx-4 mt-4">
-          <div className="flex items-center justify-between px-4 py-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-200/80 dark:border-gray-800/80 shadow-lg">
+          <div className="flex items-center justify-between px-4 py-3 bg-[var(--chrome-bg)] backdrop-blur-xl rounded-2xl border border-[var(--chrome-border)] shadow-lg">
             {/* User avatar */}
             <LocaleLink
               href="/settings"
@@ -169,13 +169,13 @@ export function MobileNavbar({ user }: MobileNavbarProps) {
 
       {/* Menu Lateral */}
       <div
-        className={`fixed top-0 right-0 h-full w-72 bg-white dark:bg-gray-900 z-50 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-72 bg-background z-50 transform transition-transform duration-300 ease-in-out ${
           isMenuOpen ? "translate-x-0" : "translate-x-full"
         } lg:hidden shadow-2xl`}
       >
         <div className="flex flex-col h-full">
           {/* Menu header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between p-4 border-b border-border">
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
               Menu
             </h2>

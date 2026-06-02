@@ -121,6 +121,18 @@
       "management": "Management",
       "finance": "Finance",
       "system": "System"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "subscriptions": "Subscriptions",
+      "financePlanner": "Finance Planner",
+      "cardInvoice": "Card Invoice",
+      "paymentMethods": "Payment Methods",
+      "settings": "Settings",
+      "profile": "Profile",
+      "auth": "Authentication",
+      "login": "Sign in",
+      "register": "Create account"
     }
   },
   "locale": {
@@ -270,6 +282,29 @@
         "EMAIL": "Send reminders by email.",
         "PUSH": "Use app push notifications when available.",
         "BOTH": "Use both channels for important renewals."
+      }
+    },
+    "darkThemeVariant": {
+      "title": "Dark theme",
+      "description": "Choose the appearance used when dark mode is active.",
+      "current": "Current: {theme}",
+      "button": "Select dark theme",
+      "modalTitle": "Select dark theme",
+      "modalDescription": "Choose between the current blue dark theme or a darker version with black tones.",
+      "save": "Save theme",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "success": "Dark theme updated.",
+      "error": "Could not update the dark theme.",
+      "options": {
+        "BLUE": {
+          "label": "Dark blue",
+          "description": "Keeps the current look with a dark blue background and emerald accents."
+        },
+        "BLACK": {
+          "label": "Deep black",
+          "description": "Uses a darker base with black tones and stronger contrast."
+        }
       }
     },
     "paymentMethods": {
