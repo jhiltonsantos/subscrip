@@ -15,13 +15,10 @@ import { Input } from "@/components/ui/input"
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog"
 import { LocaleLink } from "@/components/global"
 import { SubscriptionForm } from "./subscription-form"
+import { LinkedChangeDialog } from "@/components/subscription-expense-sync/linked-change-dialog"
 
 type SubscriptionsManagerProps = {
   initialItems: SerializedSubscription[]
@@ -41,6 +38,8 @@ export function SubscriptionsManager({
   const [editing, setEditing] = useState<SerializedSubscription | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<SerializedSubscription | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [statusTarget, setStatusTarget] = useState<SerializedSubscription | null>(null)
+  const [statusError, setStatusError] = useState<string | null>(null)
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [categoryFilter, setCategoryFilter] = useState("all")
@@ -106,13 +105,23 @@ export function SubscriptionsManager({
   }
 
   function toggleSubscriptionStatus(subscription: SerializedSubscription) {
+    setStatusTarget(subscription)
+    setStatusError(null)
+  }
+
+  function confirmStatusToggle() {
+    if (!statusTarget) return
+    setStatusError(null)
     startStatusUpdate(async () => {
-      const result = await updateSubscription(subscription.id, {
-        active: !subscription.active,
+      const result = await updateSubscription(statusTarget.id, {
+        active: !statusTarget.active,
       })
       if (result.success) {
+        setStatusTarget(null)
         router.refresh()
+        return
       }
+      setStatusError(result.error)
     })
   }
 
@@ -283,51 +292,34 @@ export function SubscriptionsManager({
         </DialogContent>
       </Dialog>
 
-      <Dialog
+      <LinkedChangeDialog
         open={!!deleteTarget}
+        variant="deleteSubscription"
+        itemName={deleteTarget?.name}
+        isPending={isDeleting}
+        error={deleteError}
         onOpenChange={(open) => {
           if (!open) {
             setDeleteTarget(null)
             setDeleteError(null)
           }
         }}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t("delete.title")}</DialogTitle>
-            <DialogDescription>
-              {deleteTarget ? (
-                <>
-                  <span className="font-medium text-foreground">{deleteTarget!.name}</span>
-                  {" — "}
-                  {t("delete.description")}
-                </>
-              ) : null}
-            </DialogDescription>
-          </DialogHeader>
-          {deleteError ? (
-            <p className="text-destructive text-sm" role="alert">
-              {deleteError}
-            </p>
-          ) : null}
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              variant="outline"
-              onClick={() => setDeleteTarget(null)}
-              disabled={isDeleting}
-            >
-              {t("delete.cancel")}
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={confirmDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? t("delete.deleting") : t("delete.confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        onConfirm={confirmDelete}
+      />
+      <LinkedChangeDialog
+        open={!!statusTarget}
+        variant="toggleSubscription"
+        itemName={statusTarget?.name}
+        isPending={isUpdatingStatus}
+        error={statusError}
+        onOpenChange={(open) => {
+          if (!open) {
+            setStatusTarget(null)
+            setStatusError(null)
+          }
+        }}
+        onConfirm={confirmStatusToggle}
+      />
     </div>
   )
 }

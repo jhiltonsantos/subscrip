@@ -20,6 +20,7 @@ import {
   type SerializedSubscription,
   type SubscriptionFormOptions,
 } from "@/server/actions/subscriptions"
+import { LinkedChangeDialog } from "@/components/subscription-expense-sync/linked-change-dialog"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -111,6 +112,7 @@ export function SubscriptionForm({
 }: SubscriptionFormProps) {
   const t = useTranslations("subscriptionsPage")
   const [error, setError] = useState<string | null>(null)
+  const [pendingPayload, setPendingPayload] = useState<SubscriptionFormValues | null>(null)
   const [isPending, startTransition] = useTransition()
 
   const form = useForm<SubscriptionFormValues>({
@@ -129,6 +131,24 @@ export function SubscriptionForm({
     }
   }, [open, mode, subscription, form])
 
+  function persistSubscription(payload: SubscriptionFormValues) {
+    setError(null)
+
+    startTransition(async () => {
+      const result =
+        mode === "create"
+          ? await createSubscription(payload)
+          : await updateSubscription(subscription!.id, payload)
+
+      if (result.success) {
+        setPendingPayload(null)
+        onSuccess()
+        return
+      }
+      setError(result.error || t("form.error"))
+    })
+  }
+
   function onSubmit(values: SubscriptionFormValues) {
     setError(null)
     const payload = {
@@ -138,18 +158,12 @@ export function SubscriptionForm({
       paymentMethodId: values.paymentMethodId || null,
     }
 
-    startTransition(async () => {
-      const result =
-        mode === "create"
-          ? await createSubscription(payload)
-          : await updateSubscription(subscription!.id, payload)
+    if (mode === "edit" || payload.active) {
+      setPendingPayload(payload)
+      return
+    }
 
-      if (result.success) {
-        onSuccess()
-        return
-      }
-      setError(result.error || t("form.error"))
-    })
+    persistSubscription(payload)
   }
 
   return (
@@ -457,6 +471,21 @@ export function SubscriptionForm({
           </DialogFooter>
         </form>
       </Form>
+      <LinkedChangeDialog
+        open={Boolean(pendingPayload)}
+        variant={mode === "create" ? "createSubscription" : "editSubscription"}
+        itemName={pendingPayload?.name}
+        isPending={isPending}
+        error={error}
+        onOpenChange={(open) => {
+          if (!open && !isPending) {
+            setPendingPayload(null)
+          }
+        }}
+        onConfirm={() => {
+          if (pendingPayload) persistSubscription(pendingPayload)
+        }}
+      />
     </>
   )
 }

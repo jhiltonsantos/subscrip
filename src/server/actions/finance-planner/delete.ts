@@ -8,6 +8,10 @@ import {
   type FinancePlannerActionResult,
 } from "./shared"
 import { syncCreditCardInvoices, type CardMonthRef } from "./card-invoices"
+import {
+  deleteSubscriptionFromExpense,
+  revalidateSubscriptionExpenseSyncPaths,
+} from "@/server/actions/subscriptions/expense-sync"
 
 type DeleteExpenseMode = "single" | "future"
 
@@ -52,12 +56,20 @@ export async function deletePlannedExpense(
       id: true,
       expenseBucket: true,
       paymentCardId: true,
+      subscriptionId: true,
       recurrenceGroupId: true,
       monthlyPlan: { select: { year: true, month: true } },
     },
   })
   if (!existing) {
     return { success: false, error: t("common.notFound") }
+  }
+
+  if (existing.subscriptionId) {
+    await deleteSubscriptionFromExpense(userId, id)
+    await syncCreditCardInvoices(userId, [toCardMonthRef(existing)])
+    revalidateSubscriptionExpenseSyncPaths()
+    return { success: true, data: { id } }
   }
 
   if (mode === "future" && existing.recurrenceGroupId) {

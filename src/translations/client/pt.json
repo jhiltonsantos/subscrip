@@ -139,6 +139,40 @@
     "en": "English",
     "pt": "Português"
   },
+  "linkedSubscriptionExpense": {
+    "cancel": "Cancelar",
+    "confirming": "Confirmando...",
+    "createSubscription": {
+      "title": "Criar despesa no planejamento?",
+      "description": "Esta assinatura será adicionada automaticamente como uma saída no mês da próxima cobrança.",
+      "confirm": "Criar assinatura e saída"
+    },
+    "editSubscription": {
+      "title": "Atualizar assinatura e planejamento?",
+      "description": "As alterações nesta assinatura também serão refletidas na saída vinculada do planejamento financeiro.",
+      "confirm": "Atualizar os dois"
+    },
+    "deleteSubscription": {
+      "title": "Remover assinatura e saída?",
+      "description": "Ao remover esta assinatura, a saída vinculada no planejamento financeiro também será removida.",
+      "confirm": "Remover os dois"
+    },
+    "toggleSubscription": {
+      "title": "Alterar status da assinatura?",
+      "description": "Ativar ou desativar esta assinatura também vai criar, atualizar ou remover a saída vinculada no planejamento.",
+      "confirm": "Confirmar alteração"
+    },
+    "editExpense": {
+      "title": "Atualizar assinatura vinculada?",
+      "description": "Esta saída foi gerada por uma assinatura. Ao editar, os dados equivalentes da assinatura também serão atualizados.",
+      "confirm": "Atualizar os dois"
+    },
+    "deleteExpense": {
+      "title": "Remover assinatura vinculada?",
+      "description": "Esta saída foi gerada por uma assinatura. Ao remover a saída, a assinatura vinculada também será removida.",
+      "confirm": "Remover os dois"
+    }
+  },
   "subscriptionsPage": {
     "title": "Assinaturas",
     "subtitle": "Gerencie suas assinaturas recorrentes.",
@@ -453,7 +487,8 @@
       "dueDate": "Data de vencimento",
       "isInstallment": "Esta é uma saída parcelada",
       "createPreviousInstallments": "Adicionar parcelas anteriores",
-      "isMonthlyRecurring": "Repetir mensalmente pelos próximos 12 meses"
+      "isMonthlyRecurring": "Repetir mensalmente pelos próximos 12 meses",
+      "subscriptionSource": "Assinatura"
     },
     "buckets": {
       "MONTHLY_BILLS": "Contas mensais",

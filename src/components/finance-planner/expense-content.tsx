@@ -29,7 +29,16 @@ export function ExpenseContent({
           {
             key: "bucket",
             label: t("table.bucket"),
-            render: (row) => t(`buckets.${row.expenseBucket}`),
+            render: (row) => (
+              <div className="space-y-1">
+                <span>{t(`buckets.${row.expenseBucket}`)}</span>
+                {row.subscriptionId ? (
+                  <span className="block text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                    {t("expense.subscriptionSource")}
+                  </span>
+                ) : null}
+              </div>
+            ),
           },
           ...(hasInstallments
             ? [
@@ -71,6 +80,7 @@ export function ExpenseContent({
           meta={[
             formatCurrency(Number(row.amount), row.currency),
             t(`buckets.${row.expenseBucket}`),
+            row.subscriptionId ? t("expense.subscriptionSource") : null,
             row.merchantName,
             formatExpenseInstallment(row),
           ].filter(Boolean).join(" · ")}
