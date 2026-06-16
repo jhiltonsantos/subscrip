@@ -35,7 +35,7 @@ Cada etapa contém suas tarefas com status de conclusão. O checkbox `[x]` indic
   - 24 service templates (Netflix, Spotify, AWS, Vercel, Notion, etc.)
   - 5 assinaturas de exemplo vinculadas ao usuário
 - [x] Criar `.env.example` com configuração Docker local e Neon (produção)
-- [x] Adicionar scripts no `package.json`: `docker:up`, `docker:down`, `db:studio`, `setup`
+- [x] Adicionar scripts no `package.json`: `docker:up`, `docker:down`, `db:studio`, `setup`, `typecheck`, `check`
 
 **Status: ✅ COMPLETA**
 
@@ -112,7 +112,7 @@ Cada etapa contém suas tarefas com status de conclusão. O checkbox `[x]` indic
 #### 4A — Layout e Navegação
 
 - [x] Criar layout do dashboard com **sidebar** (Shadcn Sidebar ou custom)
-- [x] Implementar navegação: Dashboard, Assinaturas, Configurações
+- [x] Implementar navegação: Dashboard, Assinaturas, Planejamento Financeiro, Configurações
 - [x] Criar componente de **Header do Dashboard** com avatar, nome e logout
 - [x] Implementar tema dark/light toggle
 - [x] Animações GSAP de transição entre páginas/seções
@@ -143,10 +143,10 @@ Cada etapa contém suas tarefas com status de conclusão. O checkbox `[x]` indic
 
 #### 4D — Filtrar por Usuário (Segurança Multi-tenant)
 
-- [ ] Refatorar queries do dashboard para filtrar por `userId` da sessão autenticada
-- [ ] Garantir isolamento total de dados entre usuários
-- [ ] Seed vinculado a um usuário de teste
-- [ ] Garantir isolamento por `userId` também em `MonthlyPlan`, `PlannedIncome` e `PlannedExpense`
+- [x] Refatorar queries do dashboard para filtrar por `userId` da sessão autenticada
+- [x] Garantir isolamento total de dados entre usuários nas actions principais
+- [x] Seed vinculado a um usuário de teste
+- [x] Garantir isolamento por `userId` também em `MonthlyPlan`, `PlannedIncome` e `PlannedExpense`
 
 **Status: 🟡 PARCIALMENTE IMPLEMENTADA**
 
@@ -158,28 +158,28 @@ Cada etapa contém suas tarefas com status de conclusão. O checkbox `[x]` indic
 
 #### 4.5A — Modelagem e Persistência
 
-- [ ] Adicionar model `MonthlyPlan` com chave única por `userId + year + month`
-- [ ] Adicionar model `PlannedIncome` para entradas mensais
-- [ ] Adicionar model `PlannedExpense` com enum `ExpenseBucket`
-- [ ] Criar índices para leitura eficiente por mês/usuário
-- [ ] Atualizar seed com plano mensal de exemplo para usuário de teste
+- [x] Adicionar model `MonthlyPlan` com chave única por `userId + year + month`
+- [x] Adicionar model `PlannedIncome` para entradas mensais
+- [x] Adicionar model `PlannedExpense` com enum `ExpenseBucket`
+- [x] Criar índices para leitura eficiente por mês/usuário
+- [x] Atualizar seed com plano mensal de exemplo para usuário de teste
 
 #### 4.5B — Backend (Server Actions + Validação)
 
-- [ ] Criar função `getOrCreateMonthlyPlan(userId, year, month)`
-- [ ] Criar Server Actions para CRUD de `PlannedIncome`
-- [ ] Criar Server Actions para CRUD de `PlannedExpense`
-- [ ] Validar payloads com Zod (nome, valor, moeda, bucket)
-- [ ] Implementar agregador `monthSummary` no servidor
+- [x] Criar função `getOrCreateMonthlyPlan(userId, year, month)`
+- [x] Criar Server Actions para CRUD de `PlannedIncome`
+- [x] Criar Server Actions para CRUD de `PlannedExpense`
+- [x] Validar payloads com Zod (nome, valor, moeda, bucket)
+- [x] Implementar agregador `monthSummary` no servidor
 
 #### 4.5C — Interface de Planejamento
 
-- [ ] Criar rota `/plan` (ou `/dashboard/plan`) com seletor de mês/ano
-- [ ] Exibir colunas de entradas e saídas em formato de planejamento mensal
-- [ ] Exibir resumo: receber total, custos totais, assinaturas, saldo
+- [x] Criar rota oficial `/finance-planner` e alias `/plan`
+- [x] Exibir colunas de entradas e saídas em formato de planejamento mensal
+- [x] Exibir resumo: receber total, custos totais, assinaturas, saldo
 - [ ] Garantir experiência mobile-first para edição rápida
 
-**Status: 🔴 PENDENTE**
+**Status: 🟡 PARCIALMENTE IMPLEMENTADA**
 
 ---
 
@@ -222,6 +222,10 @@ Cada etapa contém suas tarefas com status de conclusão. O checkbox `[x]` indic
 
 > **Objetivo:** Notificar o usuário sobre faturas próximas e renovações.
 
+**Decisão v1:** notificações automáticas não entram na primeira versão fechada.
+A v1 mantém preferências padrão e estrutura de dados; CRUD de lembretes por
+assinatura, cron, email de renovação e badge real ficam para v1.1.
+
 - [ ] Definir modelo de notificação no Prisma (ou usar campo `notifiedAt` na Subscription)
 - [ ] Criar lógica de verificação de faturas próximas (cron job ou Vercel Cron)
 - [ ] Enviar email de alerta X dias antes do vencimento (Resend)
@@ -229,7 +233,7 @@ Cada etapa contém suas tarefas com status de conclusão. O checkbox `[x]` indic
 - [ ] Criar componente de badge de notificações no header
 - [ ] Toast de notificação in-app (Shadcn Toast/Sonner)
 
-**Status: 🔴 PENDENTE**
+**Status: 🟡 MOVIDA PARA v1.1**
 
 ---
 
@@ -271,14 +275,14 @@ Cada etapa contém suas tarefas com status de conclusão. O checkbox `[x]` indic
 
 > **Objetivo:** Permitir que o usuário gerencie seus dados e preferências.
 
-- [ ] Criar página `/dashboard/settings`
-- [ ] Seção de perfil: editar nome e email
-- [ ] Seção de preferências: moeda padrão, tema (dark/light)
+- [x] Criar página `/settings`
+- [x] Seção de perfil: editar nome e email somente leitura
+- [x] Seção de preferências: moeda padrão, tema (dark/light), idioma e lembretes
 - [ ] Seção de conta: excluir conta (com confirmação)
-- [ ] Server Actions para atualização de perfil
+- [x] Server Actions para atualização de perfil
 - [ ] Logout funcional com redirecionamento
 
-**Status: 🔴 PENDENTE**
+**Status: 🟡 PARCIALMENTE IMPLEMENTADA**
 
 ---
 

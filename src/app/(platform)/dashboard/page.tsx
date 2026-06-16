@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Container } from "@/components/ui/container"
-import { CreditCard, DollarSign, CalendarDays } from "lucide-react"
-import { prisma } from "@/lib/prisma"
+import { CalendarDays, CreditCard, DollarSign, TrendingDown, TrendingUp } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR, enUS } from "date-fns/locale"
 import { formatCurrency } from "@/lib/utils/formatters"
@@ -10,6 +9,8 @@ import { auth } from "@/lib/auth"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { getTranslations, getLocale } from "next-intl/server"
+import { getMonthSummary } from "@/server/actions/finance-planner"
+import { listSubscriptions } from "@/server/actions/subscriptions"
 
 export const revalidate = 0
 
@@ -25,18 +26,32 @@ export default async function DashboardPage() {
     redirect("/auth/login")
   }
 
-  const subscriptions = await prisma.subscription.findMany({
-    where: { userId: session.user.id },
-    orderBy: { nextBillingDate: 'asc' }
-  })
+  const now = new Date()
+  const [subscriptionsResult, summaryResult] = await Promise.all([
+    listSubscriptions(),
+    getMonthSummary({ year: now.getFullYear(), month: now.getMonth() + 1 }),
+  ])
 
-  const totalMonthlySpend = subscriptions.reduce((acc, sub) => {
-    const multiplier = sub.currency === 'USD' ? 6 : 1
+  const subscriptions = subscriptionsResult.success ? subscriptionsResult.data : []
+  const summary = summaryResult.success ? summaryResult.data : null
+  const activeSubscriptions = subscriptions.filter((subscription) => subscription.active)
+
+  const estimatedSubscriptionTotal = activeSubscriptions.reduce((acc, sub) => {
+    const multiplier = sub.currency === "USD" ? 6 : 1
     const price = Number(sub.price) * multiplier
-    return acc + (sub.billingCycle === 'YEARLY' ? price / 12 : price)
+    return acc + (sub.billingCycle === "YEARLY" ? price / 12 : price)
   }, 0)
 
-  const activeCount = subscriptions.filter(s => s.active).length
+  const plannedIncomeTotal = toNumber(summary?.incomeTotal)
+  const plannedExpenseTotal = toNumber(summary?.expenseTotal)
+  const summarySubscriptionTotal = toNumber(summary?.subscriptionTotal)
+  const subscriptionTotal =
+    summarySubscriptionTotal > 0 ? summarySubscriptionTotal : estimatedSubscriptionTotal
+  const totalOutflow =
+    plannedExpenseTotal > 0 ? plannedExpenseTotal : subscriptionTotal
+  const projectedBalance = plannedIncomeTotal - totalOutflow
+  const activeCount = activeSubscriptions.length
+  const nextSubscription = activeSubscriptions[0]
   const dateLocale = locale === "pt" ? ptBR : enUS
 
   return (
@@ -50,23 +65,41 @@ export default async function DashboardPage() {
             </p>
           </div>
         </div>
-      
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("cards.monthlySpend")}</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("cards.plannedIncome")}</CardTitle>
             <div className="h-8 w-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
-              <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-              {formatCurrency(totalMonthlySpend, 'BRL')}
+              {formatCurrency(plannedIncomeTotal, "BRL")}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">{t("cards.conversionBase")}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {t("cards.currentMonth")}
+            </p>
           </CardContent>
         </Card>
-        
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t("cards.plannedExpenses")}</CardTitle>
+            <div className="h-8 w-8 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center">
+              <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+              {formatCurrency(plannedExpenseTotal, "BRL")}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {t("cards.currentMonth")}
+            </p>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t("cards.activeSubscriptions")}</CardTitle>
@@ -84,19 +117,39 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("cards.nextPayment")}</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("cards.totalOutflow")}</CardTitle>
             <div className="h-8 w-8 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
-              <CalendarDays className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <DollarSign className="h-4 w-4 text-amber-600 dark:text-amber-400" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {subscriptions[0] 
-                ? format(subscriptions[0].nextBillingDate, 'dd/MM') 
-                : '--'}
+            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+              {formatCurrency(totalOutflow, "BRL")}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {subscriptions[0]?.name || t("cards.noUpcoming")}
+              {t("cards.plannedPlusSubscriptions")}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t("cards.projectedBalance")}</CardTitle>
+            <div className="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-900/50 flex items-center justify-center">
+              <CalendarDays className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${projectedBalance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
+              {formatCurrency(projectedBalance, "BRL")}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {nextSubscription
+                ? t("cards.nextPaymentWithName", {
+                    name: nextSubscription.name,
+                    date: format(new Date(nextSubscription.nextBillingDate), "dd/MM"),
+                  })
+                : t("cards.noUpcoming")}
             </p>
           </CardContent>
         </Card>
@@ -126,7 +179,7 @@ export default async function DashboardPage() {
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {t("subscriptions.due", {
-                        date: format(sub.nextBillingDate, "dd 'de' MMMM", { locale: dateLocale })
+                        date: format(new Date(sub.nextBillingDate), "dd 'de' MMMM", { locale: dateLocale })
                       })}
                     </div>
                   </div>
@@ -148,4 +201,8 @@ export default async function DashboardPage() {
       </div>
     </Container>
   )
+}
+
+function toNumber(value: string | null | undefined) {
+  return value ? Number(value) : 0
 }

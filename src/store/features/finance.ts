@@ -100,8 +100,11 @@ export const createPlannedIncomeAction = createAsyncThunk(
 
 export const updatePlannedIncomeAction = createAsyncThunk(
   "finance/updatePlannedIncome",
-  async (payload: { id: string; data: unknown }, thunkAPI) => {
-    const result = await updatePlannedIncome(payload.id, payload.data)
+  async (
+    payload: { id: string; data: unknown; mode?: "single" | "future" },
+    thunkAPI
+  ) => {
+    const result = await updatePlannedIncome(payload.id, payload.data, payload.mode)
     if (!result.success) {
       throw new Error(result.error)
     }
@@ -154,8 +157,11 @@ export const createPlannedExpenseAction = createAsyncThunk(
 
 export const updatePlannedExpenseAction = createAsyncThunk(
   "finance/updatePlannedExpense",
-  async (payload: { id: string; data: unknown }, thunkAPI) => {
-    const result = await updatePlannedExpense(payload.id, payload.data)
+  async (
+    payload: { id: string; data: unknown; mode?: "single" | "future" },
+    thunkAPI
+  ) => {
+    const result = await updatePlannedExpense(payload.id, payload.data, payload.mode)
     if (!result.success) {
       throw new Error(result.error)
     }
@@ -172,8 +178,10 @@ export const updatePlannedExpenseAction = createAsyncThunk(
 
 export const deletePlannedExpenseAction = createAsyncThunk(
   "finance/deletePlannedExpense",
-  async (id: string, thunkAPI) => {
-    const result = await deletePlannedExpense(id)
+  async (payload: string | { id: string; mode?: "single" | "future" }, thunkAPI) => {
+    const id = typeof payload === "string" ? payload : payload.id
+    const mode = typeof payload === "string" ? "single" : payload.mode
+    const result = await deletePlannedExpense(id, mode)
     if (!result.success) {
       throw new Error(result.error)
     }

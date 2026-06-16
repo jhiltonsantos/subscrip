@@ -1,11 +1,14 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
-import { revalidatePath } from "next/cache"
 import {
   getUserIdOrNull,
   type SubscriptionActionResult,
 } from "./shared"
+import {
+  deleteCurrentAndFutureSubscriptionExpenses,
+  revalidateSubscriptionExpenseSyncPaths,
+} from "./expense-sync"
 import { getTranslations } from "next-intl/server"
 
 export async function deleteSubscription(
@@ -26,11 +29,13 @@ export async function deleteSubscription(
     return { success: false, error: t("common.notFound") }
   }
 
-  await prisma.subscription.delete({
-    where: { id },
+  await prisma.$transaction(async (tx) => {
+    await deleteCurrentAndFutureSubscriptionExpenses(userId, id, tx)
+    await tx.subscription.delete({
+      where: { id },
+    })
   })
 
-  revalidatePath("/dashboard")
-  revalidatePath("/subscriptions")
+  revalidateSubscriptionExpenseSyncPaths()
   return { success: true, data: { id } }
 }

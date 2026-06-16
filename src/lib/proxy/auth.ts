@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { getSessionCookie } from "better-auth/cookies"
 
 const PUBLIC_ROUTES = ["/", "/auth/login", "/auth/register"]
-const AUTH_ROUTES = ["/auth/login", "/auth/register"]
 
 export type AuthAction = 
   | { type: "redirect"; url: string }
@@ -16,12 +15,6 @@ export function checkAuth(
   const sessionCookie = getSessionCookie(req)
   const isLoggedIn = !!sessionCookie
   const isPublicRoute = PUBLIC_ROUTES.includes(cleanPath)
-  const isAuthRoute = AUTH_ROUTES.includes(cleanPath)
-
-  if ((isPublicRoute || isAuthRoute) && isLoggedIn) {
-    const dashboardUrl = locale === "pt" ? "/pt/dashboard" : "/dashboard"
-    return { type: "redirect", url: dashboardUrl }
-  }
 
   if (!isLoggedIn && !isPublicRoute) {
     const callbackUrl = cleanPath + (req.nextUrl.search || "")

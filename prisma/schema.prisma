@@ -42,6 +42,11 @@ enum Theme {
   SYSTEM
 }
 
+enum DarkThemeVariant {
+  BLUE
+  BLACK
+}
+
 enum ExpenseBucket {
   MONTHLY_BILLS
   CREDIT_CARD
@@ -66,6 +71,11 @@ enum PlanEntrySource {
   INSTALLMENT
 }
 
+enum RecurrenceKind {
+  INSTALLMENT
+  MONTHLY_RECURRING
+}
+
 enum InvoiceStatus {
   OPEN
   CLOSED
@@ -83,6 +93,7 @@ model User {
   // Preferences
   preferredCurrency      Currency        @default(BRL)
   theme                  Theme           @default(SYSTEM)
+  darkThemeVariant       DarkThemeVariant @default(BLUE)
   defaultReminderDays    Int             @default(3)
   defaultReminderChannel ReminderChannel @default(EMAIL)
   language               String          @default("en-US")
@@ -298,15 +309,22 @@ model PlannedIncome {
   amount    Decimal  @db.Decimal(10, 2)
   currency  Currency @default(BRL)
   sortOrder Int      @default(0)
+  description String?
 
   expectedDate DateTime?
   receivedAt   DateTime?
   isReceived   Boolean   @default(false)
 
+  recurrenceKind    RecurrenceKind?
+  recurrenceGroupId String?
+  recurrenceNumber  Int?
+  recurrenceTotal   Int?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([monthlyPlanId])
+  @@index([recurrenceGroupId])
 }
 
 model PlannedExpense {
@@ -315,6 +333,8 @@ model PlannedExpense {
   monthlyPlan   MonthlyPlan @relation(fields: [monthlyPlanId], references: [id], onDelete: Cascade)
 
   name          String
+  merchantName  String?
+  description   String?
   amount        Decimal       @db.Decimal(10, 2)
   currency      Currency      @default(BRL)
   expenseBucket ExpenseBucket @default(OTHER)
@@ -345,6 +365,8 @@ model PlannedExpense {
   installmentPurchase   InstallmentPurchase? @relation(fields: [installmentPurchaseId], references: [id], onDelete: Cascade)
   installmentNumber     Int?
   installmentTotal      Int?
+  recurrenceKind        RecurrenceKind?
+  recurrenceGroupId     String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -356,6 +378,7 @@ model PlannedExpense {
   @@index([subscriptionId])
   @@index([installmentPurchaseId])
   @@index([expenseBucket])
+  @@index([recurrenceGroupId])
 }
 
 model CreditCardInvoice {

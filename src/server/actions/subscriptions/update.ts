@@ -3,7 +3,6 @@
 import { prisma } from "@/lib/prisma"
 import { subscriptionUpdateSchema } from "@/lib/validations/subscription"
 import { Prisma } from "@prisma/client"
-import { revalidatePath } from "next/cache"
 import {
   assertPaymentMethodOwnedByUser,
   assertServiceTemplateExists,
@@ -14,6 +13,10 @@ import {
   type SerializedSubscription,
   type SubscriptionActionResult,
 } from "./shared"
+import {
+  revalidateSubscriptionExpenseSyncPaths,
+  syncCurrentAndFutureSubscriptionExpenses,
+} from "./expense-sync"
 import { getTranslations } from "next-intl/server"
 
 export async function updateSubscription(
@@ -84,13 +87,18 @@ export async function updateSubscription(
       ? { connect: { id: data.paymentMethodId } }
       : { disconnect: true }
 
-  const row = await prisma.subscription.update({
-    where: { id },
-    data: updateData,
-    include: subscriptionInclude,
+  const row = await prisma.$transaction(async (tx) => {
+    const subscription = await tx.subscription.update({
+      where: { id },
+      data: updateData,
+      include: subscriptionInclude,
+    })
+
+    await syncCurrentAndFutureSubscriptionExpenses(userId, subscription, tx)
+
+    return subscription
   })
 
-  revalidatePath("/dashboard")
-  revalidatePath("/subscriptions")
+  revalidateSubscriptionExpenseSyncPaths()
   return { success: true, data: serializeSubscription(row) }
 }

@@ -7,6 +7,8 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit --pretty false --incremental false",
+    "check": "pnpm lint && pnpm typecheck",
     "db:setup": "prisma generate && prisma migrate deploy && prisma db seed",
     "db:generate": "prisma generate",
     "db:pull": "prisma db pull",

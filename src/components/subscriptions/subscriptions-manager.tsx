@@ -1,26 +1,24 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { format } from "date-fns"
 import { ptBR, enUS } from "date-fns/locale"
 import { useLocale } from "next-intl"
-import { ExternalLink, Pencil, Plus, Trash2 } from "lucide-react"
-import { deleteSubscription, type SerializedSubscription, type SubscriptionFormOptions } from "@/server/actions/subscriptions"
+import { ExternalLink, Pencil, Plus, Power, Trash2 } from "lucide-react"
+import { deleteSubscription, updateSubscription, type SerializedSubscription, type SubscriptionFormOptions } from "@/server/actions/subscriptions"
 import { formatCurrency } from "@/lib/utils/formatters"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog"
 import { LocaleLink } from "@/components/global"
 import { SubscriptionForm } from "./subscription-form"
+import { LinkedChangeDialog } from "@/components/subscription-expense-sync/linked-change-dialog"
 
 type SubscriptionsManagerProps = {
   initialItems: SerializedSubscription[]
@@ -40,7 +38,36 @@ export function SubscriptionsManager({
   const [editing, setEditing] = useState<SerializedSubscription | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<SerializedSubscription | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [statusTarget, setStatusTarget] = useState<SerializedSubscription | null>(null)
+  const [statusError, setStatusError] = useState<string | null>(null)
+  const [search, setSearch] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [categoryFilter, setCategoryFilter] = useState("all")
   const [isDeleting, startDelete] = useTransition()
+  const [isUpdatingStatus, startStatusUpdate] = useTransition()
+
+  const categories = useMemo(
+    () => Array.from(new Set(initialItems.map((item) => item.category))).sort(),
+    [initialItems]
+  )
+
+  const filteredItems = useMemo(() => {
+    const query = search.trim().toLowerCase()
+    return initialItems.filter((item) => {
+      const matchesSearch =
+        query.length === 0 ||
+        item.name.toLowerCase().includes(query) ||
+        item.planLabel?.toLowerCase().includes(query)
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "active" && item.active) ||
+        (statusFilter === "inactive" && !item.active)
+      const matchesCategory =
+        categoryFilter === "all" || item.category === categoryFilter
+
+      return matchesSearch && matchesStatus && matchesCategory
+    })
+  }, [categoryFilter, initialItems, search, statusFilter])
 
   function handleFormSuccess() {
     setFormOpen(false)
@@ -77,6 +104,27 @@ export function SubscriptionsManager({
     })
   }
 
+  function toggleSubscriptionStatus(subscription: SerializedSubscription) {
+    setStatusTarget(subscription)
+    setStatusError(null)
+  }
+
+  function confirmStatusToggle() {
+    if (!statusTarget) return
+    setStatusError(null)
+    startStatusUpdate(async () => {
+      const result = await updateSubscription(statusTarget.id, {
+        active: !statusTarget.active,
+      })
+      if (result.success) {
+        setStatusTarget(null)
+        router.refresh()
+        return
+      }
+      setStatusError(result.error)
+    })
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -101,82 +149,130 @@ export function SubscriptionsManager({
           </CardContent>
         </Card>
       ) : (
-        <div className="overflow-x-auto rounded-lg border">
-          <table className="w-full min-w-[640px] text-sm">
-            <thead className="bg-muted/50">
-              <tr className="border-b text-left">
-                <th className="p-3 font-medium">{t("table.name")}</th>
-                <th className="p-3 font-medium">{t("table.price")}</th>
-                <th className="p-3 font-medium">{t("table.nextBilling")}</th>
-                <th className="p-3 font-medium">{t("table.status")}</th>
-                <th className="p-3 font-medium text-right">{t("table.actions")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {initialItems.map((subscription) => (
-                <tr key={subscription.id} className="border-b last:border-0 hover:bg-muted/30">
-                  <td className="p-3">
-                    <div className="font-medium">{subscription.name}</div>
-                    {subscription.planLabel?.trim() ? (
-                      <div className="text-muted-foreground text-xs mt-0.5">
-                        {subscription.planLabel}
-                      </div>
-                    ) : null}
-                  </td>
-                  <td className="p-3">
-                    {formatCurrency(Number(subscription.price), subscription.currency)}
-                  </td>
-                  <td className="p-3 text-muted-foreground">
-                    {format(
-                      new Date(subscription.nextBillingDate),
-                      "PPP",
-                      { locale: dateLocale }
-                    )}
-                  </td>
-                  <td className="p-3">
-                    <span
-                      className={
-                        subscription.active
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-muted-foreground"
-                      }
-                    >
-                      {subscription.active ? t("status.active") : t("status.inactive")}
-                    </span>
-                  </td>
-                  <td className="p-3">
-                    <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" asChild title={t("rowActions.open")}>
-                        <LocaleLink href={`/subscriptions/${subscription.id}`}>
-                          <ExternalLink className="size-4" />
-                        </LocaleLink>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title={t("rowActions.edit")}
-                        onClick={() => openEdit(subscription)}
-                      >
-                        <Pencil className="size-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:text-destructive"
-                        title={t("rowActions.delete")}
-                        onClick={() => {
-                          setDeleteError(null)
-                          setDeleteTarget(subscription)
-                        }}
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
+        <div className="space-y-4">
+          <div className="grid gap-3 rounded-lg border bg-muted/20 p-3 md:grid-cols-[1fr_180px_180px]">
+            <Input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder={t("filters.searchPlaceholder")}
+            />
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="all">{t("filters.allStatuses")}</option>
+              <option value="active">{t("status.active")}</option>
+              <option value="inactive">{t("status.inactive")}</option>
+            </select>
+            <select
+              value={categoryFilter}
+              onChange={(event) => setCategoryFilter(event.target.value)}
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="all">{t("filters.allCategories")}</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
               ))}
-            </tbody>
-          </table>
+            </select>
+          </div>
+
+          {filteredItems.length === 0 ? (
+            <p className="rounded-lg border p-6 text-center text-sm text-muted-foreground">
+              {t("filters.noResults")}
+            </p>
+          ) : (
+            <div className="overflow-x-auto rounded-lg border">
+              <table className="w-full min-w-[720px] text-sm">
+                <thead className="bg-muted/50">
+                  <tr className="border-b text-left">
+                    <th className="p-3 font-medium">{t("table.name")}</th>
+                    <th className="p-3 font-medium">{t("table.price")}</th>
+                    <th className="p-3 font-medium">{t("table.nextBilling")}</th>
+                    <th className="p-3 font-medium">{t("table.status")}</th>
+                    <th className="p-3 font-medium text-right">{t("table.actions")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredItems.map((subscription) => (
+                    <tr key={subscription.id} className="border-b last:border-0 hover:bg-muted/30">
+                      <td className="p-3">
+                        <div className="font-medium">{subscription.name}</div>
+                        {subscription.planLabel?.trim() ? (
+                          <div className="text-muted-foreground text-xs mt-0.5">
+                            {subscription.planLabel}
+                          </div>
+                        ) : null}
+                      </td>
+                      <td className="p-3">
+                        {formatCurrency(Number(subscription.price), subscription.currency)}
+                      </td>
+                      <td className="p-3 text-muted-foreground">
+                        {format(new Date(subscription.nextBillingDate), "PPP", {
+                          locale: dateLocale,
+                        })}
+                      </td>
+                      <td className="p-3">
+                        <span
+                          className={
+                            subscription.active
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-muted-foreground"
+                          }
+                        >
+                          {subscription.active ? t("status.active") : t("status.inactive")}
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <div className="flex justify-end gap-1">
+                          <Button variant="ghost" size="icon" asChild title={t("rowActions.open")}>
+                            <LocaleLink href={`/subscriptions/${subscription.id}`}>
+                              <ExternalLink className="size-4" />
+                            </LocaleLink>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title={t("rowActions.edit")}
+                            onClick={() => openEdit(subscription)}
+                          >
+                            <Pencil className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title={
+                              subscription.active
+                                ? t("rowActions.deactivate")
+                                : t("rowActions.reactivate")
+                            }
+                            disabled={isUpdatingStatus}
+                            onClick={() => toggleSubscriptionStatus(subscription)}
+                          >
+                            <Power className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive"
+                            title={t("rowActions.delete")}
+                            onClick={() => {
+                              setDeleteError(null)
+                              setDeleteTarget(subscription)
+                            }}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
@@ -196,51 +292,34 @@ export function SubscriptionsManager({
         </DialogContent>
       </Dialog>
 
-      <Dialog
+      <LinkedChangeDialog
         open={!!deleteTarget}
+        variant="deleteSubscription"
+        itemName={deleteTarget?.name}
+        isPending={isDeleting}
+        error={deleteError}
         onOpenChange={(open) => {
           if (!open) {
             setDeleteTarget(null)
             setDeleteError(null)
           }
         }}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t("delete.title")}</DialogTitle>
-            <DialogDescription>
-              {deleteTarget ? (
-                <>
-                  <span className="font-medium text-foreground">{deleteTarget!.name}</span>
-                  {" — "}
-                  {t("delete.description")}
-                </>
-              ) : null}
-            </DialogDescription>
-          </DialogHeader>
-          {deleteError ? (
-            <p className="text-destructive text-sm" role="alert">
-              {deleteError}
-            </p>
-          ) : null}
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              variant="outline"
-              onClick={() => setDeleteTarget(null)}
-              disabled={isDeleting}
-            >
-              {t("delete.cancel")}
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={confirmDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? t("delete.deleting") : t("delete.confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        onConfirm={confirmDelete}
+      />
+      <LinkedChangeDialog
+        open={!!statusTarget}
+        variant="toggleSubscription"
+        itemName={statusTarget?.name}
+        isPending={isUpdatingStatus}
+        error={statusError}
+        onOpenChange={(open) => {
+          if (!open) {
+            setStatusTarget(null)
+            setStatusError(null)
+          }
+        }}
+        onConfirm={confirmStatusToggle}
+      />
     </div>
   )
 }

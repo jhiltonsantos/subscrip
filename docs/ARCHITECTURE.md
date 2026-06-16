@@ -35,7 +35,10 @@ src/
 │   ├── (platform)/                         # Route Group: Authenticated platform
 │   │   ├── layout.tsx                      # Server: session check
 │   │   ├── layout-client.tsx               # Client: PlatformLayout wrapper
-│   │   └── dashboard/page.tsx              # → URL: /dashboard
+│   │   ├── dashboard/page.tsx              # → URL: /dashboard
+│   │   ├── finance-planner/page.tsx        # → URL: /finance-planner
+│   │   ├── plan/page.tsx                   # → URL: /plan (alias)
+│   │   └── settings/page.tsx               # → URL: /settings
 │   │
 │   └── api/auth/[...all]/route.ts          # Better Auth API handler
 │
@@ -99,7 +102,7 @@ Route Groups are a Next.js App Router feature that allows organizing routes **wi
 | Route Group | Purpose | Layout | Protected |
 |---|---|---|---|
 | `(landing)` | Public landing pages | `LandingLayout` | No |
-| `(auth)` | Authentication pages | `AuthLayout` | No (redirects if logged in) |
+| `(auth)` | Authentication pages | `AuthLayout` | No; pages redirect only after full session validation |
 | `(platform)` | Authenticated platform | `PlatformLayout` | Yes |
 
 ### URL Mapping
@@ -109,6 +112,9 @@ src/app/(landing)/page.tsx          → /
 src/app/(auth)/auth/login/page.tsx  → /auth/login
 src/app/(auth)/auth/register/page.tsx → /auth/register
 src/app/(platform)/dashboard/page.tsx → /dashboard
+src/app/(platform)/finance-planner/page.tsx → /finance-planner
+src/app/(platform)/plan/page.tsx     → /plan (redirects to /finance-planner)
+src/app/(platform)/settings/page.tsx → /settings
 ```
 
 ---
@@ -170,7 +176,7 @@ Located in `src/components/global/`:
 
 #### `LocaleSwitcher.tsx`
 - Language selector dropdown
-- Triggers full page reload with new locale prefix
+- Pushes the matching locale-prefixed route and refreshes server data
 
 ### Server vs Client Layouts
 
@@ -243,7 +249,6 @@ Request → proxy.ts
               │
               ├─→ 3. checkAuth()             [lib/proxy/auth.ts]
               │       Check session and return action:
-              │       → redirect to /dashboard (if logged in on /auth/*)
               │       → redirect to /auth/login (if not logged in on protected route)
               │       → next (continue)
               │
@@ -261,13 +266,7 @@ const AUTH_ROUTES = ["/auth/login", "/auth/register"]
 export function checkAuth(req, cleanPath, locale): AuthAction {
   const sessionCookie = getSessionCookie(req)
   const isLoggedIn = !!sessionCookie
-  
-  // Redirect logged-in users away from auth pages
-  if ((isPublicRoute || isAuthRoute) && isLoggedIn) {
-    return { type: "redirect", url: "/dashboard" }
-  }
 
-  // Redirect unauthenticated users to login
   if (!isLoggedIn && !isPublicRoute) {
     return { type: "redirect", url: "/auth/login" }
   }
@@ -275,6 +274,11 @@ export function checkAuth(req, cleanPath, locale): AuthAction {
   return { type: "next" }
 }
 ```
+
+Auth pages do not trust cookie presence alone. `login/page.tsx` and
+`register/page.tsx` call `auth.api.getSession()` server-side and redirect to the
+dashboard only when Better Auth returns a valid session. This avoids stale-cookie
+redirect loops.
 
 ### i18n Module (`lib/proxy/i18n.ts`)
 
@@ -390,8 +394,9 @@ import { LocaleLink } from "@/components/locale-link"
 
 Sessions are verified in two places:
 
-1. **Proxy** (`lib/proxy/auth.ts`) - Quick cookie check for redirects
+1. **Proxy** (`lib/proxy/auth.ts`) - Quick cookie check only for protected-route login redirects
 2. **Platform Layout** (`app/(platform)/layout.tsx`) - Full session verification
+3. **Auth pages** (`app/(auth)/auth/*/page.tsx`) - Full session verification before redirecting authenticated users
 
 ---
 

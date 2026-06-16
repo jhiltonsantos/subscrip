@@ -1,4 +1,4 @@
-import { Currency, ReminderChannel, Theme } from "@prisma/client"
+import { Currency, DarkThemeVariant, ReminderChannel, Theme } from "@prisma/client"
 
 export type User = {
   id: string,
@@ -8,6 +8,7 @@ export type User = {
   language?: string
   preferredCurrency?: Currency
   theme?: Theme
+  darkThemeVariant?: DarkThemeVariant
   defaultReminderDays?: number
   defaultReminderChannel?: ReminderChannel
   createdAt?: Date

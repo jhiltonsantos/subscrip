@@ -1,12 +1,23 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { Menu, X, LogOut } from "lucide-react"
+import {
+  CreditCard,
+  DollarSign,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  ReceiptText,
+  Settings,
+  WalletCards,
+  X,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { NotificationButton } from "./NotificationButton"
 import { ThemeToggle } from "./ThemeToggle"
-import { LocaleSwitcher } from "@/components/global"
+import { LocaleLink, LocaleSwitcher } from "@/components/global"
 import { signOut } from "@/server/actions/auth"
 
 interface MobileNavbarProps {
@@ -18,9 +29,62 @@ interface MobileNavbarProps {
 
 export function MobileNavbar({ user }: MobileNavbarProps) {
   const t = useTranslations()
+  const pathname = usePathname()
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const navSections = [
+    {
+      label: t("header.sections.main"),
+      items: [
+        {
+          label: t("header.dashboard"),
+          href: "/dashboard",
+          icon: LayoutDashboard,
+        },
+      ],
+    },
+    {
+      label: t("header.sections.management"),
+      items: [
+        {
+          label: t("header.subscriptions"),
+          href: "/subscriptions",
+          icon: CreditCard,
+        },
+      ],
+    },
+    {
+      label: t("header.sections.finance"),
+      items: [
+        {
+          label: t("header.financePlanner"),
+          href: "/finance-planner",
+          icon: DollarSign,
+        },
+        {
+          label: t("header.cardInvoice"),
+          href: "/card-invoice",
+          icon: ReceiptText,
+        },
+        {
+          label: t("header.paymentMethods"),
+          href: "/payment-methods",
+          icon: WalletCards,
+        },
+      ],
+    },
+    {
+      label: t("header.sections.system"),
+      items: [
+        {
+          label: t("header.settings"),
+          href: "/settings",
+          icon: Settings,
+        },
+      ],
+    },
+  ]
 
   useEffect(() => {
     const handleScroll = () => {
@@ -60,16 +124,23 @@ export function MobileNavbar({ user }: MobileNavbarProps) {
         }`}
       >
         <div className="mx-4 mt-4">
-          <div className="flex items-center justify-between px-4 py-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-200/80 dark:border-gray-800/80 shadow-lg">
+          <div className="flex items-center justify-between px-4 py-3 bg-[var(--chrome-bg)] backdrop-blur-xl rounded-2xl border border-[var(--chrome-border)] shadow-lg">
             {/* User avatar */}
-            <div className="w-10 h-10 rounded-full bg-linear-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+            <LocaleLink
+              href="/settings"
+              aria-label={t("header.settings")}
+              className="w-10 h-10 rounded-full bg-linear-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-sm font-semibold shrink-0"
+            >
               {user?.name?.[0]?.toUpperCase() || user?.email[0].toUpperCase()}
-            </div>
+            </LocaleLink>
             
             {/* Centered logo */}
-            <h1 className="absolute left-1/2 -translate-x-1/2 text-lg font-bold text-gray-900 dark:text-gray-100">
+            <LocaleLink
+              href="/dashboard"
+              className="absolute left-1/2 -translate-x-1/2 text-lg font-bold text-gray-900 dark:text-gray-100"
+            >
               {t("common.appName")}
-            </h1>
+            </LocaleLink>
             
             {/* Hamburger Menu */}
             <Button
@@ -91,20 +162,20 @@ export function MobileNavbar({ user }: MobileNavbarProps) {
       {/* Menu Overlay */}
       {isMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setIsMenuOpen(false)}
         />
       )}
 
       {/* Menu Lateral */}
       <div
-        className={`fixed top-0 right-0 h-full w-72 bg-white dark:bg-gray-900 z-50 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-72 bg-background z-50 transform transition-transform duration-300 ease-in-out ${
           isMenuOpen ? "translate-x-0" : "translate-x-full"
-        } md:hidden shadow-2xl`}
+        } lg:hidden shadow-2xl`}
       >
         <div className="flex flex-col h-full">
           {/* Menu header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between p-4 border-b border-border">
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
               Menu
             </h2>
@@ -117,33 +188,65 @@ export function MobileNavbar({ user }: MobileNavbarProps) {
             </Button>
           </div>
 
-          {/* Menu Content */}
-          <div className="flex-1 overflow-y-auto p-4">
-            {/* User Info */}
-            {user && (
-              <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-linear-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
-                    {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                      {user.name || user.email.split('@')[0]}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                      {user.email}
-                    </p>
-                  </div>
+          {/* User Info */}
+          {user ? (
+            <div className="p-4">
+              <LocaleLink
+                href="/settings"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center gap-3 rounded-xl bg-gray-50 p-3 dark:bg-gray-800"
+              >
+                <div className="h-10 w-10 rounded-full bg-linear-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                  {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                    {user.name || user.email.split('@')[0]}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {user.email}
+                  </p>
+                </div>
+              </LocaleLink>
+            </div>
+          ) : null}
+
+          {/* Navigation */}
+          <nav className="flex-1 space-y-5 overflow-y-auto px-4 pb-4">
+            {navSections.map((section) => (
+              <div key={section.label} className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  {section.label}
+                </p>
+                <div className="space-y-1">
+                  {section.items.map((item) => {
+                    const Icon = item.icon
+                    const pathnameWithoutLocale = pathname.replace(/^\/pt/, '')
+                    const isActive =
+                      pathnameWithoutLocale === item.href ||
+                      pathnameWithoutLocale.startsWith(`${item.href}/`)
+
+                    return (
+                      <LocaleLink
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsMenuOpen(false)}
+                        className={[
+                          "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors",
+                          isActive
+                            ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/50 dark:hover:text-gray-100",
+                        ].join(" ")}
+                      >
+                        <Icon className="h-5 w-5 shrink-0" strokeWidth={isActive ? 2.5 : 2} />
+                        {item.label}
+                      </LocaleLink>
+                    )
+                  })}
                 </div>
               </div>
-            )}
-
-            <div className="space-y-2 mb-4">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                {t("header.profile")}
-              </p>
-            </div>
-          </div>
+            ))}
+          </nav>
 
           {/* Menu footer - Actions */}
           <div className="p-4 border-t border-gray-200 dark:border-gray-800 space-y-2">

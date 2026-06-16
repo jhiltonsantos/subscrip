@@ -11,6 +11,7 @@ import {
   type FinancePlannerActionResult,
   type SerializedMonthlyPlan,
 } from "./shared"
+import { ensureMonthlySubscriptionExpenses } from "@/server/actions/subscriptions/expense-sync"
 
 export type SerializedMonthSummary = ReturnType<typeof buildMonthSummary>
 
@@ -37,6 +38,12 @@ export async function getMonthlyPlan(
       fieldErrors: formatZodError(parsed.error),
     }
   }
+
+  await ensureMonthlySubscriptionExpenses(
+    userId,
+    parsed.data.year,
+    parsed.data.month
+  )
 
   const row = await getOrCreateMonthlyPlan(
     userId,

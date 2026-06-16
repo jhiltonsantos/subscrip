@@ -3,7 +3,6 @@
 import { prisma } from "@/lib/prisma"
 import { subscriptionCreateSchema } from "@/lib/validations/subscription"
 import { Prisma } from "@prisma/client"
-import { revalidatePath } from "next/cache"
 import {
   assertPaymentMethodOwnedByUser,
   assertServiceTemplateExists,
@@ -14,6 +13,10 @@ import {
   type SerializedSubscription,
   type SubscriptionActionResult,
 } from "./shared"
+import {
+  revalidateSubscriptionExpenseSyncPaths,
+  upsertSubscriptionExpense,
+} from "./expense-sync"
 import { getTranslations } from "next-intl/server"
 
 export async function createSubscription(
@@ -48,25 +51,30 @@ export async function createSubscription(
       ? data.planLabel.trim()
       : null
 
-  const row = await prisma.subscription.create({
-    data: {
-      name: data.name,
-      planLabel,
-      price: new Prisma.Decimal(data.price),
-      currency: data.currency,
-      billingCycle: data.billingCycle,
-      category: data.category,
-      startDate: data.startDate,
-      nextBillingDate: data.nextBillingDate,
-      active: data.active ?? true,
-      serviceTemplateId: data.serviceTemplateId ?? undefined,
-      paymentMethodId: data.paymentMethodId ?? undefined,
-      userId,
-    },
-    include: subscriptionInclude,
+  const row = await prisma.$transaction(async (tx) => {
+    const subscription = await tx.subscription.create({
+      data: {
+        name: data.name,
+        planLabel,
+        price: new Prisma.Decimal(data.price),
+        currency: data.currency,
+        billingCycle: data.billingCycle,
+        category: data.category,
+        startDate: data.startDate,
+        nextBillingDate: data.nextBillingDate,
+        active: data.active ?? true,
+        serviceTemplateId: data.serviceTemplateId ?? undefined,
+        paymentMethodId: data.paymentMethodId ?? undefined,
+        userId,
+      },
+      include: subscriptionInclude,
+    })
+
+    await upsertSubscriptionExpense(userId, subscription, tx)
+
+    return subscription
   })
 
-  revalidatePath("/dashboard")
-  revalidatePath("/subscriptions")
+  revalidateSubscriptionExpenseSyncPaths()
   return { success: true, data: serializeSubscription(row) }
 }
