@@ -144,32 +144,32 @@
     "confirming": "Confirmando...",
     "createSubscription": {
       "title": "Criar despesa no planejamento?",
-      "description": "Esta assinatura será adicionada automaticamente como uma saída no mês da próxima cobrança.",
+      "description": "Esta assinatura mensal será adicionada como saída no mês da próxima cobrança e nos próximos meses quando eles forem abertos no planejamento.",
       "confirm": "Criar assinatura e saída"
     },
     "editSubscription": {
       "title": "Atualizar assinatura e planejamento?",
-      "description": "As alterações nesta assinatura também serão refletidas na saída vinculada do planejamento financeiro.",
+      "description": "As alterações nesta assinatura também serão refletidas nas saídas vinculadas atuais e futuras já geradas no planejamento financeiro.",
       "confirm": "Atualizar os dois"
     },
     "deleteSubscription": {
       "title": "Remover assinatura e saída?",
-      "description": "Ao remover esta assinatura, a saída vinculada no planejamento financeiro também será removida.",
+      "description": "Ao remover esta assinatura, as saídas vinculadas do mês atual em diante também serão removidas do planejamento financeiro.",
       "confirm": "Remover os dois"
     },
     "toggleSubscription": {
       "title": "Alterar status da assinatura?",
-      "description": "Ativar ou desativar esta assinatura também vai criar, atualizar ou remover a saída vinculada no planejamento.",
+      "description": "Ativar ou desativar esta assinatura também vai criar, atualizar ou remover as saídas mensais vinculadas no planejamento.",
       "confirm": "Confirmar alteração"
     },
     "editExpense": {
       "title": "Atualizar assinatura vinculada?",
-      "description": "Esta saída foi gerada por uma assinatura. Ao editar, os dados equivalentes da assinatura também serão atualizados.",
+      "description": "Esta saída foi gerada por uma assinatura. Ao editar, os dados equivalentes da assinatura e das próximas saídas já geradas também serão atualizados.",
       "confirm": "Atualizar os dois"
     },
     "deleteExpense": {
       "title": "Remover assinatura vinculada?",
-      "description": "Esta saída foi gerada por uma assinatura. Ao remover a saída, a assinatura vinculada também será removida.",
+      "description": "Esta saída foi gerada por uma assinatura. Ao remover, a assinatura vinculada e as saídas atuais/futuras também serão removidas.",
       "confirm": "Remover os dois"
     }
   },

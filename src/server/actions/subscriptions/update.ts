@@ -15,7 +15,7 @@ import {
 } from "./shared"
 import {
   revalidateSubscriptionExpenseSyncPaths,
-  upsertSubscriptionExpense,
+  syncCurrentAndFutureSubscriptionExpenses,
 } from "./expense-sync"
 import { getTranslations } from "next-intl/server"
 
@@ -94,7 +94,7 @@ export async function updateSubscription(
       include: subscriptionInclude,
     })
 
-    await upsertSubscriptionExpense(userId, subscription, tx)
+    await syncCurrentAndFutureSubscriptionExpenses(userId, subscription, tx)
 
     return subscription
   })

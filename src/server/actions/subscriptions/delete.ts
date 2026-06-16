@@ -6,7 +6,7 @@ import {
   type SubscriptionActionResult,
 } from "./shared"
 import {
-  deleteSubscriptionExpense,
+  deleteCurrentAndFutureSubscriptionExpenses,
   revalidateSubscriptionExpenseSyncPaths,
 } from "./expense-sync"
 import { getTranslations } from "next-intl/server"
@@ -30,7 +30,7 @@ export async function deleteSubscription(
   }
 
   await prisma.$transaction(async (tx) => {
-    await deleteSubscriptionExpense(userId, id, tx)
+    await deleteCurrentAndFutureSubscriptionExpenses(userId, id, tx)
     await tx.subscription.delete({
       where: { id },
     })
