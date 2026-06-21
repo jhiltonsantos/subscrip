@@ -23,6 +23,10 @@ import {
   type FinancePlannerActionResult,
 } from "./shared"
 import { syncCreditCardInvoices, type CardMonthRef } from "./card-invoices"
+import {
+  revalidateSubscriptionExpenseSyncPaths,
+  syncSubscriptionFromExpense,
+} from "@/server/actions/subscriptions/expense-sync"
 
 type UpdateMode = "single" | "future"
 
@@ -111,6 +115,7 @@ export async function updatePlannedExpense(
       expenseBucket: true,
       paymentCardId: true,
       creditCardInvoiceId: true,
+      subscriptionId: true,
       recurrenceGroupId: true,
       monthlyPlan: { select: { year: true, month: true } },
     },
@@ -142,6 +147,9 @@ export async function updatePlannedExpense(
       data: buildExpenseUpdateData(data),
       select: { id: true },
     })
+    if (existing.subscriptionId) {
+      await syncSubscriptionFromExpense(userId, id, data)
+    }
     await syncInvoicePaymentState(userId, existing, data)
     await syncCreditCardInvoices(userId, [
       toCardMonthRef(existing),
@@ -154,7 +162,11 @@ export async function updatePlannedExpense(
     ])
   }
 
-  revalidatePlannerPaths()
+  if (existing.subscriptionId) {
+    revalidateSubscriptionExpenseSyncPaths()
+  } else {
+    revalidatePlannerPaths()
+  }
   return { success: true, data: { id } }
 }
 

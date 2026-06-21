@@ -15,6 +15,7 @@ import { MonthSelector } from "./month-selector"
 import { PlannerEntryDialog } from "./planner-entry-dialog"
 import { PlanningToolbar } from "./planning-toolbar"
 import { SummaryCard } from "./summary-card"
+import { LinkedChangeDialog } from "@/components/subscription-expense-sync/linked-change-dialog"
 import type {
   ActiveTab,
   CardCostForm,
@@ -87,6 +88,14 @@ export function FinancePlannerBoard() {
   const [cardCostForm, setCardCostForm] = useState<CardCostForm>(emptyCardCostForm)
   const [formError, setFormError] = useState<string | null>(null)
   const [pendingDeleteExpense, setPendingDeleteExpense] = useState<PlannedExpense | null>(null)
+  const [pendingLinkedExpenseDelete, setPendingLinkedExpenseDelete] =
+    useState<PlannedExpense | null>(null)
+  const [pendingLinkedExpenseEdit, setPendingLinkedExpenseEdit] = useState<{
+    id: string
+    name: string
+    data: unknown
+  } | null>(null)
+  const [linkedChangeError, setLinkedChangeError] = useState<string | null>(null)
   const [pendingEdit, setPendingEdit] = useState<{
     type: "income" | "expense"
     id: string
@@ -304,6 +313,15 @@ export function FinancePlannerBoard() {
 
     if (editingExpenseId) {
       const editingExpense = manualExpenses.find((expense) => expense.id === editingExpenseId)
+      if (editingExpense?.subscriptionId) {
+        setPendingLinkedExpenseEdit({
+          id: editingExpenseId,
+          name: editingExpense.name,
+          data,
+        })
+        setDialogOpen(false)
+        return
+      }
       if (editingExpense?.recurrenceGroupId) {
         setPendingEdit({ type: "expense", id: editingExpenseId, data })
         setDialogOpen(false)
@@ -400,6 +418,11 @@ export function FinancePlannerBoard() {
   }
 
   async function removeExpense(row: PlannedExpense) {
+    if (row.subscriptionId) {
+      setLinkedChangeError(null)
+      setPendingLinkedExpenseDelete(row)
+      return
+    }
     if (row.recurrenceGroupId) {
       setPendingDeleteExpense(row)
       return
@@ -414,6 +437,40 @@ export function FinancePlannerBoard() {
       deletePlannedExpenseAction({ id: pendingDeleteExpense.id, mode })
     ).unwrap()
     setPendingDeleteExpense(null)
+  }
+
+  async function confirmLinkedExpenseEdit() {
+    if (!pendingLinkedExpenseEdit) return
+
+    try {
+      setLinkedChangeError(null)
+      await dispatch(
+        updatePlannedExpenseAction({
+          id: pendingLinkedExpenseEdit.id,
+          data: pendingLinkedExpenseEdit.data,
+        })
+      ).unwrap()
+      setPendingLinkedExpenseEdit(null)
+      closeDialog()
+    } catch (error) {
+      setLinkedChangeError(
+        error instanceof Error ? error.message : t("form.validation")
+      )
+    }
+  }
+
+  async function confirmLinkedExpenseDelete() {
+    if (!pendingLinkedExpenseDelete) return
+
+    try {
+      setLinkedChangeError(null)
+      await dispatch(deletePlannedExpenseAction(pendingLinkedExpenseDelete.id)).unwrap()
+      setPendingLinkedExpenseDelete(null)
+    } catch (error) {
+      setLinkedChangeError(
+        error instanceof Error ? error.message : t("form.validation")
+      )
+    }
   }
 
   async function confirmEditScope(mode: "single" | "future") {
@@ -571,6 +628,34 @@ export function FinancePlannerBoard() {
         onEditSingle={() => confirmEditScope("single")}
         onEditFuture={() => confirmEditScope("future")}
         t={t}
+      />
+      <LinkedChangeDialog
+        open={Boolean(pendingLinkedExpenseEdit)}
+        variant="editExpense"
+        itemName={pendingLinkedExpenseEdit?.name}
+        isPending={isLoading}
+        error={linkedChangeError}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingLinkedExpenseEdit(null)
+            setLinkedChangeError(null)
+          }
+        }}
+        onConfirm={confirmLinkedExpenseEdit}
+      />
+      <LinkedChangeDialog
+        open={Boolean(pendingLinkedExpenseDelete)}
+        variant="deleteExpense"
+        itemName={pendingLinkedExpenseDelete?.name}
+        isPending={isLoading}
+        error={linkedChangeError}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingLinkedExpenseDelete(null)
+            setLinkedChangeError(null)
+          }
+        }}
+        onConfirm={confirmLinkedExpenseDelete}
       />
     </div>
   )
