@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { Currency, ExpenseBucket, InvoiceStatus, PlanEntrySource, Prisma } from "@prisma/client"
-import { getOrCreateMonthlyPlan } from "./shared"
+
+type PrismaClientLike = typeof prisma | Prisma.TransactionClient
 
 export type CardMonthRef = {
   paymentCardId: string | null | undefined
@@ -14,7 +15,11 @@ export function buildCardDueDate(year: number, month: number, dueDay: number | n
   return new Date(year, month - 1, Math.min(day, lastDayOfMonth))
 }
 
-export async function syncCreditCardInvoices(userId: string, refs: CardMonthRef[]) {
+export async function syncCreditCardInvoices(
+  userId: string,
+  refs: CardMonthRef[],
+  client: PrismaClientLike = prisma
+) {
   const uniqueRefs = Array.from(
     new Map(
       refs
@@ -26,15 +31,16 @@ export async function syncCreditCardInvoices(userId: string, refs: CardMonthRef[
   )
 
   for (const ref of uniqueRefs) {
-    await syncCreditCardInvoice(userId, ref)
+    await syncCreditCardInvoice(userId, ref, client)
   }
 }
 
 async function syncCreditCardInvoice(
   userId: string,
-  ref: { paymentCardId: string; year: number; month: number }
+  ref: { paymentCardId: string; year: number; month: number },
+  client: PrismaClientLike
 ) {
-  const card = await prisma.paymentCard.findFirst({
+  const card = await client.paymentCard.findFirst({
     where: { id: ref.paymentCardId, userId },
     select: {
       id: true,
@@ -45,7 +51,7 @@ async function syncCreditCardInvoice(
   })
   if (!card) return
 
-  const purchases = await prisma.plannedExpense.findMany({
+  const purchases = await client.plannedExpense.findMany({
     where: {
       paymentCardId: ref.paymentCardId,
       expenseBucket: ExpenseBucket.CREDIT_CARD,
@@ -61,7 +67,7 @@ async function syncCreditCardInvoice(
     },
   })
 
-  const invoice = await prisma.creditCardInvoice.findUnique({
+  const invoice = await client.creditCardInvoice.findUnique({
     where: {
       paymentCardId_year_month: {
         paymentCardId: ref.paymentCardId,
@@ -74,8 +80,8 @@ async function syncCreditCardInvoice(
 
   if (purchases.length === 0) {
     if (invoice) {
-      await prisma.plannedExpense.deleteMany({ where: { creditCardInvoiceId: invoice.id } })
-      await prisma.creditCardInvoice.delete({ where: { id: invoice.id } })
+      await client.plannedExpense.deleteMany({ where: { creditCardInvoiceId: invoice.id } })
+      await client.creditCardInvoice.delete({ where: { id: invoice.id } })
     }
     return
   }
@@ -87,7 +93,7 @@ async function syncCreditCardInvoice(
   const dueDate = buildCardDueDate(ref.year, ref.month, card.dueDay)
   const currency = purchases[0]?.currency ?? Currency.BRL
 
-  const upsertedInvoice = await prisma.creditCardInvoice.upsert({
+  const upsertedInvoice = await client.creditCardInvoice.upsert({
     where: {
       paymentCardId_year_month: {
         paymentCardId: ref.paymentCardId,
@@ -113,9 +119,14 @@ async function syncCreditCardInvoice(
     select: { id: true },
   })
 
-  const plan = await getOrCreateMonthlyPlan(userId, ref.year, ref.month)
+  const plan = await client.monthlyPlan.upsert({
+    where: { userId_year_month: { userId, year: ref.year, month: ref.month } },
+    create: { userId, year: ref.year, month: ref.month },
+    update: {},
+    select: { id: true },
+  })
   const name = `Fatura ${card.nickname} - ${String(ref.month).padStart(2, "0")}/${ref.year}`
-  const invoiceExpense = await prisma.plannedExpense.findFirst({
+  const invoiceExpense = await client.plannedExpense.findFirst({
     where: {
       creditCardInvoiceId: upsertedInvoice.id,
       monthlyPlan: { userId },
@@ -124,7 +135,7 @@ async function syncCreditCardInvoice(
   })
 
   if (invoiceExpense) {
-    await prisma.plannedExpense.update({
+    await client.plannedExpense.update({
       where: { id: invoiceExpense.id },
       data: {
         name,
@@ -141,7 +152,7 @@ async function syncCreditCardInvoice(
     return
   }
 
-  await prisma.plannedExpense.create({
+  await client.plannedExpense.create({
     data: {
       monthlyPlanId: plan.id,
       name,

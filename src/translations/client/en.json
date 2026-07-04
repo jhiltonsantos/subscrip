@@ -526,6 +526,13 @@
       "isInstallment": "This is an installment purchase",
       "createPreviousInstallments": "Add previous installments"
     },
+    "deleteConfirmDialog": {
+      "title": "Delete this item?",
+      "description": "This action cannot be undone.",
+      "descriptionWithName": "Delete \"{name}\"? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
     "deleteDialog": {
       "title": "Delete recurring item?",
       "singleDescription": "This will remove only this item.",
@@ -533,6 +540,7 @@
       "single": "Remove only this item",
       "future": "Remove this and future items"
     },
+
     "editScopeDialog": {
       "title": "Apply edit to which items?",
       "description": "This item belongs to an installment or recurring sequence. Choose whether this change applies only to this record or to this and future records.",

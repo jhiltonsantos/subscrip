@@ -2,7 +2,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// PostgreSQL
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL") // Pooled connection
@@ -371,6 +371,7 @@ model PlannedExpense {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([subscriptionId, monthlyPlanId])
   @@index([monthlyPlanId])
   @@index([paymentMethodId])
   @@index([paymentCardId])
