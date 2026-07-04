@@ -9,6 +9,8 @@ import {
   InvoiceStatus,
 } from '@prisma/client'
 
+import { assertSafeForDestructiveDbOps } from './guard-destructive'
+
 const prisma = new PrismaClient()
 
 const PLAN_YEAR = 2026
@@ -19,9 +21,11 @@ function d(day: number): Date {
 }
 
 async function main() {
+  assertSafeForDestructiveDbOps('db seed')
+
   console.log('🌱 Starting seed...')
 
-  // Clean up existing data (respect FK order)
+  // Clean up existing data (respect FK order) — local/dev only
   await prisma.reminder.deleteMany()
   await prisma.plannedExpense.deleteMany()
   await prisma.plannedIncome.deleteMany()
