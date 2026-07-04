@@ -2,7 +2,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL") // Pooled connection
@@ -172,8 +171,9 @@ model Subscription {
   billingCycle BillingCycle
   category     Category
 
-  startDate       DateTime
-  nextBillingDate DateTime
+  hiredAt         DateTime?
+  billingDay      Int?
+  nextBillingDate DateTime?
 
   active Boolean @default(true)
 

@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import type { TranslationFn } from "./types"
 
-export type EntryTone = "default" | "success" | "paid"
+export type EntryTone = "default" | "success" | "paid" | "pending"
 
 export type TableColumn<T> = {
   key: string
@@ -80,12 +80,14 @@ export function EntryCard({
   title,
   meta,
   status,
+  badge,
   tone = "default",
   children,
 }: {
   title: string
   meta: string
   status: string
+  badge?: string | null
   tone?: EntryTone
   children: ReactNode
 }) {
@@ -96,8 +98,18 @@ export function EntryCard({
         <div className="min-w-0">
           <p className="font-medium">{title}</p>
           <p className="mt-1 text-sm text-muted-foreground">{meta}</p>
+          {badge ? (
+            <span
+              className={[
+                "mt-2 inline-flex rounded-full px-2.5 py-1 text-xs",
+                toneClasses.badge,
+              ].join(" ")}
+            >
+              {badge}
+            </span>
+          ) : null}
         </div>
-        <span className={["mt-0.5 shrink-0 rounded-full px-2.5 py-1 text-xs", toneClasses.badge].join(" ")}>
+        <span className="mt-0.5 shrink-0 rounded-full bg-muted px-2.5 py-1 text-xs">
           {status}
         </span>
       </div>
@@ -159,6 +171,13 @@ function getToneClasses(tone: EntryTone) {
       card: "border-blue-500/40 bg-blue-500/10",
       badge: "bg-blue-500 text-white",
       row: "bg-blue-500/5",
+    }
+  }
+  if (tone === "pending") {
+    return {
+      card: "border-amber-500/40 bg-amber-500/10",
+      badge: "bg-amber-500 text-white",
+      row: "bg-amber-500/5",
     }
   }
   return {

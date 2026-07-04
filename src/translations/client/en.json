@@ -212,7 +212,8 @@
       "currency": "Currency",
       "billingCycle": "Billing cycle",
       "category": "Category",
-      "startDate": "Start date",
+      "hiredAt": "Hiring date",
+      "billingDay": "Billing day",
       "nextBillingDate": "Next billing date",
       "active": "Active",
       "serviceTemplate": "Service template",
@@ -499,6 +500,8 @@
     "cards": {
       "title": "Cards - monthly detail",
       "empty": "No card expense for the selected period.",
+      "pendingCharge": "Pending charge",
+      "chargeDate": "Expected on {date}",
       "cta": "Card details",
       "open": "Open card details",
       "summaryBucket": "Card purchases",
