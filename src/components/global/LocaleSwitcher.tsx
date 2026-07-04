@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { usePathname, useRouter } from "next/navigation"
 import { Locale, locales } from "@/lib/i18n/config"
+import { navigateToLocale } from "@/lib/i18n/locale-navigation"
 import { ChevronDown, Globe } from "lucide-react"
 import { cn } from "@/lib/utils/helpers"
 import { changeUserLanguage } from "@/server/actions/user/change-language"
@@ -26,18 +27,12 @@ export function LocaleSwitcher({ className, selectClassName }: LocaleSwitcherPro
     setIsOpen(false)
     if (newLocale === locale) return
 
-    const cleanPath = pathname.replace(/^\/pt(?=\/|$)/, "") || "/"
-    const nextPath =
-      newLocale === "pt"
-        ? cleanPath === "/" ? "/pt" : `/pt${cleanPath}`
-        : cleanPath
-
     const session = await getSession()
     if (session?.user) {
       await changeUserLanguage(newLocale)
     }
 
-    router.push(nextPath)
+    navigateToLocale(router, pathname, newLocale)
   }
 
   useEffect(() => {
