@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, type Resolver } from "react-hook-form"
-import { addMonths } from "date-fns"
+import { useForm, useWatch, type Resolver } from "react-hook-form"
 import {
   BILLING_CYCLE_VALUES,
   CATEGORY_VALUES,
@@ -53,23 +52,24 @@ type SubscriptionFormValues = {
   currency: Currency
   billingCycle: BillingCycle
   category: Category
-  startDate: Date
-  nextBillingDate: Date
+  hiredAt: Date | null
+  billingDay: number | null
+  nextBillingDate: Date | null
   active: boolean
   serviceTemplateId: string | null
   paymentMethodId: string | null
 }
 
 function createEmptyDefaults(): SubscriptionFormValues {
-  const start = new Date()
   return {
     name: "",
     price: 9.99,
     currency: DEFAULT_SUBSCRIPTION_FORM.currency,
     billingCycle: DEFAULT_SUBSCRIPTION_FORM.billingCycle,
     category: DEFAULT_SUBSCRIPTION_FORM.category,
-    startDate: start,
-    nextBillingDate: addMonths(start, 1),
+    hiredAt: null,
+    billingDay: new Date().getDate(),
+    nextBillingDate: null,
     active: true,
     planLabel: "" as string | null,
     serviceTemplateId: null,
@@ -85,8 +85,11 @@ function defaultsFromSubscription(subscription: SerializedSubscription): Subscri
     currency: subscription.currency as Currency,
     billingCycle: subscription.billingCycle as BillingCycle,
     category: subscription.category as Category,
-    startDate: new Date(subscription.startDate),
-    nextBillingDate: new Date(subscription.nextBillingDate),
+    hiredAt: subscription.hiredAt ? new Date(subscription.hiredAt) : null,
+    billingDay: subscription.billingDay,
+    nextBillingDate: subscription.nextBillingDate
+      ? new Date(subscription.nextBillingDate)
+      : null,
     active: subscription.active,
     serviceTemplateId: subscription.serviceTemplate?.id ?? null,
     paymentMethodId: subscription.paymentMethod?.id ?? null,
@@ -121,6 +124,8 @@ export function SubscriptionForm({
     ) as Resolver<SubscriptionFormValues>,
     defaultValues: createEmptyDefaults(),
   })
+  const billingCycle = useWatch({ control: form.control, name: "billingCycle" })
+  const isYearly = billingCycle === "YEARLY"
 
   useEffect(() => {
     if (!open) return
@@ -156,6 +161,10 @@ export function SubscriptionForm({
       planLabel: values.planLabel?.trim() || null,
       serviceTemplateId: values.serviceTemplateId || null,
       paymentMethodId: values.paymentMethodId || null,
+      hiredAt: values.hiredAt ?? null,
+      billingDay: values.billingCycle === "YEARLY" ? null : values.billingDay,
+      nextBillingDate:
+        values.billingCycle === "YEARLY" ? values.nextBillingDate : null,
     }
 
     if (mode === "edit" || payload.active) {
@@ -356,22 +365,18 @@ export function SubscriptionForm({
           <div className="grid grid-cols-2 gap-3">
             <FormField
               control={form.control}
-              name="startDate"
+              name="hiredAt"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("form.startDate")}</FormLabel>
+                  <FormLabel>{t("form.hiredAt")}</FormLabel>
                   <FormControl>
                     <Input
                       type="date"
-                      value={
-                        field.value
-                          ? formatYmd(field.value as Date)
-                          : ""
-                      }
+                      value={field.value ? formatYmd(field.value as Date) : ""}
                       onChange={(e) => {
                         const value = e.target.value
                         field.onChange(
-                          value ? new Date(value + "T12:00:00") : undefined
+                          value ? new Date(value + "T12:00:00") : null
                         )
                       }}
                     />
@@ -380,32 +385,53 @@ export function SubscriptionForm({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="nextBillingDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("form.nextBillingDate")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="date"
-                      value={
-                        field.value
-                          ? formatYmd(field.value as Date)
-                          : ""
-                      }
-                      onChange={(e) => {
-                        const value = e.target.value
-                        field.onChange(
-                          value ? new Date(value + "T12:00:00") : undefined
-                        )
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {isYearly ? (
+              <FormField
+                control={form.control}
+                name="nextBillingDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("form.nextBillingDate")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        value={field.value ? formatYmd(field.value as Date) : ""}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          field.onChange(
+                            value ? new Date(value + "T12:00:00") : null
+                          )
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : (
+              <FormField
+                control={form.control}
+                name="billingDay"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("form.billingDay")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={31}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          field.onChange(value === "" ? null : Number(value))
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
           </div>
 
           <FormField

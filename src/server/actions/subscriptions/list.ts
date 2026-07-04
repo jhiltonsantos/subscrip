@@ -23,7 +23,7 @@ export async function listSubscriptions(): Promise<
   const rows = await prisma.subscription.findMany({
     where: { userId },
     include: subscriptionInclude,
-    orderBy: { nextBillingDate: "asc" },
+    orderBy: { name: "asc" },
   })
 
   return {

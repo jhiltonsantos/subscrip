@@ -7,6 +7,7 @@ import type { FormEvent } from "react"
 import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { emptyCardCostForm, emptyExpenseForm, emptyIncomeForm } from "./constants"
+import { DeleteConfirmDialog } from "./delete-confirm-dialog"
 import { DeleteExpenseDialog } from "./delete-expense-dialog"
 import { EditScopeDialog } from "./edit-scope-dialog"
 import { ExpenseContent } from "./expense-content"
@@ -88,6 +89,11 @@ export function FinancePlannerBoard() {
   const [cardCostForm, setCardCostForm] = useState<CardCostForm>(emptyCardCostForm)
   const [formError, setFormError] = useState<string | null>(null)
   const [pendingDeleteExpense, setPendingDeleteExpense] = useState<PlannedExpense | null>(null)
+  const [pendingSimpleDelete, setPendingSimpleDelete] = useState<
+    | { type: "income"; row: PlannedIncome }
+    | { type: "expense"; row: PlannedExpense }
+    | null
+  >(null)
   const [pendingLinkedExpenseDelete, setPendingLinkedExpenseDelete] =
     useState<PlannedExpense | null>(null)
   const [pendingLinkedExpenseEdit, setPendingLinkedExpenseEdit] = useState<{
@@ -111,7 +117,18 @@ export function FinancePlannerBoard() {
     locale: dateLocale,
   })
   const manualExpenses = useMemo(
-    () => expenses.filter((expense) => expense.expenseBucket !== "CREDIT_CARD"),
+    () =>
+      expenses.filter((expense) => {
+        if (expense.expenseBucket === "CREDIT_CARD") return false
+        // Legacy safety: subscription expenses paid on a credit card belong to the invoice.
+        if (
+          expense.subscriptionId &&
+          expense.paymentMethod?.type === "CREDIT_CARD"
+        ) {
+          return false
+        }
+        return true
+      }),
     [expenses]
   )
   const cardMethods = useMemo(
@@ -412,12 +429,11 @@ export function FinancePlannerBoard() {
     ).unwrap()
   }
 
-  async function removeIncome(row: PlannedIncome) {
-    if (!window.confirm(t("form.confirmDelete"))) return
-    await dispatch(deletePlannedIncomeAction(row.id)).unwrap()
+  function removeIncome(row: PlannedIncome) {
+    setPendingSimpleDelete({ type: "income", row })
   }
 
-  async function removeExpense(row: PlannedExpense) {
+  function removeExpense(row: PlannedExpense) {
     if (row.subscriptionId) {
       setLinkedChangeError(null)
       setPendingLinkedExpenseDelete(row)
@@ -427,8 +443,19 @@ export function FinancePlannerBoard() {
       setPendingDeleteExpense(row)
       return
     }
-    if (!window.confirm(t("form.confirmDelete"))) return
-    await dispatch(deletePlannedExpenseAction(row.id)).unwrap()
+    setPendingSimpleDelete({ type: "expense", row })
+  }
+
+  async function confirmSimpleDelete() {
+    if (!pendingSimpleDelete) return
+
+    if (pendingSimpleDelete.type === "income") {
+      await dispatch(deletePlannedIncomeAction(pendingSimpleDelete.row.id)).unwrap()
+    } else {
+      await dispatch(deletePlannedExpenseAction(pendingSimpleDelete.row.id)).unwrap()
+    }
+
+    setPendingSimpleDelete(null)
   }
 
   async function confirmDeleteExpense(mode: "single" | "future") {
@@ -608,6 +635,16 @@ export function FinancePlannerBoard() {
         onSaveExpense={saveExpense}
         onSaveCardCost={saveCardCost}
         isLoading={isLoading}
+        t={t}
+      />
+      <DeleteConfirmDialog
+        open={Boolean(pendingSimpleDelete)}
+        itemName={pendingSimpleDelete?.row.name}
+        isPending={isLoading}
+        onOpenChange={(open) => {
+          if (!open) setPendingSimpleDelete(null)
+        }}
+        onConfirm={confirmSimpleDelete}
         t={t}
       />
       <DeleteExpenseDialog

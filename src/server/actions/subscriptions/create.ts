@@ -60,8 +60,11 @@ export async function createSubscription(
         currency: data.currency,
         billingCycle: data.billingCycle,
         category: data.category,
-        startDate: data.startDate,
-        nextBillingDate: data.nextBillingDate,
+        hiredAt: data.hiredAt ?? null,
+        billingDay:
+          data.billingCycle === "YEARLY" ? null : (data.billingDay ?? null),
+        nextBillingDate:
+          data.billingCycle === "YEARLY" ? (data.nextBillingDate ?? null) : null,
         active: data.active ?? true,
         serviceTemplateId: data.serviceTemplateId ?? undefined,
         paymentMethodId: data.paymentMethodId ?? undefined,

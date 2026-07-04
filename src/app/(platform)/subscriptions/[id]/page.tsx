@@ -2,6 +2,7 @@ import { Container } from "@/components/ui/container"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LocaleLink } from "@/components/global"
+import { formatBillingSummary, resolveNextChargeDate } from "@/lib/subscription-billing"
 import { formatCurrency } from "@/lib/utils/formatters"
 import { getSubscription } from "@/server/actions/subscriptions"
 import { format } from "date-fns"
@@ -73,12 +74,30 @@ export default async function SubscriptionDetailPage({ params }: PageProps) {
               <DetailRow label={tPage("form.billingCycle")} value={sub.billingCycle} />
               <DetailRow label={tPage("form.category")} value={sub.category} />
               <DetailRow
-                label={tPage("form.startDate")}
-                value={format(new Date(sub.startDate), "PPP", { locale: dateLocale })}
+                label={tPage("form.hiredAt")}
+                value={
+                  sub.hiredAt
+                    ? format(new Date(sub.hiredAt), "PPP", { locale: dateLocale })
+                    : "—"
+                }
               />
               <DetailRow
-                label={tPage("form.nextBillingDate")}
-                value={format(new Date(sub.nextBillingDate), "PPP", { locale: dateLocale })}
+                label={
+                  sub.billingCycle === "YEARLY"
+                    ? tPage("form.nextBillingDate")
+                    : tPage("form.billingDay")
+                }
+                value={(() => {
+                  const summary = formatBillingSummary(
+                    sub,
+                    locale === "pt" ? "pt" : "en"
+                  )
+                  if (summary) return summary
+                  const nextCharge = resolveNextChargeDate(sub)
+                  return nextCharge
+                    ? format(nextCharge, "PPP", { locale: dateLocale })
+                    : "—"
+                })()}
               />
             </CardContent>
           </Card>

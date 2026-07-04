@@ -1,13 +1,23 @@
 import { prisma } from "@/lib/prisma"
 import type { PlannedExpenseUpdateInput } from "@/lib/validations/finance-planner"
 import {
+  resolveChargeForInvoiceMonth,
+  resolveInvoiceMonth,
+  resolveNextChargeDate,
+} from "@/lib/subscription-billing"
+import {
   BillingCycle,
   ExpenseBucket,
+  PaymentMethodType,
   PlanEntrySource,
   Prisma,
   type Subscription,
 } from "@prisma/client"
 import { revalidatePath } from "next/cache"
+import {
+  syncCreditCardInvoices,
+  type CardMonthRef,
+} from "@/server/actions/finance-planner/card-invoices"
 
 type SubscriptionExpenseSyncInput = Pick<
   Subscription,
@@ -18,12 +28,21 @@ type SubscriptionExpenseSyncInput = Pick<
   | "price"
   | "currency"
   | "billingCycle"
+  | "billingDay"
+  | "hiredAt"
   | "nextBillingDate"
   | "active"
   | "paymentMethodId"
 >
 
 type PrismaClientLike = typeof prisma | Prisma.TransactionClient
+
+type SubscriptionExpenseResult = {
+  id: string
+  paymentCardId: string | null
+  year: number
+  month: number
+}
 
 function monthFromDate(date: Date) {
   return {
@@ -34,13 +53,6 @@ function monthFromDate(date: Date) {
 
 function monthIndex(year: number, month: number) {
   return year * 12 + month
-}
-
-function isSameOrAfterMonth(
-  target: { year: number; month: number },
-  anchor: { year: number; month: number }
-) {
-  return monthIndex(target.year, target.month) >= monthIndex(anchor.year, anchor.month)
 }
 
 function currentMonthRef(date = new Date()) {
@@ -60,36 +72,6 @@ function futurePlanWhere(userId: string, from = new Date()) {
       },
     ],
   } satisfies Prisma.MonthlyPlanWhereInput
-}
-
-function lastDayOfMonth(year: number, month: number) {
-  return new Date(year, month, 0).getDate()
-}
-
-function buildDueDateForMonth(
-  subscription: SubscriptionExpenseSyncInput,
-  year: number,
-  month: number
-) {
-  const billingDay = subscription.nextBillingDate.getDate()
-  const day = Math.min(billingDay, lastDayOfMonth(year, month))
-
-  return new Date(year, month - 1, day)
-}
-
-function shouldGenerateForMonth(
-  subscription: SubscriptionExpenseSyncInput,
-  year: number,
-  month: number
-) {
-  if (!subscription.active || subscription.billingCycle !== BillingCycle.MONTHLY) {
-    return false
-  }
-
-  return isSameOrAfterMonth(
-    { year, month },
-    monthFromDate(subscription.nextBillingDate)
-  )
 }
 
 async function getOrCreatePlan(
@@ -125,14 +107,113 @@ function earliestMonthStart(
   return new Date(earliest.year, earliest.month - 1, 1)
 }
 
+function toCardMonthRef(result: {
+  paymentCardId: string | null
+  year: number
+  month: number
+}): CardMonthRef | null {
+  if (!result.paymentCardId) return null
+  return {
+    paymentCardId: result.paymentCardId,
+    year: result.year,
+    month: result.month,
+  }
+}
+
+async function resolveSubscriptionPaymentTarget(
+  subscription: SubscriptionExpenseSyncInput,
+  client: PrismaClientLike
+): Promise<{
+  expenseBucket: ExpenseBucket
+  paymentCardId: string | null
+  closingDay: number | null
+}> {
+  if (!subscription.paymentMethodId) {
+    return {
+      expenseBucket: ExpenseBucket.MONTHLY_BILLS,
+      paymentCardId: null,
+      closingDay: null,
+    }
+  }
+
+  const method = await client.paymentMethod.findFirst({
+    where: {
+      id: subscription.paymentMethodId,
+      userId: subscription.userId,
+    },
+    select: {
+      type: true,
+      paymentCard: { select: { id: true, closingDay: true } },
+    },
+  })
+
+  if (method?.type === PaymentMethodType.CREDIT_CARD && method.paymentCard) {
+    return {
+      expenseBucket: ExpenseBucket.CREDIT_CARD,
+      paymentCardId: method.paymentCard.id,
+      closingDay: method.paymentCard.closingDay,
+    }
+  }
+
+  return {
+    expenseBucket: ExpenseBucket.MONTHLY_BILLS,
+    paymentCardId: null,
+    closingDay: null,
+  }
+}
+
+async function collectSubscriptionCardRefs(
+  userId: string,
+  subscriptionId: string,
+  client: PrismaClientLike,
+  from?: Date
+): Promise<CardMonthRef[]> {
+  const rows = await client.plannedExpense.findMany({
+    where: {
+      subscriptionId,
+      paymentCardId: { not: null },
+      expenseBucket: ExpenseBucket.CREDIT_CARD,
+      ...(from
+        ? { monthlyPlan: futurePlanWhere(userId, from) }
+        : { monthlyPlan: { userId } }),
+    },
+    select: {
+      paymentCardId: true,
+      monthlyPlan: { select: { year: true, month: true } },
+    },
+  })
+
+  return rows
+    .filter((row): row is typeof row & { paymentCardId: string } => Boolean(row.paymentCardId))
+    .map((row) => ({
+      paymentCardId: row.paymentCardId,
+      year: row.monthlyPlan.year,
+      month: row.monthlyPlan.month,
+    }))
+}
+
 export async function upsertSubscriptionExpense(
   userId: string,
   subscription: SubscriptionExpenseSyncInput,
   client: PrismaClientLike = prisma
 ) {
-  const { year, month } = monthFromDate(subscription.nextBillingDate)
+  const now = new Date()
+  const previousRefs = await collectSubscriptionCardRefs(userId, subscription.id, client)
+  const result = await upsertSubscriptionExpenseForMonth(
+    userId,
+    subscription,
+    now.getFullYear(),
+    now.getMonth() + 1,
+    client
+  )
 
-  return upsertSubscriptionExpenseForMonth(userId, subscription, year, month, client)
+  const refs = [
+    ...previousRefs,
+    ...(result ? [toCardMonthRef(result)].filter(Boolean) : []),
+  ] as CardMonthRef[]
+
+  await syncCreditCardInvoices(userId, refs, client)
+  return result
 }
 
 export async function upsertSubscriptionExpenseForMonth(
@@ -141,17 +222,52 @@ export async function upsertSubscriptionExpenseForMonth(
   year: number,
   month: number,
   client: PrismaClientLike = prisma
-) {
-  if (!shouldGenerateForMonth(subscription, year, month)) return null
+): Promise<SubscriptionExpenseResult | null> {
+  if (!subscription.active) return null
 
-  const dueDate = buildDueDateForMonth(subscription, year, month)
+  const paymentTarget = await resolveSubscriptionPaymentTarget(subscription, client)
+  const dueDate = resolveChargeForInvoiceMonth(
+    subscription,
+    year,
+    month,
+    paymentTarget.closingDay
+  )
+
+  if (!dueDate) {
+    // Remove stale auto-generated expense for this invoice month if billing no longer applies
+    const plan = await client.monthlyPlan.findUnique({
+      where: { userId_year_month: { userId, year, month } },
+      select: { id: true },
+    })
+    if (plan) {
+      const existing = await client.plannedExpense.findFirst({
+        where: {
+          subscriptionId: subscription.id,
+          monthlyPlanId: plan.id,
+          isAutoGenerated: true,
+        },
+        select: { id: true, paymentCardId: true },
+      })
+      if (existing) {
+        await client.plannedExpense.delete({ where: { id: existing.id } })
+        return {
+          id: existing.id,
+          paymentCardId: existing.paymentCardId,
+          year,
+          month,
+        }
+      }
+    }
+    return null
+  }
+
   const plan = await getOrCreatePlan(client, userId, year, month)
   const existing = await client.plannedExpense.findFirst({
     where: {
       subscriptionId: subscription.id,
       monthlyPlanId: plan.id,
     },
-    select: { id: true },
+    select: { id: true, paymentCardId: true },
   })
 
   const data = {
@@ -160,13 +276,13 @@ export async function upsertSubscriptionExpenseForMonth(
     description: buildExpenseDescription(subscription),
     amount: subscription.price,
     currency: subscription.currency,
-    expenseBucket: ExpenseBucket.MONTHLY_BILLS,
+    expenseBucket: paymentTarget.expenseBucket,
     dueDate,
     source: PlanEntrySource.SUBSCRIPTION,
     isAutoGenerated: true,
     isLocked: true,
     paymentMethodId: subscription.paymentMethodId,
-    paymentCardId: null,
+    paymentCardId: paymentTarget.paymentCardId,
     creditCardInvoiceId: null,
     installmentPurchaseId: null,
     installmentNumber: null,
@@ -175,21 +291,26 @@ export async function upsertSubscriptionExpenseForMonth(
     recurrenceGroupId: null,
   } satisfies Prisma.PlannedExpenseUncheckedUpdateInput
 
-  if (existing) {
-    return client.plannedExpense.update({
-      where: { id: existing.id },
-      data,
-      select: { id: true },
-    })
-  }
+  const row = existing
+    ? await client.plannedExpense.update({
+        where: { id: existing.id },
+        data,
+        select: { id: true, paymentCardId: true },
+      })
+    : await client.plannedExpense.create({
+        data: {
+          ...data,
+          subscriptionId: subscription.id,
+        },
+        select: { id: true, paymentCardId: true },
+      })
 
-  return client.plannedExpense.create({
-    data: {
-      ...data,
-      subscriptionId: subscription.id,
-    },
-    select: { id: true },
-  })
+  return {
+    id: row.id,
+    paymentCardId: row.paymentCardId,
+    year,
+    month,
+  }
 }
 
 export async function ensureMonthlySubscriptionExpenses(
@@ -202,18 +323,51 @@ export async function ensureMonthlySubscriptionExpenses(
     where: {
       userId,
       active: true,
-      billingCycle: BillingCycle.MONTHLY,
-      nextBillingDate: {
-        lte: new Date(year, month, 0),
+      billingCycle: {
+        in: [BillingCycle.MONTHLY, BillingCycle.WEEKLY, BillingCycle.YEARLY],
       },
     },
   })
 
-  await Promise.all(
+  const subscriptionIds = subscriptions.map((subscription) => subscription.id)
+  const previousRows =
+    subscriptionIds.length === 0
+      ? []
+      : await client.plannedExpense.findMany({
+          where: {
+            subscriptionId: { in: subscriptionIds },
+            paymentCardId: { not: null },
+            expenseBucket: ExpenseBucket.CREDIT_CARD,
+            monthlyPlan: { userId, year, month },
+          },
+          select: {
+            paymentCardId: true,
+            monthlyPlan: { select: { year: true, month: true } },
+          },
+        })
+
+  const results = await Promise.all(
     subscriptions.map((subscription) =>
       upsertSubscriptionExpenseForMonth(userId, subscription, year, month, client)
     )
   )
+
+  const refs: CardMonthRef[] = [
+    ...previousRows
+      .filter((row): row is typeof row & { paymentCardId: string } =>
+        Boolean(row.paymentCardId)
+      )
+      .map((row) => ({
+        paymentCardId: row.paymentCardId,
+        year: row.monthlyPlan.year,
+        month: row.monthlyPlan.month,
+      })),
+    ...results
+      .map((result) => (result ? toCardMonthRef(result) : null))
+      .filter((ref): ref is CardMonthRef => Boolean(ref)),
+  ]
+
+  await syncCreditCardInvoices(userId, refs, client)
 }
 
 export async function syncCurrentAndFutureSubscriptionExpenses(
@@ -222,12 +376,63 @@ export async function syncCurrentAndFutureSubscriptionExpenses(
   client: PrismaClientLike = prisma,
   from = new Date()
 ) {
-  if (!subscription.active || subscription.billingCycle !== BillingCycle.MONTHLY) {
+  const previousRefs = await collectSubscriptionCardRefs(
+    userId,
+    subscription.id,
+    client,
+    from
+  )
+
+  const supportedCycles: BillingCycle[] = [
+    BillingCycle.MONTHLY,
+    BillingCycle.WEEKLY,
+    BillingCycle.YEARLY,
+  ]
+
+  if (!subscription.active || !supportedCycles.includes(subscription.billingCycle)) {
     await deleteCurrentAndFutureSubscriptionExpenses(userId, subscription.id, client, from)
+    await syncCreditCardInvoices(userId, previousRefs, client)
     return
   }
 
-  await upsertSubscriptionExpense(userId, subscription, client)
+  const results: SubscriptionExpenseResult[] = []
+  const current = currentMonthRef(from)
+  const primary = await upsertSubscriptionExpenseForMonth(
+    userId,
+    subscription,
+    current.year,
+    current.month,
+    client
+  )
+  if (primary) results.push(primary)
+
+  // Also ensure the invoice month for the next charge (may differ when closingDay shifts month)
+  const nextCharge = resolveNextChargeDate(subscription, from)
+  if (nextCharge) {
+    const paymentTarget = await resolveSubscriptionPaymentTarget(subscription, client)
+    const chargeForCurrent = resolveChargeForInvoiceMonth(
+      subscription,
+      current.year,
+      current.month,
+      paymentTarget.closingDay
+    )
+    // If next charge maps to a different invoice month, upsert that month too
+    const invoiceMonth = resolveInvoiceMonth(nextCharge, paymentTarget.closingDay)
+    if (
+      !chargeForCurrent ||
+      invoiceMonth.year !== current.year ||
+      invoiceMonth.month !== current.month
+    ) {
+      const extra = await upsertSubscriptionExpenseForMonth(
+        userId,
+        subscription,
+        invoiceMonth.year,
+        invoiceMonth.month,
+        client
+      )
+      if (extra) results.push(extra)
+    }
+  }
 
   const rows = await client.plannedExpense.findMany({
     where: {
@@ -236,27 +441,46 @@ export async function syncCurrentAndFutureSubscriptionExpenses(
     },
     select: {
       id: true,
+      paymentCardId: true,
       monthlyPlan: { select: { year: true, month: true } },
     },
   })
 
   await Promise.all(
-    rows.map((row) => {
+    rows.map(async (row) => {
       const { year, month } = row.monthlyPlan
+      const paymentTarget = await resolveSubscriptionPaymentTarget(subscription, client)
+      const dueDate = resolveChargeForInvoiceMonth(
+        subscription,
+        year,
+        month,
+        paymentTarget.closingDay
+      )
 
-      if (!shouldGenerateForMonth(subscription, year, month)) {
-        return client.plannedExpense.delete({ where: { id: row.id } })
+      if (!dueDate) {
+        await client.plannedExpense.delete({ where: { id: row.id } })
+        return
       }
 
-      return upsertSubscriptionExpenseForMonth(
+      const result = await upsertSubscriptionExpenseForMonth(
         userId,
         subscription,
         year,
         month,
         client
       )
+      if (result) results.push(result)
     })
   )
+
+  const refs: CardMonthRef[] = [
+    ...previousRefs,
+    ...results
+      .map((result) => toCardMonthRef(result))
+      .filter((ref): ref is CardMonthRef => Boolean(ref)),
+  ]
+
+  await syncCreditCardInvoices(userId, refs, client)
 }
 
 export async function deleteCurrentAndFutureSubscriptionExpenses(
@@ -265,12 +489,22 @@ export async function deleteCurrentAndFutureSubscriptionExpenses(
   client: PrismaClientLike = prisma,
   from = new Date()
 ) {
-  return client.plannedExpense.deleteMany({
+  const previousRefs = await collectSubscriptionCardRefs(
+    userId,
+    subscriptionId,
+    client,
+    from
+  )
+
+  const result = await client.plannedExpense.deleteMany({
     where: {
       subscriptionId,
       monthlyPlan: futurePlanWhere(userId, from),
     },
   })
+
+  await syncCreditCardInvoices(userId, previousRefs, client)
+  return result
 }
 
 export async function syncSubscriptionFromExpense(
@@ -294,7 +528,7 @@ export async function syncSubscriptionFromExpense(
   if (!expense?.subscription) return null
 
   const updateData: Prisma.SubscriptionUpdateInput = {}
-  const nextBillingDate =
+  const dueDate =
     data.dueDate !== undefined && data.dueDate !== null ? data.dueDate : undefined
 
   if (data.name !== undefined) updateData.name = data.name
@@ -303,7 +537,18 @@ export async function syncSubscriptionFromExpense(
   }
   if (data.amount !== undefined) updateData.price = new Prisma.Decimal(data.amount)
   if (data.currency !== undefined) updateData.currency = data.currency
-  if (nextBillingDate) updateData.nextBillingDate = nextBillingDate
+
+  if (dueDate) {
+    if (
+      expense.subscription.billingCycle === BillingCycle.MONTHLY ||
+      expense.subscription.billingCycle === BillingCycle.WEEKLY
+    ) {
+      updateData.billingDay = dueDate.getDate()
+    } else if (expense.subscription.billingCycle === BillingCycle.YEARLY) {
+      updateData.nextBillingDate = dueDate
+    }
+  }
+
   if (data.paymentMethodId !== undefined) {
     updateData.paymentMethod = data.paymentMethodId
       ? { connect: { id: data.paymentMethodId } }
@@ -321,7 +566,7 @@ export async function syncSubscriptionFromExpense(
     userId,
     subscription,
     client,
-    earliestMonthStart(expense.monthlyPlan, nextBillingDate ?? expense.dueDate)
+    earliestMonthStart(expense.monthlyPlan, dueDate ?? expense.dueDate)
   )
 
   return subscription
@@ -338,7 +583,12 @@ export async function deleteSubscriptionFromExpense(
       monthlyPlan: { userId },
       subscriptionId: { not: null },
     },
-    select: { subscriptionId: true },
+    select: {
+      subscriptionId: true,
+      paymentCardId: true,
+      expenseBucket: true,
+      monthlyPlan: { select: { year: true, month: true } },
+    },
   })
 
   if (!expense?.subscriptionId) return null
@@ -355,4 +605,5 @@ export function revalidateSubscriptionExpenseSyncPaths() {
   revalidatePath("/dashboard")
   revalidatePath("/subscriptions")
   revalidatePath("/finance-planner")
+  revalidatePath("/card-invoice")
 }

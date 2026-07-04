@@ -19,6 +19,7 @@ import {
 import { CardCostDialogForm } from "./card-cost-dialog-form"
 import { CardCostsContent } from "./card-costs-content"
 import { emptyCardCostForm } from "./constants"
+import { DeleteConfirmDialog } from "./delete-confirm-dialog"
 import { DeleteExpenseDialog } from "./delete-expense-dialog"
 import { EditScopeDialog } from "./edit-scope-dialog"
 import { MonthSelector } from "./month-selector"
@@ -68,6 +69,7 @@ export function CardInvoiceBoard() {
   const [cardCostForm, setCardCostForm] = useState<CardCostForm>(emptyCardCostForm)
   const [formError, setFormError] = useState<string | null>(null)
   const [pendingDeleteExpense, setPendingDeleteExpense] = useState<PlannedExpense | null>(null)
+  const [pendingSimpleDelete, setPendingSimpleDelete] = useState<PlannedExpense | null>(null)
   const [pendingEdit, setPendingEdit] = useState<{
     id: string
     data: unknown
@@ -199,13 +201,18 @@ export function CardInvoiceBoard() {
     closeDialog()
   }
 
-  async function removeCardCost(row: PlannedExpense) {
+  function removeCardCost(row: PlannedExpense) {
     if (row.recurrenceGroupId) {
       setPendingDeleteExpense(row)
       return
     }
-    if (!window.confirm(t("form.confirmDelete"))) return
-    await dispatch(deletePlannedExpenseAction(row.id)).unwrap()
+    setPendingSimpleDelete(row)
+  }
+
+  async function confirmSimpleDelete() {
+    if (!pendingSimpleDelete) return
+    await dispatch(deletePlannedExpenseAction(pendingSimpleDelete.id)).unwrap()
+    setPendingSimpleDelete(null)
   }
 
   async function confirmDeleteExpense(mode: "single" | "future") {
@@ -335,6 +342,16 @@ export function CardInvoiceBoard() {
         </DialogContent>
       </Dialog>
 
+      <DeleteConfirmDialog
+        open={Boolean(pendingSimpleDelete)}
+        itemName={pendingSimpleDelete?.name}
+        isPending={isLoading}
+        onOpenChange={(open) => {
+          if (!open) setPendingSimpleDelete(null)
+        }}
+        onConfirm={confirmSimpleDelete}
+        t={t}
+      />
       <DeleteExpenseDialog
         row={pendingDeleteExpense}
         open={Boolean(pendingDeleteExpense)}

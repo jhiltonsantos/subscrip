@@ -289,8 +289,10 @@ export function serializeMonthlyPlan(row: MonthlyPlanWithRelations) {
         ? {
             ...expense.subscription,
             price: expense.subscription.price.toString(),
-            startDate: expense.subscription.startDate.toISOString(),
-            nextBillingDate: expense.subscription.nextBillingDate.toISOString(),
+            hiredAt: expense.subscription.hiredAt?.toISOString() ?? null,
+            billingDay: expense.subscription.billingDay,
+            nextBillingDate:
+              expense.subscription.nextBillingDate?.toISOString() ?? null,
             createdAt: expense.subscription.createdAt.toISOString(),
             updatedAt: expense.subscription.updatedAt.toISOString(),
           }

@@ -74,9 +74,24 @@ export async function updateSubscription(
   if (data.currency !== undefined) updateData.currency = data.currency
   if (data.billingCycle !== undefined) updateData.billingCycle = data.billingCycle
   if (data.category !== undefined) updateData.category = data.category
-  if (data.startDate !== undefined) updateData.startDate = data.startDate
+  if (data.hiredAt !== undefined) updateData.hiredAt = data.hiredAt
+  if (data.billingDay !== undefined) updateData.billingDay = data.billingDay
   if (data.nextBillingDate !== undefined)
     updateData.nextBillingDate = data.nextBillingDate
+
+  // Keep billing fields consistent with cycle when cycle changes
+  if (data.billingCycle === "YEARLY") {
+    updateData.billingDay = null
+    if (data.nextBillingDate !== undefined) {
+      updateData.nextBillingDate = data.nextBillingDate
+    }
+  } else if (data.billingCycle === "MONTHLY" || data.billingCycle === "WEEKLY") {
+    updateData.nextBillingDate = null
+    if (data.billingDay !== undefined) {
+      updateData.billingDay = data.billingDay
+    }
+  }
+
   if (data.active !== undefined) updateData.active = data.active
   if (data.serviceTemplateId !== undefined)
     updateData.serviceTemplate = data.serviceTemplateId
