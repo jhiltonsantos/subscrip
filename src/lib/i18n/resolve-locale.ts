@@ -1,14 +1,7 @@
 import { defaultLocale, locales, Locale } from "./config"
+import { localeFromPathname } from "./locale-path"
 
-export function localeFromPathname(pathname: string | null | undefined): Locale | null {
-  if (!pathname) return null
-
-  if (pathname === "/pt" || pathname.startsWith("/pt/")) {
-    return "pt"
-  }
-
-  return "en"
-}
+export { localeFromPathname } from "./locale-path"
 
 export function resolveLocale(input: {
   headerLocale?: string | null

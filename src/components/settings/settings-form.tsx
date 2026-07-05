@@ -24,7 +24,7 @@ import {
 import { updateDarkThemeVariant, updateUserSettings } from "@/server/actions/user"
 import {
   buildLocalizedPath,
-  setLocaleCookie,
+  navigateToLocale,
 } from "@/lib/i18n/locale-navigation"
 import { Locale } from "@/lib/i18n/config"
 import { cn } from "@/lib/utils/helpers"
@@ -241,9 +241,7 @@ export function SettingsForm({ user }: SettingsFormProps) {
         setSuccess(t("form.success"))
 
         if (nextPath !== pathname) {
-          setLocaleCookie(languageToLocale(updatedValues.language))
-          router.push(nextPath)
-          router.refresh()
+          navigateToLocale(pathname, languageToLocale(updatedValues.language))
         } else {
           router.refresh()
         }

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react"
 import { usePathname } from "next/navigation"
 import { LocaleLink } from "@/components/global"
+import { stripLocalePrefixFromPath } from "@/lib/i18n/locale-path"
 import { useTranslations } from "next-intl"
 import { 
   LayoutDashboard, 
@@ -168,7 +169,7 @@ export function Sidebar({ user }: SidebarProps) {
               {section.items.map((item) => {
                 const Icon = item.icon
                 // Remove locale prefix for comparison
-                const pathnameWithoutLocale = pathname.replace(/^\/pt/, '')
+                const pathnameWithoutLocale = stripLocalePrefixFromPath(pathname)
                 const isActive =
                   pathnameWithoutLocale === item.href ||
                   pathnameWithoutLocale.startsWith(`${item.href}/`)

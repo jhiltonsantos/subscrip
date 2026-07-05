@@ -7,8 +7,8 @@ import { ptBR, enUS } from "date-fns/locale"
 import { resolveNextChargeDate } from "@/lib/subscription-billing"
 import { formatCurrency } from "@/lib/utils/formatters"
 import { auth } from "@/lib/auth"
+import { localizedRedirect } from "@/lib/i18n/localized-redirect"
 import { headers } from "next/headers"
-import { redirect } from "next/navigation"
 import { getTranslations, getLocale } from "next-intl/server"
 import { getMonthSummary } from "@/server/actions/finance-planner"
 import { listSubscriptions } from "@/server/actions/subscriptions"
@@ -24,7 +24,7 @@ export default async function DashboardPage() {
   })
 
   if (!session) {
-    redirect("/auth/login")
+    return localizedRedirect("/auth/login")
   }
 
   const now = new Date()
