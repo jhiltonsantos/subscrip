@@ -9,6 +9,8 @@ import {
   InvoiceStatus,
 } from '@prisma/client'
 
+import { assertSafeForDestructiveDbOps } from './guard-destructive'
+
 const prisma = new PrismaClient()
 
 const PLAN_YEAR = 2026
@@ -19,9 +21,11 @@ function d(day: number): Date {
 }
 
 async function main() {
+  assertSafeForDestructiveDbOps('db seed')
+
   console.log('🌱 Starting seed...')
 
-  // Clean up existing data (respect FK order)
+  // Clean up existing data (respect FK order) — local/dev only
   await prisma.reminder.deleteMany()
   await prisma.plannedExpense.deleteMany()
   await prisma.plannedIncome.deleteMany()
@@ -140,8 +144,8 @@ async function main() {
       currency: Currency.BRL,
       billingCycle: BillingCycle.MONTHLY,
       category: Category.ENTERTAINMENT,
-      startDate: new Date('2024-03-10'),
-      nextBillingDate: d(10),
+      hiredAt: new Date('2024-03-10'),
+      billingDay: 10,
       active: true,
       userId: testUser.id,
       serviceTemplateId: crunchyrollTemplate?.id,
@@ -156,8 +160,8 @@ async function main() {
       currency: Currency.BRL,
       billingCycle: BillingCycle.MONTHLY,
       category: Category.ENTERTAINMENT,
-      startDate: new Date('2024-06-01'),
-      nextBillingDate: d(1),
+      hiredAt: new Date('2024-06-01'),
+      billingDay: 1,
       active: true,
       userId: testUser.id,
       paymentMethodId: pix.id,

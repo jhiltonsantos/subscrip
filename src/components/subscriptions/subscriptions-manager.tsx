@@ -3,11 +3,10 @@
 import { useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { format } from "date-fns"
-import { ptBR, enUS } from "date-fns/locale"
 import { useLocale } from "next-intl"
 import { ExternalLink, Pencil, Plus, Power, Trash2 } from "lucide-react"
 import { deleteSubscription, updateSubscription, type SerializedSubscription, type SubscriptionFormOptions } from "@/server/actions/subscriptions"
+import { formatBillingSummary } from "@/lib/subscription-billing"
 import { formatCurrency } from "@/lib/utils/formatters"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -32,7 +31,6 @@ export function SubscriptionsManager({
   const t = useTranslations("subscriptionsPage")
   const locale = useLocale()
   const router = useRouter()
-  const dateLocale = locale === "pt" ? ptBR : enUS
 
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<SerializedSubscription | null>(null)
@@ -210,9 +208,10 @@ export function SubscriptionsManager({
                         {formatCurrency(Number(subscription.price), subscription.currency)}
                       </td>
                       <td className="p-3 text-muted-foreground">
-                        {format(new Date(subscription.nextBillingDate), "PPP", {
-                          locale: dateLocale,
-                        })}
+                        {formatBillingSummary(
+                          subscription,
+                          locale === "pt" ? "pt" : "en"
+                        ) ?? "—"}
                       </td>
                       <td className="p-3">
                         <span

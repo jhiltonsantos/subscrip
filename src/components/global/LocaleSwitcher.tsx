@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { Locale, locales } from "@/lib/i18n/config"
+import { navigateToLocale } from "@/lib/i18n/locale-navigation"
 import { ChevronDown, Globe } from "lucide-react"
 import { cn } from "@/lib/utils/helpers"
 import { changeUserLanguage } from "@/server/actions/user/change-language"
@@ -14,30 +15,26 @@ interface LocaleSwitcherProps {
   selectClassName?: string
 }
 
+async function changeUserLanguageIfLoggedIn(newLocale: Locale) {
+  const session = await getSession()
+  if (session?.user) {
+    await changeUserLanguage(newLocale)
+  }
+}
+
 export function LocaleSwitcher({ className, selectClassName }: LocaleSwitcherProps) {
   const t = useTranslations("locale")
   const locale = useLocale()
   const pathname = usePathname()
-  const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
 
-  const handleChange = async (newLocale: Locale) => {
-    setIsOpen(false)
+  const handleChange = (newLocale: Locale) => {
     if (newLocale === locale) return
 
-    const cleanPath = pathname.replace(/^\/pt(?=\/|$)/, "") || "/"
-    const nextPath =
-      newLocale === "pt"
-        ? cleanPath === "/" ? "/pt" : `/pt${cleanPath}`
-        : cleanPath
-
-    const session = await getSession()
-    if (session?.user) {
-      await changeUserLanguage(newLocale)
-    }
-
-    router.push(nextPath)
+    setIsOpen(false)
+    navigateToLocale(pathname, newLocale)
+    void changeUserLanguageIfLoggedIn(newLocale)
   }
 
   useEffect(() => {

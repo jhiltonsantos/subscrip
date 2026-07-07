@@ -2,6 +2,7 @@
 
 import { ChevronRight, Home } from "lucide-react"
 import { LocaleLink } from "@/components/global"
+import { stripLocalePrefixFromPath } from "@/lib/i18n/locale-path"
 import { useTranslations } from "next-intl"
 import { usePathname } from "next/navigation"
 
@@ -30,8 +31,7 @@ export function Breadcrumb() {
   const t = useTranslations("header.breadcrumbs")
   const pathname = usePathname()
   
-  const segments = pathname
-    .replace(/^\/pt(?=\/|$)/, "")
+  const segments = stripLocalePrefixFromPath(pathname)
     .split("/")
     .filter(Boolean)
 

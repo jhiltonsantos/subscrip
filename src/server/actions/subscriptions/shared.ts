@@ -19,8 +19,9 @@ export function serializeSubscription(row: SubscriptionWithRelations) {
   return {
     ...row,
     price: row.price.toString(),
-    startDate: row.startDate.toISOString(),
-    nextBillingDate: row.nextBillingDate.toISOString(),
+    hiredAt: row.hiredAt?.toISOString() ?? null,
+    billingDay: row.billingDay,
+    nextBillingDate: row.nextBillingDate?.toISOString() ?? null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
     serviceTemplate: row.serviceTemplate

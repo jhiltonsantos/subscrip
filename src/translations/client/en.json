@@ -212,7 +212,8 @@
       "currency": "Currency",
       "billingCycle": "Billing cycle",
       "category": "Category",
-      "startDate": "Start date",
+      "hiredAt": "Hiring date",
+      "billingDay": "Billing day",
       "nextBillingDate": "Next billing date",
       "active": "Active",
       "serviceTemplate": "Service template",
@@ -499,6 +500,8 @@
     "cards": {
       "title": "Cards - monthly detail",
       "empty": "No card expense for the selected period.",
+      "pendingCharge": "Pending charge",
+      "chargeDate": "Expected on {date}",
       "cta": "Card details",
       "open": "Open card details",
       "summaryBucket": "Card purchases",
@@ -526,6 +529,13 @@
       "isInstallment": "This is an installment purchase",
       "createPreviousInstallments": "Add previous installments"
     },
+    "deleteConfirmDialog": {
+      "title": "Delete this item?",
+      "description": "This action cannot be undone.",
+      "descriptionWithName": "Delete \"{name}\"? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
     "deleteDialog": {
       "title": "Delete recurring item?",
       "singleDescription": "This will remove only this item.",
@@ -533,6 +543,7 @@
       "single": "Remove only this item",
       "future": "Remove this and future items"
     },
+
     "editScopeDialog": {
       "title": "Apply edit to which items?",
       "description": "This item belongs to an installment or recurring sequence. Choose whether this change applies only to this record or to this and future records.",

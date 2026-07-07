@@ -212,8 +212,9 @@
       "currency": "Moeda",
       "billingCycle": "Ciclo de cobrança",
       "category": "Categoria",
-      "startDate": "Data de início",
-      "nextBillingDate": "Próxima cobrança",
+      "hiredAt": "Data de contratação",
+      "billingDay": "Dia da cobrança",
+      "nextBillingDate": "Data da próxima cobrança",
       "active": "Ativa",
       "serviceTemplate": "Template de serviço",
       "planLabel": "Plano / faixa",
@@ -499,6 +500,8 @@
     "cards": {
       "title": "Cartões - detalhamento mensal",
       "empty": "Nenhum gasto em cartão para o período selecionado.",
+      "pendingCharge": "Cobrança em aguardo",
+      "chargeDate": "Previsto em {date}",
       "cta": "Detalhes dos cartões",
       "open": "Abrir detalhes dos cartões",
       "summaryBucket": "Compras no cartão",
@@ -526,6 +529,13 @@
       "isInstallment": "Esta é uma compra parcelada",
       "createPreviousInstallments": "Adicionar parcelas anteriores"
     },
+    "deleteConfirmDialog": {
+      "title": "Excluir este item?",
+      "description": "Esta ação não pode ser desfeita.",
+      "descriptionWithName": "Excluir \"{name}\"? Esta ação não pode ser desfeita.",
+      "cancel": "Cancelar",
+      "confirm": "Excluir"
+    },
     "deleteDialog": {
       "title": "Excluir item recorrente?",
       "singleDescription": "Isso remove somente este item.",
@@ -533,6 +543,7 @@
       "single": "Remover apenas este item",
       "future": "Remover este e os próximos"
     },
+
     "editScopeDialog": {
       "title": "Aplicar edição em quais itens?",
       "description": "Este item faz parte de uma sequência parcelada ou recorrente. Escolha se a alteração vale apenas para este registro ou para este e os próximos.",

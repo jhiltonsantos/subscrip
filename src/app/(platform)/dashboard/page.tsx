@@ -4,10 +4,11 @@ import { Container } from "@/components/ui/container"
 import { CalendarDays, CreditCard, DollarSign, TrendingDown, TrendingUp } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR, enUS } from "date-fns/locale"
+import { resolveNextChargeDate } from "@/lib/subscription-billing"
 import { formatCurrency } from "@/lib/utils/formatters"
 import { auth } from "@/lib/auth"
+import { localizedRedirect } from "@/lib/i18n/localized-redirect"
 import { headers } from "next/headers"
-import { redirect } from "next/navigation"
 import { getTranslations, getLocale } from "next-intl/server"
 import { getMonthSummary } from "@/server/actions/finance-planner"
 import { listSubscriptions } from "@/server/actions/subscriptions"
@@ -23,7 +24,7 @@ export default async function DashboardPage() {
   })
 
   if (!session) {
-    redirect("/auth/login")
+    return localizedRedirect("/auth/login")
   }
 
   const now = new Date()
@@ -51,7 +52,17 @@ export default async function DashboardPage() {
     plannedExpenseTotal > 0 ? plannedExpenseTotal : subscriptionTotal
   const projectedBalance = plannedIncomeTotal - totalOutflow
   const activeCount = activeSubscriptions.length
-  const nextSubscription = activeSubscriptions[0]
+  const subscriptionsWithNextCharge = activeSubscriptions
+    .map((sub) => ({
+      sub,
+      nextCharge: resolveNextChargeDate(sub),
+    }))
+    .filter(
+      (item): item is { sub: (typeof activeSubscriptions)[number]; nextCharge: Date } =>
+        Boolean(item.nextCharge)
+    )
+    .sort((a, b) => a.nextCharge.getTime() - b.nextCharge.getTime())
+  const nextSubscription = subscriptionsWithNextCharge[0] ?? null
   const dateLocale = locale === "pt" ? ptBR : enUS
 
   return (
@@ -146,8 +157,8 @@ export default async function DashboardPage() {
             <p className="text-xs text-muted-foreground mt-1">
               {nextSubscription
                 ? t("cards.nextPaymentWithName", {
-                    name: nextSubscription.name,
-                    date: format(new Date(nextSubscription.nextBillingDate), "dd/MM"),
+                    name: nextSubscription.sub.name,
+                    date: format(nextSubscription.nextCharge, "dd/MM"),
                   })
                 : t("cards.noUpcoming")}
             </p>
@@ -161,7 +172,9 @@ export default async function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {subscriptions.map((sub) => (
+            {activeSubscriptions.map((sub) => {
+              const nextCharge = resolveNextChargeDate(sub)
+              return (
               <div 
                 key={sub.id} 
                 className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
@@ -177,17 +190,20 @@ export default async function DashboardPage() {
                     <div className="font-bold text-emerald-600 dark:text-emerald-400">
                       {formatCurrency(Number(sub.price), sub.currency)}
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      {t("subscriptions.due", {
-                        date: format(new Date(sub.nextBillingDate), "dd 'de' MMMM", { locale: dateLocale })
-                      })}
-                    </div>
+                    {nextCharge ? (
+                      <div className="text-xs text-muted-foreground">
+                        {t("subscriptions.due", {
+                          date: format(nextCharge, "dd 'de' MMMM", { locale: dateLocale })
+                        })}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </div>
-            ))}
+              )
+            })}
             
-            {subscriptions.length === 0 && (
+            {activeSubscriptions.length === 0 && (
               <div className="text-center py-8">
                 <p className="text-muted-foreground">{t("subscriptions.empty")}</p>
                 <Button variant="link" className="text-primary mt-2">

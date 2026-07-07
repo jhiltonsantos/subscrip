@@ -22,6 +22,11 @@ import {
   type UserSettingsInput,
 } from "@/lib/validations/user-settings"
 import { updateDarkThemeVariant, updateUserSettings } from "@/server/actions/user"
+import {
+  buildLocalizedPath,
+  navigateToLocale,
+} from "@/lib/i18n/locale-navigation"
+import { Locale } from "@/lib/i18n/config"
 import { cn } from "@/lib/utils/helpers"
 import {
   Bell,
@@ -121,19 +126,8 @@ function applyDarkThemeVariant(
   root.classList.toggle("dark-black", variant === "BLACK" && darkModeIsActive)
 }
 
-function languageToLocale(language: UserSettingsLanguage): "en" | "pt" {
+function languageToLocale(language: UserSettingsLanguage): Locale {
   return language === "pt-BR" ? "pt" : "en"
-}
-
-function localizedPath(pathname: string, language: UserSettingsLanguage): string {
-  const cleanPath = pathname.replace(/^\/pt(?=\/|$)/, "") || "/"
-  const locale = languageToLocale(language)
-
-  if (locale === "pt") {
-    return cleanPath === "/" ? "/pt" : `/pt${cleanPath}`
-  }
-
-  return cleanPath
 }
 
 function OptionCardGroup<T extends string>({
@@ -232,7 +226,10 @@ export function SettingsForm({ user }: SettingsFormProps) {
 
       if (result.success) {
         const updatedValues = createDefaultValues(result.data)
-        const nextPath = localizedPath(pathname, updatedValues.language)
+        const nextPath = buildLocalizedPath(
+          pathname,
+          languageToLocale(updatedValues.language)
+        )
 
         setTheme(themeToNextTheme(updatedValues.theme))
         applyDarkThemeVariant(
@@ -244,7 +241,7 @@ export function SettingsForm({ user }: SettingsFormProps) {
         setSuccess(t("form.success"))
 
         if (nextPath !== pathname) {
-          router.push(nextPath)
+          navigateToLocale(pathname, languageToLocale(updatedValues.language))
         } else {
           router.refresh()
         }
