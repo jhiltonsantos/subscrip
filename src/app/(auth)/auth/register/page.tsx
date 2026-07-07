@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth"
+import { buildLocalizedPath } from "@/lib/i18n/locale-path"
 import { resolveLocale } from "@/lib/i18n/resolve-locale"
 import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
@@ -14,7 +15,7 @@ async function getDashboardPath(): Promise<string> {
     cookieLocale: cookieStore.get("NEXT_LOCALE")?.value,
   })
 
-  return locale === "pt" ? "/pt/dashboard" : "/dashboard"
+  return buildLocalizedPath("/dashboard", locale)
 }
 
 export default async function RegisterPage() {

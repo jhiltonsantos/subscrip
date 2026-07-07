@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button"
 import { NotificationButton } from "./NotificationButton"
 import { ThemeToggle } from "./ThemeToggle"
 import { LocaleLink, LocaleSwitcher } from "@/components/global"
+import { stripLocalePrefixFromPath } from "@/lib/i18n/locale-path"
 import { signOut } from "@/server/actions/auth"
 
 interface MobileNavbarProps {
@@ -221,7 +222,7 @@ export function MobileNavbar({ user }: MobileNavbarProps) {
                 <div className="space-y-1">
                   {section.items.map((item) => {
                     const Icon = item.icon
-                    const pathnameWithoutLocale = pathname.replace(/^\/pt/, '')
+                    const pathnameWithoutLocale = stripLocalePrefixFromPath(pathname)
                     const isActive =
                       pathnameWithoutLocale === item.href ||
                       pathnameWithoutLocale.startsWith(`${item.href}/`)

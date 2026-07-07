@@ -1,16 +1,21 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getSessionCookie } from "better-auth/cookies"
+import {
+  buildLocalizedPath,
+  resolveLocaleFromCookie,
+} from "@/lib/i18n/locale-path"
+import { Locale } from "@/lib/i18n/config"
 
 const PUBLIC_ROUTES = ["/", "/auth/login", "/auth/register"]
 
-export type AuthAction = 
+export type AuthAction =
   | { type: "redirect"; url: string }
   | { type: "next" }
 
 export function checkAuth(
   req: NextRequest,
   cleanPath: string,
-  locale: string
+  locale: Locale | null
 ): AuthAction {
   const sessionCookie = getSessionCookie(req)
   const isLoggedIn = !!sessionCookie
@@ -18,10 +23,12 @@ export function checkAuth(
 
   if (!isLoggedIn && !isPublicRoute) {
     const callbackUrl = cleanPath + (req.nextUrl.search || "")
-    const loginUrl = locale === "pt" ? "/pt/auth/login" : "/auth/login"
-    return { 
-      type: "redirect", 
-      url: `${loginUrl}?callbackUrl=${encodeURIComponent(callbackUrl)}` 
+    const effectiveLocale =
+      locale ?? resolveLocaleFromCookie(req.cookies.get("NEXT_LOCALE")?.value)
+    const loginUrl = buildLocalizedPath("/auth/login", effectiveLocale)
+    return {
+      type: "redirect",
+      url: `${loginUrl}?callbackUrl=${encodeURIComponent(callbackUrl)}`,
     }
   }
 

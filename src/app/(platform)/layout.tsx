@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { localizedRedirect } from "@/lib/i18n/localized-redirect"
 import { headers } from "next/headers"
-import { redirect } from "next/navigation"
 import { PlatformLayoutClient } from "./layout-client"
 
 export default async function PlatformRouteLayout({
@@ -14,7 +14,7 @@ export default async function PlatformRouteLayout({
   })
 
   if (!session) {
-    redirect("/auth/login")
+    return localizedRedirect("/auth/login")
   }
 
   const user = await prisma.user.findUnique({

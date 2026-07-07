@@ -1,32 +1,16 @@
-import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime"
 import { Locale } from "./config"
+import { buildLocalizedPath } from "./locale-path"
 
-export function stripLocalePrefixFromPath(pathname: string): string {
-  return pathname.replace(/^\/pt(?=\/|$)/, "") || "/"
-}
-
-export function buildLocalizedPath(pathname: string, locale: Locale): string {
-  const cleanPath = stripLocalePrefixFromPath(pathname)
-
-  if (locale === "pt") {
-    return cleanPath === "/" ? "/pt" : `/pt${cleanPath}`
-  }
-
-  return cleanPath
-}
+export { buildLocalizedPath, stripLocalePrefixFromPath } from "./locale-path"
 
 export function setLocaleCookie(locale: Locale): void {
   document.cookie = `NEXT_LOCALE=${locale};path=/;SameSite=Lax`
 }
 
-export function navigateToLocale(
-  router: AppRouterInstance,
-  pathname: string,
-  newLocale: Locale
-): void {
+export function navigateToLocale(pathname: string, newLocale: Locale): void {
   const nextPath = buildLocalizedPath(pathname, newLocale)
+  if (nextPath === pathname) return
 
   setLocaleCookie(newLocale)
-  router.push(nextPath)
-  router.refresh()
+  window.location.assign(nextPath)
 }

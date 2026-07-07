@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation"
+import { localizedRedirect } from "@/lib/i18n/localized-redirect"
 
-export default function PlanAliasPage() {
-  redirect("/finance-planner")
+export default async function PlanAliasPage() {
+  return localizedRedirect("/finance-planner")
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { LocaleLink } from "@/components/global"
+import { stripLocalePrefixFromPath } from "@/lib/i18n/locale-path"
 import { useTranslations } from "next-intl"
 import { CreditCard, DollarSign, LayoutDashboard, ReceiptText } from "lucide-react"
 
@@ -62,7 +63,7 @@ export function MobileDock() {
         <div className="flex items-center justify-around px-2 py-2 bg-[var(--chrome-bg)] backdrop-blur-xl rounded-2xl border border-[var(--chrome-border)] shadow-lg">
           {navItems.map((item) => {
             const Icon = item.icon
-            const pathnameWithoutLocale = pathname.replace(/^\/pt/, '')
+            const pathnameWithoutLocale = stripLocalePrefixFromPath(pathname)
             const isActive = pathnameWithoutLocale === item.href || pathnameWithoutLocale.startsWith(`${item.href}/`)
             
             return (

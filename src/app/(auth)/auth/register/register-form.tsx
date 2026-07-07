@@ -9,12 +9,15 @@ import { InputOTP } from "@/components/ui/input-otp"
 import { authClient } from "@/lib/auth-client"
 import { UserPlus, Loader2, ArrowLeft } from "lucide-react"
 import { LocaleLink } from "@/components/global"
-import { useTranslations } from "next-intl"
+import { buildLocalizedPath } from "@/lib/i18n/locale-path"
+import { Locale } from "@/lib/i18n/config"
+import { useLocale, useTranslations } from "next-intl"
 
 type Step = "form" | "otp"
 
 export function RegisterForm() {
   const t = useTranslations("auth.register")
+  const locale = useLocale()
   const router = useRouter()
   const [step, setStep] = useState<Step>("form")
   const [name, setName] = useState("")
@@ -64,7 +67,7 @@ export function RegisterForm() {
         return
       }
 
-      router.push("/dashboard")
+      router.push(buildLocalizedPath("/dashboard", locale as Locale))
       router.refresh()
     } catch {
       setError(t("errorVerifyCode"))
