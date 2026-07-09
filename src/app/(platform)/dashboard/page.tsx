@@ -1,22 +1,18 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Container } from "@/components/ui/container"
-import { CalendarDays, CreditCard, DollarSign, TrendingDown, TrendingUp } from "lucide-react"
+import { DashboardSubscriptionsSection } from "@/components/dashboard/dashboard-subscriptions-section"
+import { DashboardSummaryCards } from "@/components/dashboard/dashboard-summary-cards"
 import { format } from "date-fns"
-import { ptBR, enUS } from "date-fns/locale"
 import { resolveNextChargeDate } from "@/lib/subscription-billing"
-import { formatCurrency } from "@/lib/utils/formatters"
 import { auth } from "@/lib/auth"
 import { localizedRedirect } from "@/lib/i18n/localized-redirect"
 import { headers } from "next/headers"
-import { getTranslations, getLocale } from "next-intl/server"
+import { getTranslations } from "next-intl/server"
 import { getMonthSummary } from "@/server/actions/finance-planner"
 import { listSubscriptions } from "@/server/actions/subscriptions"
 
 export const revalidate = 0
 
 export default async function DashboardPage() {
-  const locale = await getLocale()
   const t = await getTranslations("dashboard")
 
   const session = await auth.api.getSession({
@@ -63,7 +59,25 @@ export default async function DashboardPage() {
     )
     .sort((a, b) => a.nextCharge.getTime() - b.nextCharge.getTime())
   const nextSubscription = subscriptionsWithNextCharge[0] ?? null
-  const dateLocale = locale === "pt" ? ptBR : enUS
+  const projectedBalanceFooter = nextSubscription
+    ? t("cards.nextPaymentWithName", {
+        name: nextSubscription.sub.name,
+        date: format(nextSubscription.nextCharge, "dd/MM"),
+      })
+    : t("cards.noUpcoming")
+
+  const dashboardSubscriptions = activeSubscriptions.map((sub) => {
+    const nextCharge = resolveNextChargeDate(sub)
+    return {
+      id: sub.id,
+      name: sub.name,
+      category: sub.category,
+      billingCycle: sub.billingCycle,
+      price: Number(sub.price),
+      currency: sub.currency,
+      nextChargeIso: nextCharge?.toISOString() ?? null,
+    }
+  })
 
   return (
     <Container>
@@ -76,144 +90,17 @@ export default async function DashboardPage() {
             </p>
           </div>
         </div>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("cards.plannedIncome")}</CardTitle>
-            <div className="h-8 w-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
-              <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-              {formatCurrency(plannedIncomeTotal, "BRL")}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {t("cards.currentMonth")}
-            </p>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("cards.plannedExpenses")}</CardTitle>
-            <div className="h-8 w-8 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center">
-              <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-              {formatCurrency(plannedExpenseTotal, "BRL")}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {t("cards.currentMonth")}
-            </p>
-          </CardContent>
-        </Card>
+        <DashboardSummaryCards
+          plannedIncomeTotal={plannedIncomeTotal}
+          plannedExpenseTotal={plannedExpenseTotal}
+          activeCount={activeCount}
+          totalOutflow={totalOutflow}
+          projectedBalance={projectedBalance}
+          projectedBalanceFooter={projectedBalanceFooter}
+        />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("cards.activeSubscriptions")}</CardTitle>
-            <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
-              <CreditCard className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{activeCount}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {t("cards.subscriptionCount", { count: activeCount })}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("cards.totalOutflow")}</CardTitle>
-            <div className="h-8 w-8 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
-              <DollarSign className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
-              {formatCurrency(totalOutflow, "BRL")}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {t("cards.plannedPlusSubscriptions")}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("cards.projectedBalance")}</CardTitle>
-            <div className="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-900/50 flex items-center justify-center">
-              <CalendarDays className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${projectedBalance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
-              {formatCurrency(projectedBalance, "BRL")}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {nextSubscription
-                ? t("cards.nextPaymentWithName", {
-                    name: nextSubscription.sub.name,
-                    date: format(nextSubscription.nextCharge, "dd/MM"),
-                  })
-                : t("cards.noUpcoming")}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("subscriptions.title")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {activeSubscriptions.map((sub) => {
-              const nextCharge = resolveNextChargeDate(sub)
-              return (
-              <div 
-                key={sub.id} 
-                className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-              >
-                <div className="flex flex-col">
-                  <span className="font-medium">{sub.name}</span>
-                  <span className="text-xs text-muted-foreground capitalize">
-                    {sub.category.toLowerCase()} • {sub.billingCycle.toLowerCase()}
-                  </span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <div className="font-bold text-emerald-600 dark:text-emerald-400">
-                      {formatCurrency(Number(sub.price), sub.currency)}
-                    </div>
-                    {nextCharge ? (
-                      <div className="text-xs text-muted-foreground">
-                        {t("subscriptions.due", {
-                          date: format(nextCharge, "dd 'de' MMMM", { locale: dateLocale })
-                        })}
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-              )
-            })}
-            
-            {activeSubscriptions.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">{t("subscriptions.empty")}</p>
-                <Button variant="link" className="text-primary mt-2">
-                  {t("subscriptions.addFirst")}
-                </Button>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+        <DashboardSubscriptionsSection subscriptions={dashboardSubscriptions} />
       </div>
     </Container>
   )

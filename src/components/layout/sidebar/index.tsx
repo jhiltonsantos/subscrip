@@ -142,7 +142,7 @@ export function Sidebar({ user }: SidebarProps) {
       {/* Header */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200/30 dark:border-gray-800/30">
         <div ref={contentRef}>
-          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+          <h2 className="text-lg font-bold text-primary">
             {t("common.appName")}
           </h2>
         </div>
