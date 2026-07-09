@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   LogOut,
   DollarSign,
+  BarChart3,
   ReceiptText,
   WalletCards
 } from "lucide-react"
@@ -62,6 +63,11 @@ export function Sidebar({ user }: SidebarProps) {
           label: t("header.financePlanner"),
           href: "/finance-planner",
           icon: DollarSign,
+        },
+        {
+          label: t("header.reports"),
+          href: "/reports",
+          icon: BarChart3,
         },
         {
           label: t("header.cardInvoice"),

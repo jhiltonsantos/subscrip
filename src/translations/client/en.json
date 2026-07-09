@@ -102,12 +102,75 @@
       "due": "Due: {date}",
       "empty": "No subscriptions found.",
       "addFirst": "Add your first subscription"
+    },
+    "charts": {
+      "title": "Financial overview",
+      "subtitle": "Last 6 months from your finance planner",
+      "viewReports": "View reports",
+      "cashFlowTitle": "Income vs expenses",
+      "expenseBreakdownTitle": "Expense breakdown",
+      "balanceTrendTitle": "Projected balance trend",
+      "noExpenses": "No expenses recorded this month.",
+      "empty": "Start planning your income and expenses to unlock charts and monthly insights.",
+      "emptyCta": "Open finance planner",
+      "legend": {
+        "income": "Income",
+        "expense": "Expenses",
+        "balance": "Balance"
+      }
+    }
+  },
+  "reportsPage": {
+    "title": "Reports",
+    "subtitle": "Compare months and explore detailed financial trends.",
+    "empty": "No planner data yet for the selected period.",
+    "modes": {
+      "trend": "Trend",
+      "compare": "Compare months"
+    },
+    "period": {
+      "label": "Period",
+      "sixMonths": "6 months",
+      "twelveMonths": "12 months"
+    },
+    "charts": {
+      "cashFlow": "Income vs expenses",
+      "balance": "Projected balance",
+      "expenseBuckets": "Expenses by category",
+      "comparison": "Month comparison"
+    },
+    "table": {
+      "title": "Monthly breakdown",
+      "month": "Month",
+      "actions": "Actions",
+      "openPlanner": "Open planner"
+    },
+    "compare": {
+      "selectMonths": "Select months to compare",
+      "monthA": "Month A",
+      "monthB": "Month B",
+      "month": "Month",
+      "year": "Year",
+      "apply": "Compare",
+      "loading": "Comparing...",
+      "delta": "{value} ({percent})"
+    },
+    "metrics": {
+      "income": "Income",
+      "expense": "Expenses",
+      "balance": "Balance",
+      "subscriptions": "Subscriptions",
+      "creditCard": "Credit card"
+    },
+    "errors": {
+      "invalidMonth": "Enter a valid month (1–12) and year."
     }
   },
   "header":{
     "dashboard": "Dashboard",
     "subscriptions": "Subscriptions",
     "financePlanner": "Finance Planner",
+    "reports": "Reports",
     "cardInvoice": "Card Invoice",
     "paymentMethods": "Payment Methods",
     "settings": "Settings",
@@ -126,6 +189,7 @@
       "dashboard": "Dashboard",
       "subscriptions": "Subscriptions",
       "financePlanner": "Finance Planner",
+      "reports": "Reports",
       "cardInvoice": "Card Invoice",
       "paymentMethods": "Payment Methods",
       "settings": "Settings",

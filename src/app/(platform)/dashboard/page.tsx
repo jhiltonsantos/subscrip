@@ -1,4 +1,5 @@
 import { Container } from "@/components/ui/container"
+import { DashboardChartsSection } from "@/components/dashboard/dashboard-charts-section"
 import { DashboardSubscriptionsSection } from "@/components/dashboard/dashboard-subscriptions-section"
 import { DashboardSummaryCards } from "@/components/dashboard/dashboard-summary-cards"
 import { format } from "date-fns"
@@ -7,7 +8,7 @@ import { auth } from "@/lib/auth"
 import { localizedRedirect } from "@/lib/i18n/localized-redirect"
 import { headers } from "next/headers"
 import { getTranslations } from "next-intl/server"
-import { getMonthSummary } from "@/server/actions/finance-planner"
+import { getFinanceTrend, getMonthSummary } from "@/server/actions/finance-planner"
 import { listSubscriptions } from "@/server/actions/subscriptions"
 
 export const revalidate = 0
@@ -24,13 +25,19 @@ export default async function DashboardPage() {
   }
 
   const now = new Date()
-  const [subscriptionsResult, summaryResult] = await Promise.all([
+  const [subscriptionsResult, summaryResult, trendResult] = await Promise.all([
     listSubscriptions(),
     getMonthSummary({ year: now.getFullYear(), month: now.getMonth() + 1 }),
+    getFinanceTrend({
+      year: now.getFullYear(),
+      month: now.getMonth() + 1,
+      count: 6,
+    }),
   ])
 
   const subscriptions = subscriptionsResult.success ? subscriptionsResult.data : []
   const summary = summaryResult.success ? summaryResult.data : null
+  const trendPoints = trendResult.success ? trendResult.data.points : []
   const activeSubscriptions = subscriptions.filter((subscription) => subscription.active)
 
   const estimatedSubscriptionTotal = activeSubscriptions.reduce((acc, sub) => {
@@ -99,6 +106,8 @@ export default async function DashboardPage() {
           projectedBalance={projectedBalance}
           projectedBalanceFooter={projectedBalanceFooter}
         />
+
+        <DashboardChartsSection points={trendPoints} />
 
         <DashboardSubscriptionsSection subscriptions={dashboardSubscriptions} />
       </div>

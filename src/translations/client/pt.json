@@ -102,12 +102,75 @@
       "due": "Vence: {date}",
       "empty": "Nenhuma assinatura encontrada.",
       "addFirst": "Adicione sua primeira assinatura"
+    },
+    "charts": {
+      "title": "Visão financeira",
+      "subtitle": "Últimos 6 meses do seu planejamento",
+      "viewReports": "Ver relatórios",
+      "cashFlowTitle": "Receitas vs despesas",
+      "expenseBreakdownTitle": "Distribuição de despesas",
+      "balanceTrendTitle": "Evolução do saldo previsto",
+      "noExpenses": "Nenhuma despesa registrada neste mês.",
+      "empty": "Comece a planejar receitas e despesas para desbloquear gráficos e insights mensais.",
+      "emptyCta": "Abrir planejador financeiro",
+      "legend": {
+        "income": "Receitas",
+        "expense": "Despesas",
+        "balance": "Saldo"
+      }
+    }
+  },
+  "reportsPage": {
+    "title": "Relatórios",
+    "subtitle": "Compare meses e explore tendências financeiras detalhadas.",
+    "empty": "Ainda não há dados do planejamento para o período selecionado.",
+    "modes": {
+      "trend": "Tendência",
+      "compare": "Comparar meses"
+    },
+    "period": {
+      "label": "Período",
+      "sixMonths": "6 meses",
+      "twelveMonths": "12 meses"
+    },
+    "charts": {
+      "cashFlow": "Receitas vs despesas",
+      "balance": "Saldo previsto",
+      "expenseBuckets": "Despesas por categoria",
+      "comparison": "Comparação entre meses"
+    },
+    "table": {
+      "title": "Detalhamento mensal",
+      "month": "Mês",
+      "actions": "Ações",
+      "openPlanner": "Abrir planejador"
+    },
+    "compare": {
+      "selectMonths": "Selecione os meses para comparar",
+      "monthA": "Mês A",
+      "monthB": "Mês B",
+      "month": "Mês",
+      "year": "Ano",
+      "apply": "Comparar",
+      "loading": "Comparando...",
+      "delta": "{value} ({percent})"
+    },
+    "metrics": {
+      "income": "Receitas",
+      "expense": "Despesas",
+      "balance": "Saldo",
+      "subscriptions": "Assinaturas",
+      "creditCard": "Cartão de crédito"
+    },
+    "errors": {
+      "invalidMonth": "Informe um mês válido (1–12) e ano."
     }
   },
   "header":{
     "dashboard": "Dashboard",
     "subscriptions": "Assinaturas",
     "financePlanner": "Planejador Financeiro",
+    "reports": "Relatórios",
     "cardInvoice": "Fatura do cartão",
     "paymentMethods": "Métodos de Pagamento",
     "settings": "Configurações",
@@ -126,6 +189,7 @@
       "dashboard": "Dashboard",
       "subscriptions": "Assinaturas",
       "financePlanner": "Planejador Financeiro",
+      "reports": "Relatórios",
       "cardInvoice": "Fatura do cartão",
       "paymentMethods": "Métodos de Pagamento",
       "settings": "Configurações",
