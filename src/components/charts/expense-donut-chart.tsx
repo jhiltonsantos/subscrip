@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Cell, Pie, PieChart, Sector } from "recharts"
+import { Pie, PieChart, Sector } from "recharts"
 import type { PieSectorDataItem } from "recharts/types/polar/Pie"
 import {
   ChartContainer,
@@ -26,6 +26,11 @@ type EnrichedDonutPoint = ExpenseDonutPoint & {
   percent: number
 }
 
+type PieSectorProps = PieSectorDataItem & {
+  isActive?: boolean
+  payload?: EnrichedDonutPoint
+}
+
 type ExpenseDonutChartProps = {
   data: ExpenseDonutPoint[]
   config: ChartConfig
@@ -35,7 +40,7 @@ const MIN_LABEL_PERCENT = 8
 
 export function ExpenseDonutChart({ data, config }: ExpenseDonutChartProps) {
   const locale = useLocale()
-  const [activeIndex, setActiveIndex] = useState<number | null>(null)
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
   const enriched = useMemo(() => enrichDonutData(data), [data])
   const total = useMemo(
@@ -83,22 +88,12 @@ export function ExpenseDonutChart({ data, config }: ExpenseDonutChartProps) {
               strokeWidth={2}
               labelLine={false}
               label={(props) => renderSegmentLabel(props, locale)}
-              activeIndex={activeIndex ?? undefined}
-              activeShape={renderActiveShape}
-              onMouseEnter={(_, index) => setActiveIndex(index)}
-              onMouseLeave={() => setActiveIndex(null)}
-            >
-              {enriched.map((entry, index) => (
-                <Cell
-                  key={entry.key}
-                  fill={entry.fill}
-                  opacity={
-                    activeIndex !== null && activeIndex !== index ? 0.45 : 1
-                  }
-                  className="transition-opacity duration-150"
-                />
-              ))}
-            </Pie>
+              shape={(props) =>
+                renderPieSector(props as PieSectorProps, hoveredIndex)
+              }
+              onMouseEnter={(_, index) => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+            />
           </PieChart>
         </ChartContainer>
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
@@ -185,7 +180,10 @@ function renderSegmentLabel(
   )
 }
 
-function renderActiveShape(props: PieSectorDataItem) {
+function renderPieSector(
+  props: PieSectorProps,
+  hoveredIndex: number | null
+) {
   const {
     cx = 0,
     cy = 0,
@@ -193,20 +191,27 @@ function renderActiveShape(props: PieSectorDataItem) {
     outerRadius = 0,
     startAngle = 0,
     endAngle = 0,
-    fill = "currentColor",
+    isActive = false,
+    payload,
   } = props
+
+  const fill = payload?.fill ?? props.fill ?? "currentColor"
+  const isHovered = hoveredIndex !== null
+  const opacity = isHovered && !isActive ? 0.45 : 1
 
   return (
     <Sector
       cx={cx}
       cy={cy}
       innerRadius={innerRadius}
-      outerRadius={outerRadius + 8}
+      outerRadius={isActive ? outerRadius + 8 : outerRadius}
       startAngle={startAngle}
       endAngle={endAngle}
       fill={fill}
-      stroke="var(--foreground)"
-      strokeWidth={2}
+      stroke={isActive ? "var(--foreground)" : undefined}
+      strokeWidth={isActive ? 2 : 0}
+      opacity={opacity}
+      className="transition-opacity duration-150"
     />
   )
 }
