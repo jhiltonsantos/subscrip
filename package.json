@@ -15,6 +15,7 @@
     "db:pull": "prisma db pull",
     "db:push": "ts-node --project prisma/tsconfig.json prisma/run-guarded-prisma.ts db push",
     "db:seed": "prisma db seed",
+    "db:seed:prod": "ts-node --project prisma/tsconfig.json prisma/seed-prod-demo.ts",
     "db:migrate": "ts-node --project prisma/tsconfig.json prisma/run-guarded-prisma.ts migrate dev",
     "db:reset": "ts-node --project prisma/tsconfig.json prisma/run-guarded-prisma.ts migrate reset --force",
     "db:studio": "prisma studio",
