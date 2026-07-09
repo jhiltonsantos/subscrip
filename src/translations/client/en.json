@@ -198,6 +198,21 @@
       "reactivate": "Reactivate",
       "delete": "Delete"
     },
+    "enums": {
+      "categories": {
+        "INFRASTRUCTURE": "Infrastructure",
+        "ENTERTAINMENT": "Entertainment",
+        "EDUCATION": "Education",
+        "TOOLS": "Tools",
+        "FITNESS": "Fitness",
+        "OTHER": "Other"
+      },
+      "billingCycles": {
+        "MONTHLY": "Monthly",
+        "YEARLY": "Yearly",
+        "WEEKLY": "Weekly"
+      }
+    },
     "filters": {
       "searchPlaceholder": "Search by name or plan...",
       "allStatuses": "All statuses",

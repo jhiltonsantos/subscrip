@@ -1,14 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { format } from "date-fns"
-import { enUS, ptBR } from "date-fns/locale"
 import { useLocale, useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CardGrid } from "@/components/finance-planner/entry-list-parts"
 import { ViewToggle } from "@/components/finance-planner/view-toggle"
 import type { ViewMode } from "@/components/finance-planner/types"
+import {
+  formatSubscriptionDueDate,
+  getBillingCycleLabel,
+  getCategoryLabel,
+} from "@/lib/subscription-labels"
 import { formatCurrency } from "@/lib/utils/formatters"
 
 export type DashboardSubscriptionItem = {
@@ -29,10 +32,18 @@ export function DashboardSubscriptionsSection({
   subscriptions,
 }: DashboardSubscriptionsSectionProps) {
   const t = useTranslations("dashboard")
-  const viewT = useTranslations("financePlanner")
+  const viewT = useTranslations("financePlannerPage")
+  const subscriptionsT = useTranslations("subscriptionsPage")
   const locale = useLocale()
   const [viewMode, setViewMode] = useState<ViewMode>("list")
-  const dateLocale = locale === "pt" ? ptBR : enUS
+
+  function formatDueLabel(nextChargeIso: string | null) {
+    if (!nextChargeIso) return null
+
+    return t("subscriptions.due", {
+      date: formatSubscriptionDueDate(new Date(nextChargeIso), locale),
+    })
+  }
 
   return (
     <Card>
@@ -56,13 +67,8 @@ export function DashboardSubscriptionsSection({
               <SubscriptionListRow
                 key={sub.id}
                 subscription={sub}
-                dueLabel={t("subscriptions.due", {
-                  date: sub.nextChargeIso
-                    ? format(new Date(sub.nextChargeIso), "dd 'de' MMMM", {
-                        locale: dateLocale,
-                      })
-                    : "",
-                })}
+                metaLabel={formatSubscriptionMeta(sub, subscriptionsT)}
+                dueLabel={formatDueLabel(sub.nextChargeIso)}
               />
             ))}
           </div>
@@ -72,15 +78,8 @@ export function DashboardSubscriptionsSection({
               <SubscriptionGridCard
                 key={sub.id}
                 subscription={sub}
-                dueLabel={
-                  sub.nextChargeIso
-                    ? t("subscriptions.due", {
-                        date: format(new Date(sub.nextChargeIso), "dd 'de' MMMM", {
-                          locale: dateLocale,
-                        }),
-                      })
-                    : null
-                }
+                metaLabel={formatSubscriptionMeta(sub, subscriptionsT)}
+                dueLabel={formatDueLabel(sub.nextChargeIso)}
               />
             ))}
           </CardGrid>
@@ -90,28 +89,33 @@ export function DashboardSubscriptionsSection({
   )
 }
 
+function formatSubscriptionMeta(
+  subscription: DashboardSubscriptionItem,
+  t: ReturnType<typeof useTranslations<"subscriptionsPage">>
+) {
+  return `${getCategoryLabel(subscription.category, t)} • ${getBillingCycleLabel(subscription.billingCycle, t)}`
+}
+
 function SubscriptionListRow({
   subscription,
+  metaLabel,
   dueLabel,
 }: {
   subscription: DashboardSubscriptionItem
-  dueLabel: string
+  metaLabel: string
+  dueLabel: string | null
 }) {
   return (
     <div className="flex items-center justify-between rounded-lg bg-muted/30 p-4 transition-colors hover:bg-muted/50">
       <div className="flex flex-col">
         <span className="font-medium">{subscription.name}</span>
-        <span className="text-xs capitalize text-muted-foreground">
-          {subscription.category.toLowerCase()} • {subscription.billingCycle.toLowerCase()}
-        </span>
+        <span className="text-xs text-muted-foreground">{metaLabel}</span>
       </div>
       <div className="text-right">
         <div className="font-bold text-emerald-600 dark:text-emerald-400">
           {formatCurrency(subscription.price, subscription.currency)}
         </div>
-        {subscription.nextChargeIso ? (
-          <div className="text-xs text-muted-foreground">{dueLabel}</div>
-        ) : null}
+        {dueLabel ? <div className="text-xs text-muted-foreground">{dueLabel}</div> : null}
       </div>
     </div>
   )
@@ -119,9 +123,11 @@ function SubscriptionListRow({
 
 function SubscriptionGridCard({
   subscription,
+  metaLabel,
   dueLabel,
 }: {
   subscription: DashboardSubscriptionItem
+  metaLabel: string
   dueLabel: string | null
 }) {
   return (
@@ -129,9 +135,7 @@ function SubscriptionGridCard({
       <div className="space-y-3">
         <div>
           <p className="font-medium">{subscription.name}</p>
-          <p className="mt-1 text-xs capitalize text-muted-foreground">
-            {subscription.category.toLowerCase()} • {subscription.billingCycle.toLowerCase()}
-          </p>
+          <p className="mt-1 text-xs text-muted-foreground">{metaLabel}</p>
         </div>
         <div>
           <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">

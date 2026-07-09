@@ -198,6 +198,21 @@
       "reactivate": "Reativar",
       "delete": "Excluir"
     },
+    "enums": {
+      "categories": {
+        "INFRASTRUCTURE": "Infraestrutura",
+        "ENTERTAINMENT": "Entretenimento",
+        "EDUCATION": "Educação",
+        "TOOLS": "Ferramentas",
+        "FITNESS": "Fitness",
+        "OTHER": "Outros"
+      },
+      "billingCycles": {
+        "MONTHLY": "Mensal",
+        "YEARLY": "Anual",
+        "WEEKLY": "Semanal"
+      }
+    },
     "filters": {
       "searchPlaceholder": "Buscar por nome ou plano...",
       "allStatuses": "Todos os status",
