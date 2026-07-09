@@ -100,7 +100,7 @@ export function DashboardChartsSection({ points }: DashboardChartsSectionProps) 
           <CardHeader>
             <CardTitle className="text-base">{t("expenseBreakdownTitle")}</CardTitle>
           </CardHeader>
-          <CardContent className="flex items-center justify-center">
+          <CardContent className="pt-2">
             {donutData.length > 0 ? (
               <ExpenseDonutChart data={donutData} config={bucketConfig} />
             ) : (
