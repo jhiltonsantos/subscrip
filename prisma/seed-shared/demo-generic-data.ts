@@ -268,3 +268,13 @@ export const DEMO_INSTALLMENTS: DemoInstallmentSeed[] = [
     firstPurchaseDate: '2026-05-05',
   },
 ]
+
+/** Scale factors for 12-month history (index 0 = oldest, 11 = current). */
+export const DEMO_MONTH_SCALE_FACTORS = [
+  0.88, 0.9, 0.92, 0.94, 0.96, 0.98, 1.0, 1.01, 1.02, 1.03, 1.04, 1.05,
+] as const
+
+export function scaleDemoAmount(base: number, monthIndex: number): number {
+  const factor = DEMO_MONTH_SCALE_FACTORS[monthIndex] ?? 1
+  return Math.round(base * factor * 100) / 100
+}
