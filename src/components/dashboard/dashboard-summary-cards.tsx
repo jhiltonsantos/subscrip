@@ -109,7 +109,11 @@ export function DashboardSummaryCards(props: DashboardSummaryCardsProps) {
   const t = useTranslations("dashboard")
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+    <div
+      role="region"
+      aria-label={t("cards.regionLabel")}
+      className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 snap-x snap-mandatory lg:mx-0 lg:grid lg:grid-cols-2 lg:gap-4 lg:overflow-visible lg:px-0 lg:pb-0 lg:snap-none xl:grid-cols-5"
+    >
       {CARD_CONFIGS.map((config) => {
         const Icon = config.icon
 
@@ -117,10 +121,10 @@ export function DashboardSummaryCards(props: DashboardSummaryCardsProps) {
           <LocaleLink
             key={config.id}
             href={config.href}
-            className="block rounded-xl transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="min-w-[70vw] shrink-0 snap-start rounded-xl transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-w-[220px] lg:min-w-0"
           >
-            <Card className="h-full cursor-pointer border-transparent hover:border-border/60">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Card className="h-full cursor-pointer gap-3 border-transparent py-4 hover:border-border/60 lg:gap-6 lg:py-6">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 px-4 pb-1 lg:px-6 lg:pb-2">
                 <CardTitle className="text-sm font-medium">{t(config.titleKey)}</CardTitle>
                 <div
                   className={cn(
@@ -131,8 +135,13 @@ export function DashboardSummaryCards(props: DashboardSummaryCardsProps) {
                   <Icon className={cn("h-4 w-4", config.iconClass)} />
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className={cn("text-2xl font-bold", config.valueClass)}>
+              <CardContent className="px-4 lg:px-6">
+                <div
+                  className={cn(
+                    "text-xl font-bold lg:text-2xl",
+                    config.valueClass
+                  )}
+                >
                   {config.getValue(props)}
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">

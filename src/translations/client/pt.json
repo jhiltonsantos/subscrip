@@ -82,6 +82,7 @@
   "dashboard": {
     "title": "Dashboard",
     "greeting": "Olá, {name}",
+    "welcomeLabel": "Oi, bem-vindo de volta",
     "newSubscription": "Nova Assinatura",
     "cards": {
       "monthlySpend": "Gasto Mensal (Est.)",
@@ -96,7 +97,16 @@
       "subscriptionCount": "{count, plural, one {# assinatura} other {# assinaturas}} ativas",
       "nextPayment": "Próxima Fatura",
       "nextPaymentWithName": "{name} em {date}",
-      "noUpcoming": "Nenhuma"
+      "noUpcoming": "Nenhuma",
+      "regionLabel": "Cards de resumo financeiro"
+    },
+    "upcoming": {
+      "nextBill": "Próxima conta",
+      "nextSubscription": "Próxima assinatura",
+      "dueOn": "Vence {date}",
+      "empty": "Nada a vencer em breve",
+      "regionLabel": "Próximos vencimentos",
+      "goToSlide": "Ir para o slide {index}"
     },
     "subscriptions": {
       "title": "Suas Assinaturas",

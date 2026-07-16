@@ -82,6 +82,7 @@
   "dashboard": {
     "title": "Dashboard",
     "greeting": "Hello, {name}",
+    "welcomeLabel": "Hi, welcome back",
     "newSubscription": "New Subscription",
     "cards": {
       "monthlySpend": "Monthly Spend (Est.)",
@@ -96,7 +97,16 @@
       "subscriptionCount": "{count, plural, one {# subscription} other {# subscriptions}} active",
       "nextPayment": "Next Payment",
       "nextPaymentWithName": "{name} on {date}",
-      "noUpcoming": "No upcoming"
+      "noUpcoming": "No upcoming",
+      "regionLabel": "Financial summary cards"
+    },
+    "upcoming": {
+      "nextBill": "Next bill",
+      "nextSubscription": "Next subscription",
+      "dueOn": "Due {date}",
+      "empty": "Nothing due soon",
+      "regionLabel": "Upcoming payments",
+      "goToSlide": "Go to slide {index}"
     },
     "subscriptions": {
       "title": "Your Subscriptions",

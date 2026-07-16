@@ -2,14 +2,24 @@ import { Container } from "@/components/ui/container"
 import { DashboardChartsSection } from "@/components/dashboard/dashboard-charts-section"
 import { DashboardSubscriptionsSection } from "@/components/dashboard/dashboard-subscriptions-section"
 import { DashboardSummaryCards } from "@/components/dashboard/dashboard-summary-cards"
+import {
+  DashboardUpcomingCarousel,
+  type DashboardUpcomingBill,
+  type DashboardUpcomingSubscription,
+} from "@/components/dashboard/dashboard-upcoming-carousel"
 import { format } from "date-fns"
 import { resolveNextChargeDate } from "@/lib/subscription-billing"
 import { auth } from "@/lib/auth"
 import { localizedRedirect } from "@/lib/i18n/localized-redirect"
 import { headers } from "next/headers"
 import { getTranslations } from "next-intl/server"
-import { getFinanceTrend, getMonthSummary } from "@/server/actions/finance-planner"
+import {
+  getFinanceTrend,
+  getMonthlyPlan,
+  getMonthSummary,
+} from "@/server/actions/finance-planner"
 import { listSubscriptions } from "@/server/actions/subscriptions"
+import type { SerializedMonthlyPlan } from "@/server/actions/finance-planner"
 
 export const revalidate = 0
 
@@ -25,19 +35,21 @@ export default async function DashboardPage() {
   }
 
   const now = new Date()
-  const [subscriptionsResult, summaryResult, trendResult] = await Promise.all([
-    listSubscriptions(),
-    getMonthSummary({ year: now.getFullYear(), month: now.getMonth() + 1 }),
-    getFinanceTrend({
-      year: now.getFullYear(),
-      month: now.getMonth() + 1,
-      count: 6,
-    }),
-  ])
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+
+  const [subscriptionsResult, summaryResult, trendResult, planResult] =
+    await Promise.all([
+      listSubscriptions(),
+      getMonthSummary({ year, month }),
+      getFinanceTrend({ year, month, count: 6 }),
+      getMonthlyPlan({ year, month }),
+    ])
 
   const subscriptions = subscriptionsResult.success ? subscriptionsResult.data : []
   const summary = summaryResult.success ? summaryResult.data : null
   const trendPoints = trendResult.success ? trendResult.data.points : []
+  const plan = planResult.success ? planResult.data.plan : null
   const activeSubscriptions = subscriptions.filter((subscription) => subscription.active)
 
   const estimatedSubscriptionTotal = activeSubscriptions.reduce((acc, sub) => {
@@ -65,13 +77,26 @@ export default async function DashboardPage() {
         Boolean(item.nextCharge)
     )
     .sort((a, b) => a.nextCharge.getTime() - b.nextCharge.getTime())
-  const nextSubscription = subscriptionsWithNextCharge[0] ?? null
-  const projectedBalanceFooter = nextSubscription
+  const nextSubscriptionSource = subscriptionsWithNextCharge[0] ?? null
+  const projectedBalanceFooter = nextSubscriptionSource
     ? t("cards.nextPaymentWithName", {
-        name: nextSubscription.sub.name,
-        date: format(nextSubscription.nextCharge, "dd/MM"),
+        name: nextSubscriptionSource.sub.name,
+        date: format(nextSubscriptionSource.nextCharge, "dd/MM"),
       })
     : t("cards.noUpcoming")
+
+  const nextSubscription: DashboardUpcomingSubscription | null =
+    nextSubscriptionSource
+      ? {
+          id: nextSubscriptionSource.sub.id,
+          name: nextSubscriptionSource.sub.name,
+          price: Number(nextSubscriptionSource.sub.price),
+          currency: nextSubscriptionSource.sub.currency,
+          nextChargeIso: nextSubscriptionSource.nextCharge.toISOString(),
+        }
+      : null
+
+  const nextBill = resolveNextUpcomingBill(plan, now)
 
   const dashboardSubscriptions = activeSubscriptions.map((sub) => {
     const nextCharge = resolveNextChargeDate(sub)
@@ -86,14 +111,31 @@ export default async function DashboardPage() {
     }
   })
 
+  const userName = session.user.name || session.user.email
+
   return (
     <Container>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3 lg:hidden">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium text-muted-foreground">
+              {t("welcomeLabel")}
+            </p>
+            <h1 className="truncate text-xl font-bold tracking-tight sm:text-2xl">
+              {userName}
+            </h1>
+          </div>
+          <DashboardUpcomingCarousel
+            nextBill={nextBill}
+            nextSubscription={nextSubscription}
+          />
+        </div>
+
+        <div className="hidden items-center justify-between lg:flex">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
             <p className="text-muted-foreground">
-              {t("greeting", { name: session.user.name || session.user.email })}
+              {t("greeting", { name: userName })}
             </p>
           </div>
         </div>
@@ -117,4 +159,63 @@ export default async function DashboardPage() {
 
 function toNumber(value: string | null | undefined) {
   return value ? Number(value) : 0
+}
+
+function startOfLocalDay(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+}
+
+function resolveNextUpcomingBill(
+  plan: SerializedMonthlyPlan | null,
+  now: Date
+): DashboardUpcomingBill | null {
+  if (!plan) return null
+
+  const today = startOfLocalDay(now)
+
+  const candidates = plan.expenses
+    .map((expense) => {
+      if (expense.isPaid) return null
+
+      const isCardInvoice = expense.expenseBucket === "CREDIT_CARD"
+      const dueDateIso = isCardInvoice
+        ? expense.creditCardInvoice?.dueDate ?? expense.dueDate
+        : expense.dueDate
+
+      if (!dueDateIso) return null
+
+      const dueDate = startOfLocalDay(new Date(dueDateIso))
+      if (dueDate < today) return null
+
+      const name =
+        isCardInvoice && expense.creditCardInvoice?.paymentCard?.nickname
+          ? expense.creditCardInvoice.paymentCard.nickname
+          : expense.name
+
+      return {
+        id: expense.id,
+        name,
+        amount: Number(expense.amount),
+        currency: expense.currency,
+        dueDateIso,
+        dueTime: dueDate.getTime(),
+        href: (isCardInvoice ? "/card-invoice" : "/finance-planner") as
+          | "/finance-planner"
+          | "/card-invoice",
+      }
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item))
+    .sort((a, b) => a.dueTime - b.dueTime)
+
+  const first = candidates[0]
+  if (!first) return null
+
+  return {
+    id: first.id,
+    name: first.name,
+    amount: first.amount,
+    currency: first.currency,
+    dueDateIso: first.dueDateIso,
+    href: first.href,
+  }
 }
