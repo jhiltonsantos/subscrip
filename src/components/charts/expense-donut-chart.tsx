@@ -34,11 +34,16 @@ type PieSectorProps = PieSectorDataItem & {
 type ExpenseDonutChartProps = {
   data: ExpenseDonutPoint[]
   config: ChartConfig
+  compact?: boolean
 }
 
 const MIN_LABEL_PERCENT = 8
 
-export function ExpenseDonutChart({ data, config }: ExpenseDonutChartProps) {
+export function ExpenseDonutChart({
+  data,
+  config,
+  compact = false,
+}: ExpenseDonutChartProps) {
   const locale = useLocale()
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
@@ -52,12 +57,23 @@ export function ExpenseDonutChart({ data, config }: ExpenseDonutChartProps) {
     return null
   }
 
+  const chartSize = compact ? "h-[200px]" : "h-[260px]"
+  const chartMaxWidth = compact ? "max-w-[200px]" : "max-w-[280px]"
+  const innerRadius = compact ? 46 : 58
+  const outerRadius = compact ? 76 : 96
+
   return (
-    <div className="flex w-full flex-col items-center gap-6 sm:flex-row sm:items-center sm:justify-center">
-      <div className="relative mx-auto w-full max-w-[280px] shrink-0">
+    <div
+      className={
+        compact
+          ? "flex w-full flex-col items-center gap-4"
+          : "flex w-full flex-col items-center gap-6 sm:flex-row sm:items-center sm:justify-center"
+      }
+    >
+      <div className={`relative mx-auto w-full shrink-0 ${chartMaxWidth}`}>
         <ChartContainer
           config={config}
-          className="mx-auto aspect-square h-[260px] w-full"
+          className={`mx-auto aspect-square w-full ${chartSize}`}
         >
           <PieChart>
             <ChartTooltip
@@ -83,11 +99,15 @@ export function ExpenseDonutChart({ data, config }: ExpenseDonutChartProps) {
               data={enriched}
               dataKey="value"
               nameKey="label"
-              innerRadius={58}
-              outerRadius={96}
+              innerRadius={innerRadius}
+              outerRadius={outerRadius}
               strokeWidth={2}
               labelLine={false}
-              label={(props) => renderSegmentLabel(props, locale)}
+              label={
+                compact
+                  ? undefined
+                  : (props) => renderSegmentLabel(props, locale)
+              }
               shape={(props) =>
                 renderPieSector(props as PieSectorProps, hoveredIndex)
               }
@@ -100,13 +120,25 @@ export function ExpenseDonutChart({ data, config }: ExpenseDonutChartProps) {
           <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
             Total
           </span>
-          <span className="text-lg font-semibold tabular-nums">
+          <span
+            className={
+              compact
+                ? "text-base font-semibold tabular-nums"
+                : "text-lg font-semibold tabular-nums"
+            }
+          >
             {formatChartCurrency(total, locale)}
           </span>
         </div>
       </div>
 
-      <ul className="w-full min-w-0 flex-1 space-y-2.5 sm:max-w-[240px]">
+      <ul
+        className={
+          compact
+            ? "w-full min-w-0 space-y-2"
+            : "w-full min-w-0 flex-1 space-y-2.5 sm:max-w-[240px]"
+        }
+      >
         {enriched.map((entry) => (
           <li
             key={entry.key}

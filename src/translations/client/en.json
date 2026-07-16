@@ -27,12 +27,13 @@
       "title": "Manage subscriptions,\nincome, and monthly spending in one place.",
       "description": "Get a complete view of your recurring finances with smart alerts and real-time monthly tracking.",
       "cta": "Create Free Account",
-      "metrics": {
-        "monthlySpend": "Consolidated monthly spending",
-        "savings": "in monthly savings",
-        "activeSubscriptions": "Active subscriptions",
-        "gains": "Monthly gains",
-        "controlMessage": "Centralize everything in one dashboard and track each subscription without losing money on forgotten charges."
+      "charts": {
+        "cashFlowTitle": "Income vs expenses",
+        "expenseBreakdownTitle": "Expense breakdown",
+        "legend": {
+          "income": "Income",
+          "expense": "Expenses"
+        }
       }
     }
   },

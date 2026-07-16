@@ -21,13 +21,18 @@ export type CashFlowChartPoint = {
 type CashFlowBarChartProps = {
   data: CashFlowChartPoint[]
   config: ChartConfig
+  className?: string
 }
 
-export function CashFlowBarChart({ data, config }: CashFlowBarChartProps) {
+export function CashFlowBarChart({
+  data,
+  config,
+  className = "aspect-auto h-[280px] w-full",
+}: CashFlowBarChartProps) {
   const locale = useLocale()
 
   return (
-    <ChartContainer config={config} className="aspect-auto h-[280px] w-full">
+    <ChartContainer config={config} className={className}>
       <BarChart accessibilityLayer data={data}>
         <CartesianGrid vertical={false} />
         <XAxis
