@@ -74,23 +74,27 @@ export function LandingHeroCharts() {
   }))
 
   return (
-    <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
-      <div className="glass-card animate-in fade-in-0 slide-in-from-bottom-4 duration-700 rounded-2xl p-4 sm:p-5">
+    <div className="mx-auto grid w-full max-w-5xl grid-cols-1 items-stretch gap-4 md:grid-cols-2 md:gap-5">
+      <div className="glass-card flex h-full animate-in flex-col rounded-2xl p-4 fade-in-0 slide-in-from-bottom-4 duration-700 sm:p-5">
         <h2 className="mb-3 text-left text-sm font-semibold tracking-tight sm:text-base">
           {t("cashFlowTitle")}
         </h2>
-        <CashFlowBarChart
-          data={cashFlowData}
-          config={cashFlowConfig}
-          className="aspect-auto h-[220px] w-full"
-        />
+        <div className="flex flex-1 items-center justify-center">
+          <CashFlowBarChart
+            data={cashFlowData}
+            config={cashFlowConfig}
+            className="aspect-auto mx-auto h-[240px] w-full max-w-md"
+          />
+        </div>
       </div>
 
-      <div className="glass-card animate-in fade-in-0 slide-in-from-bottom-4 duration-700 delay-150 rounded-2xl p-4 sm:p-5">
+      <div className="glass-card flex h-full animate-in flex-col rounded-2xl p-4 fade-in-0 slide-in-from-bottom-4 duration-700 delay-150 sm:p-5">
         <h2 className="mb-3 text-left text-sm font-semibold tracking-tight sm:text-base">
           {t("expenseBreakdownTitle")}
         </h2>
-        <ExpenseDonutChart data={donutData} config={bucketConfig} compact />
+        <div className="flex flex-1 items-center justify-center">
+          <ExpenseDonutChart data={donutData} config={bucketConfig} compact />
+        </div>
       </div>
     </div>
   )

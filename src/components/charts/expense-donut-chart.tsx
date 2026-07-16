@@ -57,16 +57,17 @@ export function ExpenseDonutChart({
     return null
   }
 
-  const chartSize = compact ? "h-[200px]" : "h-[260px]"
-  const chartMaxWidth = compact ? "max-w-[200px]" : "max-w-[280px]"
-  const innerRadius = compact ? 46 : 58
-  const outerRadius = compact ? 76 : 96
+  // Compact (landing): chart-only, larger, centered — no side/bottom legend
+  const chartSize = compact ? "h-[240px]" : "h-[260px]"
+  const chartMaxWidth = compact ? "max-w-[240px]" : "max-w-[280px]"
+  const innerRadius = 58
+  const outerRadius = 96
 
   return (
     <div
       className={
         compact
-          ? "flex w-full flex-col items-center gap-4"
+          ? "flex w-full items-center justify-center"
           : "flex w-full flex-col items-center gap-6 sm:flex-row sm:items-center sm:justify-center"
       }
     >
@@ -120,47 +121,37 @@ export function ExpenseDonutChart({
           <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
             Total
           </span>
-          <span
-            className={
-              compact
-                ? "text-base font-semibold tabular-nums"
-                : "text-lg font-semibold tabular-nums"
-            }
-          >
+          <span className="text-lg font-semibold tabular-nums">
             {formatChartCurrency(total, locale)}
           </span>
         </div>
       </div>
 
-      <ul
-        className={
-          compact
-            ? "w-full min-w-0 space-y-2"
-            : "w-full min-w-0 flex-1 space-y-2.5 sm:max-w-[240px]"
-        }
-      >
-        {enriched.map((entry) => (
-          <li
-            key={entry.key}
-            className="flex items-center gap-2.5 text-sm"
-          >
-            <span
-              className="size-3 shrink-0 rounded-sm"
-              style={{ backgroundColor: entry.fill }}
-              aria-hidden
-            />
-            <span className="min-w-0 flex-1 truncate font-medium">
-              {entry.label}
-            </span>
-            <span className="shrink-0 tabular-nums text-muted-foreground">
-              {formatChartCurrency(entry.value, locale)}
-            </span>
-            <span className="w-12 shrink-0 text-right tabular-nums text-muted-foreground">
-              {formatChartPercent(entry.percent, locale)}
-            </span>
-          </li>
-        ))}
-      </ul>
+      {!compact ? (
+        <ul className="w-full min-w-0 flex-1 space-y-2.5 sm:max-w-[240px]">
+          {enriched.map((entry) => (
+            <li
+              key={entry.key}
+              className="flex items-center gap-2.5 text-sm"
+            >
+              <span
+                className="size-3 shrink-0 rounded-sm"
+                style={{ backgroundColor: entry.fill }}
+                aria-hidden
+              />
+              <span className="min-w-0 flex-1 truncate font-medium">
+                {entry.label}
+              </span>
+              <span className="shrink-0 tabular-nums text-muted-foreground">
+                {formatChartCurrency(entry.value, locale)}
+              </span>
+              <span className="w-12 shrink-0 text-right tabular-nums text-muted-foreground">
+                {formatChartPercent(entry.percent, locale)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </div>
   )
 }
