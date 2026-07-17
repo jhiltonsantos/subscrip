@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { format } from "date-fns"
-import { CalendarClock, CreditCard } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { LocaleLink } from "@/components/global"
 import { formatCurrency } from "@/lib/utils/formatters"
@@ -36,11 +35,11 @@ type UpcomingSlide = {
   name: string
   amountLabel: string
   dueLabel: string
-  icon: "bill" | "subscription"
 }
 
 const AUTO_ADVANCE_MS = 5000
 const CARD_MIN_HEIGHT = "min-h-[5.5rem]"
+const CARD_WIDTH = "w-[10.5rem] max-w-full shrink-0"
 
 export function DashboardUpcomingCarousel({
   nextBill,
@@ -64,7 +63,6 @@ export function DashboardUpcomingCarousel({
         dueLabel: t("dueOn", {
           date: format(new Date(nextBill.dueDateIso), "dd/MM"),
         }),
-        icon: "bill",
       })
     }
 
@@ -81,7 +79,6 @@ export function DashboardUpcomingCarousel({
         dueLabel: t("dueOn", {
           date: format(new Date(nextSubscription.nextChargeIso), "dd/MM"),
         }),
-        icon: "subscription",
       })
     }
 
@@ -126,16 +123,16 @@ export function DashboardUpcomingCarousel({
   if (slides.length === 0) {
     return (
       <div
-        className={`flex ${CARD_MIN_HEIGHT} min-w-0 max-w-[58%] items-center rounded-2xl border border-border/50 bg-card/80 px-4 py-3.5 shadow-sm backdrop-blur-sm`}
+        className={`flex ${CARD_MIN_HEIGHT} ${CARD_WIDTH} items-center rounded-2xl border border-border/50 bg-card/80 px-3 py-3 shadow-sm backdrop-blur-sm`}
       >
-        <p className="text-sm text-muted-foreground">{t("empty")}</p>
+        <p className="text-xs text-muted-foreground">{t("empty")}</p>
       </div>
     )
   }
 
   return (
     <div
-      className="min-w-0 max-w-[58%] shrink-0"
+      className={CARD_WIDTH}
       onPointerEnter={() => setPaused(true)}
       onPointerLeave={() => setPaused(false)}
       onTouchStart={() => setPaused(true)}
@@ -148,43 +145,34 @@ export function DashboardUpcomingCarousel({
         aria-roledescription="carousel"
         className="flex snap-x snap-mandatory overflow-x-auto rounded-2xl [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {slides.map((slide) => {
-          const Icon = slide.icon === "bill" ? CalendarClock : CreditCard
-
-          return (
-            <LocaleLink
-              key={slide.key}
-              href={slide.href}
-              className="w-full min-w-full shrink-0 snap-start"
+        {slides.map((slide) => (
+          <LocaleLink
+            key={slide.key}
+            href={slide.href}
+            className="w-full min-w-full shrink-0 snap-start"
+          >
+            <div
+              className={`flex ${CARD_MIN_HEIGHT} flex-col justify-between rounded-2xl border border-border/50 bg-card/85 px-3 py-3 shadow-sm backdrop-blur-sm transition-colors hover:bg-card`}
             >
-              <div
-                className={`flex ${CARD_MIN_HEIGHT} flex-col justify-between rounded-2xl border border-border/50 bg-card/85 px-4 py-3.5 shadow-sm backdrop-blur-sm transition-colors hover:bg-card`}
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="min-w-0 truncate text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                      {slide.label}
-                    </p>
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
-                      <Icon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                  </div>
-                  <p className="truncate text-base font-semibold leading-tight">
-                    {slide.name}
-                  </p>
-                </div>
-                <div className="mt-2 flex items-baseline justify-between gap-2">
-                  <span className="truncate text-base font-semibold text-emerald-600 dark:text-emerald-400">
-                    {slide.amountLabel}
-                  </span>
-                  <span className="shrink-0 text-xs text-muted-foreground">
-                    {slide.dueLabel}
-                  </span>
-                </div>
+              <div className="space-y-1">
+                <p className="truncate text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                  {slide.label}
+                </p>
+                <p className="truncate text-sm font-semibold leading-tight">
+                  {slide.name}
+                </p>
               </div>
-            </LocaleLink>
-          )
-        })}
+              <div className="mt-1.5 space-y-0.5">
+                <p className="truncate text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                  {slide.amountLabel}
+                </p>
+                <p className="truncate text-[10px] text-muted-foreground">
+                  {slide.dueLabel}
+                </p>
+              </div>
+            </div>
+          </LocaleLink>
+        ))}
       </div>
     </div>
   )
