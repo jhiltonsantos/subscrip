@@ -112,7 +112,7 @@ export function DashboardSummaryCards(props: DashboardSummaryCardsProps) {
     <div
       role="region"
       aria-label={t("cards.regionLabel")}
-      className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 snap-x snap-mandatory lg:mx-0 lg:grid lg:grid-cols-2 lg:gap-4 lg:overflow-visible lg:px-0 lg:pb-0 lg:snap-none xl:grid-cols-5"
+      className="-mx-4 flex gap-3 overflow-x-auto px-6 pb-1 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:mx-0 lg:grid lg:grid-cols-2 lg:gap-4 lg:overflow-visible lg:px-0 lg:pb-0 lg:snap-none xl:grid-cols-5"
     >
       {CARD_CONFIGS.map((config) => {
         const Icon = config.icon

@@ -6,7 +6,6 @@ import { CalendarClock, CreditCard } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { LocaleLink } from "@/components/global"
 import { formatCurrency } from "@/lib/utils/formatters"
-import { cn } from "@/lib/utils/helpers"
 
 export type DashboardUpcomingBill = {
   id: string
@@ -41,6 +40,7 @@ type UpcomingSlide = {
 }
 
 const AUTO_ADVANCE_MS = 5000
+const CARD_MIN_HEIGHT = "min-h-[5.5rem]"
 
 export function DashboardUpcomingCarousel({
   nextBill,
@@ -48,8 +48,8 @@ export function DashboardUpcomingCarousel({
 }: DashboardUpcomingCarouselProps) {
   const t = useTranslations("dashboard.upcoming")
   const scrollerRef = useRef<HTMLDivElement>(null)
-  const [activeIndex, setActiveIndex] = useState(0)
   const [paused, setPaused] = useState(false)
+  const slideIndexRef = useRef(0)
 
   const slides = useMemo<UpcomingSlide[]>(() => {
     const items: UpcomingSlide[] = []
@@ -94,17 +94,15 @@ export function DashboardUpcomingCarousel({
     const child = scroller.children[index] as HTMLElement | undefined
     if (!child) return
     scroller.scrollTo({ left: child.offsetLeft, behavior: "smooth" })
+    slideIndexRef.current = index
   }, [])
 
   useEffect(() => {
     if (slides.length <= 1 || paused) return
 
     const timer = window.setInterval(() => {
-      setActiveIndex((current) => {
-        const next = (current + 1) % slides.length
-        scrollToIndex(next)
-        return next
-      })
+      const next = (slideIndexRef.current + 1) % slides.length
+      scrollToIndex(next)
     }, AUTO_ADVANCE_MS)
 
     return () => window.clearInterval(timer)
@@ -118,7 +116,7 @@ export function DashboardUpcomingCarousel({
       const width = scroller.clientWidth
       if (width <= 0) return
       const index = Math.round(scroller.scrollLeft / width)
-      setActiveIndex(Math.min(Math.max(index, 0), slides.length - 1))
+      slideIndexRef.current = Math.min(Math.max(index, 0), slides.length - 1)
     }
 
     scroller.addEventListener("scroll", onScroll, { passive: true })
@@ -127,8 +125,10 @@ export function DashboardUpcomingCarousel({
 
   if (slides.length === 0) {
     return (
-      <div className="min-w-0 max-w-[58%] rounded-2xl border border-border/50 bg-card/80 px-3 py-2.5 shadow-sm backdrop-blur-sm">
-        <p className="text-xs text-muted-foreground">{t("empty")}</p>
+      <div
+        className={`flex ${CARD_MIN_HEIGHT} min-w-0 max-w-[58%] items-center rounded-2xl border border-border/50 bg-card/80 px-4 py-3.5 shadow-sm backdrop-blur-sm`}
+      >
+        <p className="text-sm text-muted-foreground">{t("empty")}</p>
       </div>
     )
   }
@@ -157,55 +157,35 @@ export function DashboardUpcomingCarousel({
               href={slide.href}
               className="w-full min-w-full shrink-0 snap-start"
             >
-              <div className="rounded-2xl border border-border/50 bg-card/85 px-3 py-2.5 shadow-sm backdrop-blur-sm transition-colors hover:bg-card">
-                <div className="flex items-start gap-2">
-                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
-                    <Icon className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+              <div
+                className={`flex ${CARD_MIN_HEIGHT} flex-col justify-between rounded-2xl border border-border/50 bg-card/85 px-4 py-3.5 shadow-sm backdrop-blur-sm transition-colors hover:bg-card`}
+              >
+                <div className="flex items-start gap-2.5">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
+                    <Icon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <p className="truncate text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                       {slide.label}
                     </p>
-                    <p className="truncate text-sm font-semibold leading-tight">
+                    <p className="truncate text-base font-semibold leading-tight">
                       {slide.name}
                     </p>
-                    <div className="mt-0.5 flex items-baseline justify-between gap-2">
-                      <span className="truncate text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                        {slide.amountLabel}
-                      </span>
-                      <span className="shrink-0 text-[10px] text-muted-foreground">
-                        {slide.dueLabel}
-                      </span>
-                    </div>
                   </div>
+                </div>
+                <div className="mt-2 flex items-baseline justify-between gap-2 pl-[2.625rem]">
+                  <span className="truncate text-base font-semibold text-emerald-600 dark:text-emerald-400">
+                    {slide.amountLabel}
+                  </span>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {slide.dueLabel}
+                  </span>
                 </div>
               </div>
             </LocaleLink>
           )
         })}
       </div>
-
-      {slides.length > 1 ? (
-        <div className="mt-1.5 flex items-center justify-center gap-1.5">
-          {slides.map((slide, index) => (
-            <button
-              key={slide.key}
-              type="button"
-              aria-label={t("goToSlide", { index: index + 1 })}
-              className={cn(
-                "h-1.5 rounded-full transition-all",
-                index === activeIndex
-                  ? "w-4 bg-emerald-500"
-                  : "w-1.5 bg-muted-foreground/35"
-              )}
-              onClick={() => {
-                setActiveIndex(index)
-                scrollToIndex(index)
-              }}
-            />
-          ))}
-        </div>
-      ) : null}
     </div>
   )
 }

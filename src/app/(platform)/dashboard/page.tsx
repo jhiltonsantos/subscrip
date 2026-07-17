@@ -116,12 +116,12 @@ export default async function DashboardPage() {
   return (
     <Container>
       <div className="space-y-6">
-        <div className="flex items-center justify-between gap-3 lg:hidden">
+        <div className="flex min-h-[5.5rem] items-center justify-between gap-3 py-2 lg:hidden">
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-muted-foreground">
+            <p className="text-sm font-medium text-muted-foreground">
               {t("welcomeLabel")}
             </p>
-            <h1 className="truncate text-xl font-bold tracking-tight sm:text-2xl">
+            <h1 className="truncate text-2xl font-bold tracking-tight">
               {userName}
             </h1>
           </div>
