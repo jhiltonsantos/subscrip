@@ -5,6 +5,7 @@ import { LocaleLink } from "@/components/global/LocaleLink"
 import { LocaleSwitcher } from "@/components/global/LocaleSwitcher"
 import { useTranslations } from "next-intl"
 import { HeaderDock } from "./HeaderDock"
+import { LandingHeaderPrefsMenu } from "./LandingHeaderPrefsMenu"
 import { ThemeToggle } from "./ThemeToggle"
 
 interface HeaderProps {
@@ -39,11 +40,20 @@ export function Header({ variant }: HeaderProps) {
           {t("common.appName")}
         </LocaleLink>
 
-        <div className="flex items-center gap-1.5">
+        {/* Mobile: Sign In + preferences menu */}
+        <div className="flex items-center gap-0.5 sm:hidden">
+          <Button asChild variant="ghost" size="sm" className="px-3">
+            <LocaleLink href="/auth/login">{t("landing.signIn")}</LocaleLink>
+          </Button>
+          <LandingHeaderPrefsMenu />
+        </div>
+
+        {/* Desktop: full controls */}
+        <div className="hidden items-center gap-1.5 sm:flex">
           <LocaleSwitcher className="px-2.5" selectClassName="text-xs sm:text-sm" />
           <ThemeToggle title={t("header.theme")} className="h-9 w-9" />
           <div className="h-6 w-px bg-gray-200 dark:bg-gray-700" />
-          <Button asChild variant="ghost" size="sm" className="hidden px-3 sm:inline-flex">
+          <Button asChild variant="ghost" size="sm" className="px-3">
             <LocaleLink href="/auth/login">{t("landing.signIn")}</LocaleLink>
           </Button>
           <Button asChild size="sm" className="bg-emerald-600 px-3 text-white hover:bg-emerald-700">

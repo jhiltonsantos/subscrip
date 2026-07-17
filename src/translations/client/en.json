@@ -23,6 +23,7 @@
   "landing": {
     "signIn": "Sign In",
     "getStarted": "Get Started",
+    "openPreferences": "Language and theme",
     "hero": {
       "title": "Manage subscriptions,\nincome, and monthly spending in one place.",
       "description": "Get a complete view of your recurring finances with smart alerts and real-time monthly tracking.",
