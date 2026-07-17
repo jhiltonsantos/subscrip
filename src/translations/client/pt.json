@@ -82,7 +82,7 @@
   "dashboard": {
     "title": "Dashboard",
     "greeting": "Olá, {name}",
-    "welcomeLabel": "Oi, bem-vindo de volta",
+    "welcomeLabel": "Oi, bem-vindo",
     "newSubscription": "Nova Assinatura",
     "cards": {
       "monthlySpend": "Gasto Mensal (Est.)",

@@ -160,20 +160,20 @@ export function DashboardUpcomingCarousel({
               <div
                 className={`flex ${CARD_MIN_HEIGHT} flex-col justify-between rounded-2xl border border-border/50 bg-card/85 px-4 py-3.5 shadow-sm backdrop-blur-sm transition-colors hover:bg-card`}
               >
-                <div className="flex items-start gap-2.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
-                    <Icon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <p className="truncate text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="min-w-0 truncate text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                       {slide.label}
                     </p>
-                    <p className="truncate text-base font-semibold leading-tight">
-                      {slide.name}
-                    </p>
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
+                      <Icon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    </div>
                   </div>
+                  <p className="truncate text-base font-semibold leading-tight">
+                    {slide.name}
+                  </p>
                 </div>
-                <div className="mt-2 flex items-baseline justify-between gap-2 pl-[2.625rem]">
+                <div className="mt-2 flex items-baseline justify-between gap-2">
                   <span className="truncate text-base font-semibold text-emerald-600 dark:text-emerald-400">
                     {slide.amountLabel}
                   </span>

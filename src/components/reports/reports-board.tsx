@@ -173,12 +173,12 @@ export function ReportsBoard({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-start lg:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
-        <div className="flex rounded-lg border p-1">
+        <div className="flex w-full rounded-lg border p-1 lg:w-auto">
           <ModeButton
             active={mode === "trend"}
             onClick={() => setMode("trend")}
@@ -200,24 +200,28 @@ export function ReportsBoard({
 
       {mode === "trend" ? (
         <>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
             <span className="text-sm text-muted-foreground">{t("period.label")}</span>
-            <Button
-              size="sm"
-              variant={period === 6 ? "default" : "outline"}
-              onClick={() => loadTrend(6)}
-              disabled={isPending}
-            >
-              {t("period.sixMonths")}
-            </Button>
-            <Button
-              size="sm"
-              variant={period === 12 ? "default" : "outline"}
-              onClick={() => loadTrend(12)}
-              disabled={isPending}
-            >
-              {t("period.twelveMonths")}
-            </Button>
+            <div className="flex w-full gap-2 sm:w-auto">
+              <Button
+                size="sm"
+                className="flex-1 sm:flex-none"
+                variant={period === 6 ? "default" : "outline"}
+                onClick={() => loadTrend(6)}
+                disabled={isPending}
+              >
+                {t("period.sixMonths")}
+              </Button>
+              <Button
+                size="sm"
+                className="flex-1 sm:flex-none"
+                variant={period === 12 ? "default" : "outline"}
+                onClick={() => loadTrend(12)}
+                disabled={isPending}
+              >
+                {t("period.twelveMonths")}
+              </Button>
+            </div>
           </div>
 
           {!hasTrendData ? (
@@ -437,7 +441,7 @@ function ModeButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+        "flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors lg:flex-none",
         active
           ? "bg-primary text-primary-foreground"
           : "text-muted-foreground hover:text-foreground"
