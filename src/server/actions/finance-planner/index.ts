@@ -16,6 +16,14 @@ export {
   type SerializedMonthSummary as SerializedMonthSummaryOnly,
 } from "./summary"
 export {
+  getFinanceTrend,
+  getMonthComparison,
+  type FinanceTrendPoint,
+  type FinanceTrendResult,
+  type MonthComparisonMetric,
+  type MonthComparisonResult,
+} from "./trend"
+export {
   updatePlannedExpense,
   updatePlannedIncome,
 } from "./update"

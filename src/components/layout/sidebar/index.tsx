@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   LogOut,
   DollarSign,
+  BarChart3,
   ReceiptText,
   WalletCards
 } from "lucide-react"
@@ -62,6 +63,11 @@ export function Sidebar({ user }: SidebarProps) {
           label: t("header.financePlanner"),
           href: "/finance-planner",
           icon: DollarSign,
+        },
+        {
+          label: t("header.reports"),
+          href: "/reports",
+          icon: BarChart3,
         },
         {
           label: t("header.cardInvoice"),
@@ -136,13 +142,13 @@ export function Sidebar({ user }: SidebarProps) {
   return (
     <aside
       ref={sidebarRef}
-      className="fixed left-4 top-4 bottom-4 bg-[var(--chrome-bg)] backdrop-blur-xl rounded-2xl border border-[var(--chrome-border)] flex flex-col shadow-lg"
+      className="fixed left-4 top-4 bottom-4 bg-(--chrome-bg) backdrop-blur-xl rounded-2xl border border-(--chrome-border) flex flex-col shadow-lg"
       style={{ width: 280 }}
     >
       {/* Header */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200/30 dark:border-gray-800/30">
         <div ref={contentRef}>
-          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+          <h2 className="text-lg font-bold text-primary">
             {t("common.appName")}
           </h2>
         </div>

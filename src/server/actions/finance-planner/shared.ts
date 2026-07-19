@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { Prisma } from "@prisma/client"
+import { ExpenseBucket, Prisma } from "@prisma/client"
 import type { ZodError } from "zod"
 import { headers } from "next/headers"
 import { getTranslations } from "next-intl/server"
@@ -355,5 +355,58 @@ export function buildMonthSummary(row: MonthlyPlanWithRelations) {
     balance: incomeTotal.minus(expenseTotal).toString(),
     pendingIncomeTotal: incomeTotal.minus(receivedTotal).toString(),
     pendingExpenseTotal: expenseTotal.minus(paidTotal).toString(),
+  }
+}
+
+export function emptyMonthSummary() {
+  return {
+    incomeTotal: "0",
+    receivedTotal: "0",
+    expenseTotal: "0",
+    paidTotal: "0",
+    subscriptionTotal: "0",
+    creditCardTotal: "0",
+    balance: "0",
+    pendingIncomeTotal: "0",
+    pendingExpenseTotal: "0",
+  }
+}
+
+export type SerializedMonthSummary = ReturnType<typeof buildMonthSummary>
+
+export function buildExpenseBreakdown(row: MonthlyPlanWithRelations) {
+  const buckets: Record<ExpenseBucket, Prisma.Decimal> = {
+    MONTHLY_BILLS: new Prisma.Decimal(0),
+    CREDIT_CARD: new Prisma.Decimal(0),
+    FIXED_CARD: new Prisma.Decimal(0),
+    OTHER: new Prisma.Decimal(0),
+  }
+
+  for (const expense of row.expenses) {
+    buckets[expense.expenseBucket] =
+      buckets[expense.expenseBucket].plus(expense.amount)
+  }
+
+  const categoryMap = new Map<string, Prisma.Decimal>()
+  for (const expense of row.expenses) {
+    if (!expense.subscriptionId || !expense.subscription?.category) continue
+    const category = expense.subscription.category
+    const current = categoryMap.get(category) ?? new Prisma.Decimal(0)
+    categoryMap.set(category, current.plus(expense.amount))
+  }
+
+  return {
+    expenseByBucket: {
+      MONTHLY_BILLS: buckets.MONTHLY_BILLS.toString(),
+      CREDIT_CARD: buckets.CREDIT_CARD.toString(),
+      FIXED_CARD: buckets.FIXED_CARD.toString(),
+      OTHER: buckets.OTHER.toString(),
+    } satisfies Record<ExpenseBucket, string>,
+    subscriptionByCategory: Array.from(categoryMap.entries())
+      .map(([category, total]) => ({
+        category,
+        total: total.toString(),
+      }))
+      .sort((a, b) => Number(b.total) - Number(a.total)),
   }
 }

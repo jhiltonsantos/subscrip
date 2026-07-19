@@ -23,16 +23,18 @@
   "landing": {
     "signIn": "Sign In",
     "getStarted": "Get Started",
+    "openPreferences": "Language and theme",
     "hero": {
       "title": "Manage subscriptions,\nincome, and monthly spending in one place.",
       "description": "Get a complete view of your recurring finances with smart alerts and real-time monthly tracking.",
       "cta": "Create Free Account",
-      "metrics": {
-        "monthlySpend": "Consolidated monthly spending",
-        "savings": "in monthly savings",
-        "activeSubscriptions": "Active subscriptions",
-        "gains": "Monthly gains",
-        "controlMessage": "Centralize everything in one dashboard and track each subscription without losing money on forgotten charges."
+      "charts": {
+        "cashFlowTitle": "Income vs expenses",
+        "expenseBreakdownTitle": "Expense breakdown",
+        "legend": {
+          "income": "Income",
+          "expense": "Expenses"
+        }
       }
     }
   },
@@ -81,6 +83,7 @@
   "dashboard": {
     "title": "Dashboard",
     "greeting": "Hello, {name}",
+    "welcomeLabel": "Hi, welcome back",
     "newSubscription": "New Subscription",
     "cards": {
       "monthlySpend": "Monthly Spend (Est.)",
@@ -95,19 +98,91 @@
       "subscriptionCount": "{count, plural, one {# subscription} other {# subscriptions}} active",
       "nextPayment": "Next Payment",
       "nextPaymentWithName": "{name} on {date}",
-      "noUpcoming": "No upcoming"
+      "noUpcoming": "No upcoming",
+      "regionLabel": "Financial summary cards"
+    },
+    "upcoming": {
+      "nextBill": "Next bill",
+      "nextSubscription": "Next subscription",
+      "dueOn": "Due {date}",
+      "empty": "Nothing due soon",
+      "regionLabel": "Upcoming payments",
+      "goToSlide": "Go to slide {index}"
     },
     "subscriptions": {
       "title": "Your Subscriptions",
       "due": "Due: {date}",
       "empty": "No subscriptions found.",
       "addFirst": "Add your first subscription"
+    },
+    "charts": {
+      "title": "Financial overview",
+      "subtitle": "Last 6 months from your finance planner",
+      "viewReports": "View reports",
+      "cashFlowTitle": "Income vs expenses",
+      "expenseBreakdownTitle": "Expense breakdown",
+      "balanceTrendTitle": "Projected balance trend",
+      "noExpenses": "No expenses recorded this month.",
+      "empty": "Start planning your income and expenses to unlock charts and monthly insights.",
+      "emptyCta": "Open finance planner",
+      "legend": {
+        "income": "Income",
+        "expense": "Expenses",
+        "balance": "Balance"
+      }
+    }
+  },
+  "reportsPage": {
+    "title": "Reports",
+    "subtitle": "Compare months and explore detailed financial trends.",
+    "empty": "No planner data yet for the selected period.",
+    "modes": {
+      "trend": "Trend",
+      "compare": "Compare months"
+    },
+    "period": {
+      "label": "Period",
+      "sixMonths": "6 months",
+      "twelveMonths": "12 months"
+    },
+    "charts": {
+      "cashFlow": "Income vs expenses",
+      "balance": "Projected balance",
+      "expenseBuckets": "Expenses by category",
+      "comparison": "Month comparison"
+    },
+    "table": {
+      "title": "Monthly breakdown",
+      "month": "Month",
+      "actions": "Actions",
+      "openPlanner": "Open planner"
+    },
+    "compare": {
+      "selectMonths": "Select months to compare",
+      "monthA": "Month A",
+      "monthB": "Month B",
+      "month": "Month",
+      "year": "Year",
+      "apply": "Compare",
+      "loading": "Comparing...",
+      "delta": "{value} ({percent})"
+    },
+    "metrics": {
+      "income": "Income",
+      "expense": "Expenses",
+      "balance": "Balance",
+      "subscriptions": "Subscriptions",
+      "creditCard": "Credit card"
+    },
+    "errors": {
+      "invalidMonth": "Enter a valid month (1–12) and year."
     }
   },
   "header":{
     "dashboard": "Dashboard",
     "subscriptions": "Subscriptions",
     "financePlanner": "Finance Planner",
+    "reports": "Reports",
     "cardInvoice": "Card Invoice",
     "paymentMethods": "Payment Methods",
     "settings": "Settings",
@@ -126,6 +201,7 @@
       "dashboard": "Dashboard",
       "subscriptions": "Subscriptions",
       "financePlanner": "Finance Planner",
+      "reports": "Reports",
       "cardInvoice": "Card Invoice",
       "paymentMethods": "Payment Methods",
       "settings": "Settings",
@@ -197,6 +273,21 @@
       "deactivate": "Deactivate",
       "reactivate": "Reactivate",
       "delete": "Delete"
+    },
+    "enums": {
+      "categories": {
+        "INFRASTRUCTURE": "Infrastructure",
+        "ENTERTAINMENT": "Entertainment",
+        "EDUCATION": "Education",
+        "TOOLS": "Tools",
+        "FITNESS": "Fitness",
+        "OTHER": "Other"
+      },
+      "billingCycles": {
+        "MONTHLY": "Monthly",
+        "YEARLY": "Yearly",
+        "WEEKLY": "Weekly"
+      }
     },
     "filters": {
       "searchPlaceholder": "Search by name or plan...",

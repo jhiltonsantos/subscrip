@@ -101,3 +101,17 @@ export type PlannedIncomeCreateInput = z.infer<typeof plannedIncomeCreateSchema>
 export type PlannedIncomeUpdateInput = z.infer<typeof plannedIncomeUpdateSchema>
 export type PlannedExpenseCreateInput = z.infer<typeof plannedExpenseCreateSchema>
 export type PlannedExpenseUpdateInput = z.infer<typeof plannedExpenseUpdateSchema>
+
+export const financeTrendParamsSchema = monthPlanParamsSchema.extend({
+  count: z.coerce.number().int().min(3).max(12).default(6),
+})
+
+export const monthComparisonParamsSchema = z.object({
+  yearA: z.coerce.number().int().min(2000).max(2100),
+  monthA: z.coerce.number().int().min(1).max(12),
+  yearB: z.coerce.number().int().min(2000).max(2100),
+  monthB: z.coerce.number().int().min(1).max(12),
+})
+
+export type FinanceTrendParamsInput = z.infer<typeof financeTrendParamsSchema>
+export type MonthComparisonParamsInput = z.infer<typeof monthComparisonParamsSchema>

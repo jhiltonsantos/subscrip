@@ -10,6 +10,7 @@ const BREADCRUMB_LABEL_KEYS: Record<string, string> = {
   dashboard: "dashboard",
   subscriptions: "subscriptions",
   "finance-planner": "financePlanner",
+  reports: "reports",
   "card-invoice": "cardInvoice",
   "payment-methods": "paymentMethods",
   settings: "settings",
