@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit --pretty false --incremental false",
-    "check": "pnpm lint && pnpm typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
     "db:deploy": "prisma generate && prisma migrate deploy",
     "db:setup": "prisma generate && prisma migrate deploy && prisma db seed",
     "db:generate": "prisma generate",
@@ -52,17 +54,24 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4.7.0",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.7",
+    "jsdom": "^26.1.0",
     "prisma": "5.22.0",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "tw-animate-css": "^1.4.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
