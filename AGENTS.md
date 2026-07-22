@@ -122,5 +122,16 @@ Test user after seed: `test@subscrip.dev`
 - `.agents/` — project-context, engineering-standards, v1-scope, agent-playbook
 - `.cursor/rules/` — cursor-specific rule files (forward to `.agents/`)
 - `.claude/CLAUDE.md` — Claude-specific entrypoint (delegates to `.agents/`)
-- `docs/ARCHITECTURE.md` — architecture reference (some details may lag)
-- `docs/v1-readiness-audit.md` / `docs/v1-closure-plan.md` — current v1 planning baseline
+- `docs/documentation/architecture.md` — architecture reference (some details may lag)
+- `docs/documentation/local-setup.md` — local setup instructions
+- `docs/roadmap/v1-readiness-audit.md` / `docs/roadmap/v1-closure-plan.md` — current v1 planning baseline
+- `docs/roadmap/development-roadmap.md` — historical roadmap with task status
+
+## Docs conventions
+
+When saving generated content to the `docs/` directory, follow these rules:
+
+- **Plans, roadmaps, audits, smoke tests, and task-tracking artifacts** → `docs/roadmap/`
+- **Application documentation** (architecture, setup, schema, features, code structure) → `docs/documentation/`
+- File names in kebab-case (lowercase, hyphens): `v1-closure-plan.md`, `architecture.md`
+- Remove outdated or duplicated files instead of creating variants
