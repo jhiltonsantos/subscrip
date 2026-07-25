@@ -1,7 +1,7 @@
 # Test Infrastructure Roadmap
 
-> **Last updated:** 2026-07-21
-> **Status:** Phase 1 complete, progressing through Phase 2
+> **Last updated:** 2026-07-24
+> **Status:** Phases 1–3 complete, progressing through Phase 4
 
 ## Decisions
 
@@ -44,12 +44,12 @@
 
 ### 2.1 Utilities
 
-- [ ] `src/lib/utils/helpers.test.ts` — `cn()`
-- [ ] `src/lib/utils/formatters.test.ts` — `formatCurrency()`
+- [x] `src/lib/utils/helpers.test.ts` — `cn()`
+- [x] `src/lib/utils/formatters.test.ts` — `formatCurrency()`
 
 ### 2.2 Billing logic
 
-- [ ] `src/lib/subscription-billing.test.ts` — 9 functions:
+- [x] `src/lib/subscription-billing.test.ts` — 9 functions:
   - `buildChargeDate`, `resolveMonthlyChargeDate`, `resolveYearlyChargeDate`
   - `resolveInvoiceMonth`, `resolveChargeForInvoiceMonth`
   - `isChargeAwaiting`, `resolveNextChargeDate`
@@ -57,24 +57,24 @@
 
 ### 2.3 Labels and constants
 
-- [ ] `src/lib/subscription-labels.test.ts` — `getCategoryLabel`, `getBillingCycleLabel`, `formatSubscriptionDueDate`
-- [ ] `src/lib/subscription-constants.test.ts` — constant integrity checks
+- [x] `src/lib/subscription-labels.test.ts` — `getCategoryLabel`, `getBillingCycleLabel`, `formatSubscriptionDueDate`
+- [x] `src/lib/subscription-constants.test.ts` — constant integrity checks
 
 ### 2.4 Zod validations
 
-- [ ] `src/lib/validations/user-settings.test.ts` — `userSettingsSchema`, `darkThemeVariantSchema`
-- [ ] `src/lib/validations/payment-methods.test.ts` — `paymentMethodCreateSchema` (+ `superRefine`), `paymentMethodUpdateSchema`
-- [ ] `src/lib/validations/finance-planner.test.ts` — 7 schemas (month/year range, coercion, UUIDs)
-- [ ] `src/lib/validations/subscription.test.ts` — `subscriptionCreateSchema` (+ `superRefine` cross-field), `subscriptionUpdateSchema`
+- [x] `src/lib/validations/user-settings.test.ts` — `userSettingsSchema`, `darkThemeVariantSchema`
+- [x] `src/lib/validations/payment-methods.test.ts` — `paymentMethodCreateSchema` (+ `superRefine`), `paymentMethodUpdateSchema`
+- [x] `src/lib/validations/finance-planner.test.ts` — 7 schemas (month/year range, coercion, UUIDs)
+- [x] `src/lib/validations/subscription.test.ts` — `subscriptionCreateSchema` (+ `superRefine` cross-field), `subscriptionUpdateSchema`
 
 ### 2.5 Chart utilities
 
-- [ ] `src/components/charts/format-chart-currency.test.ts` — `formatChartCurrency`, `formatChartPercent`
-- [ ] `src/components/charts/trend-chart-data.test.ts` — 8 functions (label formatting, data transformations)
+- [x] `src/components/charts/format-chart-currency.test.ts` — `formatChartCurrency`, `formatChartPercent`
+- [x] `src/components/charts/trend-chart-data.test.ts` — 8 functions (label formatting, data transformations)
 
 ### 2.6 Finance planner utilities
 
-- [ ] `src/components/finance-planner/utils.test.ts` — 9 functions (dialog titles, formatting, date conversions)
+- [x] `src/components/finance-planner/utils.test.ts` — 9 functions (dialog titles, formatting, date conversions)
 
 ---
 
@@ -82,10 +82,10 @@
 
 > Uses global server action mocks from Phase 1. Tests reducers and async thunk lifecycles.
 
-- [ ] `src/store/features/auth.test.ts` — `fetchSession` (pending/fulfilled/rejected), `fetchUserProfile`, `clearAuthState`
-- [ ] `src/store/features/subscriptions.test.ts` — `fetchSubscriptions`, `fetchSubscriptionFormOptions`, create/update/delete thunks + array mutations, `clearSubscriptionsState`
-- [ ] `src/store/features/finance.test.ts` — `setSelectedMonth`, `fetchMonthlyPlan`, 6 CUD thunks (chained `fetchMonthlyPlan` re-dispatch), `clearFinanceState`
-- [ ] `src/store/selectors/finance.test.ts` — memoized selectors (if/when created)
+- [x] `src/store/features/auth.test.ts` — `fetchSession` (pending/fulfilled/rejected), `fetchUserProfile`, `clearAuthState`
+- [x] `src/store/features/subscriptions.test.ts` — `fetchSubscriptions`, `fetchSubscriptionFormOptions`, create/update/delete thunks + array mutations, `clearSubscriptionsState`
+- [x] `src/store/features/finance.test.ts` — `setSelectedMonth`, `fetchMonthlyPlan`, 6 CUD thunks (chained `fetchMonthlyPlan` re-dispatch), `clearFinanceState`
+- [x] `src/store/selectors/finance.test.ts` — memoized selectors (if/when created)
 
 ---
 
