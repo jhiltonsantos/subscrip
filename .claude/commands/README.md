@@ -35,8 +35,8 @@ Use `pnpm db:setup` only when you intentionally want to run `migrate deploy` and
 ## V1 Planning References
 
 ```text
-docs/v1-readiness-audit.md
-docs/v1-closure-plan.md
+docs/roadmap/v1-readiness-audit.md
+docs/roadmap/v1-closure-plan.md
 .agents/v1-scope.md
 ```
 

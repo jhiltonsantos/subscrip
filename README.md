@@ -13,11 +13,11 @@
 **Subscrip** is a SaaS platform designed to solve the "invisible money leak" problem — users who lose track of multiple active subscriptions (Netflix, AWS, Vercel, gyms, etc.) and end up paying for services they don't use or being surprised by unexpected renewals.
 
 <p align="center">
-  <img src="docs/images/3.png" alt="Subscrip — landing and mobile dashboard" width="720" />
+  <img src="docs/documentation/images/3.png" alt="Subscrip — landing and mobile dashboard" width="720" />
 </p>
 
 <p align="center">
-  <img src="docs/images/2.png" alt="Subscrip — dashboard, finance planner, and subscriptions across devices" width="720" />
+  <img src="docs/documentation/images/2.png" alt="Subscrip — dashboard, finance planner, and subscriptions across devices" width="720" />
 </p>
 
 ### The Problem

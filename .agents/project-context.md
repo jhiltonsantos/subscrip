@@ -23,10 +23,10 @@ Subscrip is a SaaS platform for subscription tracking and monthly financial plan
 
 ## Important Docs
 
-- `docs/v1-readiness-audit.md`: current v1 gap audit.
-- `docs/v1-closure-plan.md`: prioritized v1 closure plan.
-- `docs/development-roadmap.md`: historical roadmap; verify against code before trusting status.
-- `docs/ARCHITECTURE.md`: architecture reference; some proxy/auth details may lag behind code.
+- `docs/roadmap/v1-readiness-audit.md`: current v1 gap audit.
+- `docs/roadmap/v1-closure-plan.md`: prioritized v1 closure plan.
+- `docs/roadmap/development-roadmap.md`: historical roadmap; verify against code before trusting status.
+- `docs/documentation/architecture.md`: architecture reference; some proxy/auth details may lag behind code.
 
 ## Current V1 Focus
 
