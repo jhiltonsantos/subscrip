@@ -8,8 +8,8 @@ alwaysApply: false
 
 Use these files as the current planning baseline:
 
-- `docs/v1-readiness-audit.md`
-- `docs/v1-closure-plan.md`
+- `docs/roadmap/v1-readiness-audit.md`
+- `docs/roadmap/v1-closure-plan.md`
 - `.agents/v1-scope.md`
 
 When editing docs:

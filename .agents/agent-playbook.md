@@ -2,7 +2,7 @@
 
 ## Before Changing Code
 
-1. Read the relevant docs under `docs/`, especially `docs/v1-readiness-audit.md` and `docs/v1-closure-plan.md`.
+1. Read the relevant docs under `docs/`, especially `docs/roadmap/v1-readiness-audit.md` and `docs/roadmap/v1-closure-plan.md`.
 2. Inspect the existing implementation in `src/app`, `src/components`, `src/server/actions` and `prisma/schema.prisma`.
 3. Check whether the task affects user-owned data and identify the required `userId` boundary.
 4. Prefer current local patterns over new dependencies.

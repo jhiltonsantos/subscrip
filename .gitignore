@@ -26,3 +26,6 @@ logs
 
 # Prisma
 /src/generated/prisma
+
+# Slim
+.slim/
