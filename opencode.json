@@ -1,0 +1,27 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["AGENTS.md"],
+  "skills": {
+    "paths": [".opencode/skills"]
+  },
+  "mcp": {
+    "better-auth": {
+      "type": "remote",
+      "url": "https://mcp.better-auth.com/mcp",
+      "enabled": true
+    }
+  },
+  "permission": {
+    "edit": "allow",
+    "bash": {
+      "git push*": "ask",
+      "git push --force*": "deny",
+      "rm -rf*": "deny",
+      "*": "allow"
+    },
+    "external_directory": {
+      "~/.config/opencode/**": "allow",
+      "*": "ask"
+    }
+  }
+}
