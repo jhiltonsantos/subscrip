@@ -35,7 +35,7 @@ export async function getMonthlyPlan(
     return {
       success: false,
       error: t("common.invalidData"),
-      fieldErrors: formatZodError(parsed.error),
+      fieldErrors: formatZodError(parsed.error)
     }
   }
 
