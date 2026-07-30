@@ -92,6 +92,10 @@ Configure environment variables in **Vercel Dashboard** for deployment.
 
 ## Common Issues
 
+### "packages field missing or empty" error
+**Cause**: `pnpm-workspace.yaml` exists but doesn't define workspace packages
+**Fix**: Delete `pnpm-workspace.yaml` if this is a single project (not a monorepo)
+
 ### Typecheck fails in CI but works locally
 **Cause**: Different TypeScript versions or missing type definitions
 **Fix**: Ensure `pnpm install --frozen-lockfile` is used, check `tsconfig.json`
