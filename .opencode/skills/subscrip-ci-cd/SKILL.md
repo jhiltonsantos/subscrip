@@ -50,6 +50,9 @@ pnpm lint
 ```
 - Config: `eslint.config.mjs` (ESLint 9 flat config)
 - Extends: `eslint-config-next/core-web-vitals`, `eslint-config-next/typescript`
+- **Stricter rules** (errors, not warnings):
+  - `@typescript-eslint/no-unused-vars`: Unused vars/imports are errors (prefix with `_` to ignore)
+  - `@typescript-eslint/no-explicit-any`: Using `any` type is an error
 - **Fails pipeline** if issues found
 
 ### 4. Unit Tests

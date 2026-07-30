@@ -77,6 +77,10 @@ on:
 - Extends `eslint-config-next/typescript`
 - Ignores: `.next/**`, `out/**`, `build/**`, `next-env.d.ts`
 
+**Stricter rules** (enforced as errors, not warnings):
+- `@typescript-eslint/no-unused-vars`: Unused variables/imports are errors (prefix with `_` to ignore)
+- `@typescript-eslint/no-explicit-any`: Using `any` type is an error (use proper types or `unknown`)
+
 **Failure handling**: Pipeline stops if lint fails. Developer must fix issues before proceeding.
 
 ### Step 3: Unit Tests (Vitest)

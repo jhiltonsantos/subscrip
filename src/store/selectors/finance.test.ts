@@ -559,7 +559,7 @@ describe("selectPendingExpenses", () => {
 // Bucket selectors (expenseBucket enum)
 // ---------------------------------------------------------------------------
 
-function makeBucketState(bucket: string) {
+function makeBucketState(_bucket: string) {
   const expenses = [
     makeExpense({ id: "e-mb", expenseBucket: "MONTHLY_BILLS" as const }),
     makeExpense({ id: "e-cc", expenseBucket: "CREDIT_CARD" as const }),
