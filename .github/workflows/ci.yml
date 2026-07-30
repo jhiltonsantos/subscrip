@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   ci:
-    name: Lint and Test
+    name: Lint, Test & Build
     runs-on: ubuntu-latest
     
     steps:
