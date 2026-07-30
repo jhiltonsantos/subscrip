@@ -34,9 +34,9 @@ Push to staging/main
 ## Pipeline Steps
 
 ### 1. Environment Setup
-- **Node.js**: 20.x (required for Next.js 16, React 19)
+- **Node.js**: 24.x (latest LTS)
 - **pnpm**: 9.x (latest stable)
-- **Caching**: pnpm store + Next.js cache for faster builds
+- **Caching**: Automatic pnpm cache via `actions/setup-node` + Next.js cache
 
 ### 2. Install Dependencies
 ```bash

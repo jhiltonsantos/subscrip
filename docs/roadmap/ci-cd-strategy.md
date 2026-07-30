@@ -38,18 +38,21 @@ on:
 
 ### Environment Setup
 
-**Node.js version**: 20.x (required for Next.js 16, React 19)
+**Node.js version**: 24.x (latest LTS)
 **pnpm version**: 9.x (latest stable)
 
 ```yaml
-- uses: actions/setup-node@v4
-  with:
-    node-version: '20'
-    
 - uses: pnpm/action-setup@v4
   with:
     version: 9
+    
+- uses: actions/setup-node@v4
+  with:
+    node-version: '24'
+    cache: 'pnpm'  # Built-in pnpm caching
 ```
+
+**Note**: Using `cache: 'pnpm'` in `actions/setup-node` automatically handles dependency caching. No need for manual cache configuration.
 
 ### Step 1: Install Dependencies
 
@@ -147,25 +150,28 @@ Vercel handles environment variables separately during deployment. Configure the
 
 ## Caching Strategy
 
-Speed up CI with pnpm dependency caching:
+Speed up CI with automatic pnpm dependency caching:
 
 ```yaml
-- name: Get pnpm store directory
-  id: pnpm-cache
-  shell: bash
-  run: |
-    echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-
-- name: Setup pnpm cache
-  uses: actions/cache@v4
+- uses: actions/setup-node@v4
   with:
-    path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-    key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-    restore-keys: |
-      ${{ runner.os }}-pnpm-store-
+    node-version: '24'
+    cache: 'pnpm'  # Automatic caching
 ```
 
-**Benefit**: Reduces `pnpm install` from ~30s to ~5s on cache hit.
+**Benefit**: Reduces `pnpm install` from ~30s to ~5s on cache hit. No manual cache configuration needed.
+
+**Next.js build cache**: Additional cache for `.next/cache` to speed up builds:
+
+```yaml
+- name: Setup Next.js cache
+  uses: actions/cache@v4
+  with:
+    path: .next/cache
+    key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}
+    restore-keys: |
+      ${{ runner.os }}-nextjs-
+```
 
 ## Optional Enhancements (Post-v1)
 
