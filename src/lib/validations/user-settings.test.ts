@@ -32,7 +32,7 @@ describe("userSettingsSchema", () => {
 
   describe("name", () => {
     it("is optional — can be omitted", () => {
-      const { name: _omit, ...withoutName } = validInput
+      const { name: _name, ...withoutName } = validInput
       const result = userSettingsSchema.safeParse(withoutName)
       expect(result.success).toBe(true)
     })
@@ -213,13 +213,13 @@ describe("userSettingsSchema", () => {
   })
 
   it("rejects input missing preferredCurrency", () => {
-    const { preferredCurrency: _omit, ...rest } = validInput
+    const { preferredCurrency: _preferredCurrency, ...rest } = validInput
     const result = userSettingsSchema.safeParse(rest)
     expect(result.success).toBe(false)
   })
 
   it("rejects input missing theme", () => {
-    const { theme: _omit, ...rest } = validInput
+    const { theme: _theme, ...rest } = validInput
     const result = userSettingsSchema.safeParse(rest)
     expect(result.success).toBe(false)
   })

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest"
+import { describe, it, expect, vi } from "vitest"
 import { makeStore } from "@/store"
 import {
   fetchSession,
@@ -55,7 +55,7 @@ describe("auth slice", () => {
       // Populate the store with some data
       const sessionPayload = {
         user: { id: "1", email: "user@test.com", name: "Test" },
-      } as any
+      } as unknown as Parameters<typeof fetchSession.fulfilled>[0]
       store.dispatch(fetchSession.fulfilled(sessionPayload, "req-1"))
       store.dispatch(
         fetchUserProfile.fulfilled(
@@ -63,7 +63,7 @@ describe("auth slice", () => {
             id: "1",
             email: "user@test.com",
             name: "Test User",
-          } as any,
+          } as unknown as Parameters<typeof fetchUserProfile.fulfilled>[0],
           "req-1",
         ),
       )
@@ -110,7 +110,7 @@ describe("auth slice", () => {
       const store = makeStore()
       const mockSession = {
         user: { id: "1", email: "user@test.com", name: "Test" },
-      } as any
+      } as unknown as Parameters<typeof fetchSession.fulfilled>[0]
 
       store.dispatch(fetchSession.fulfilled(mockSession, "req-1"))
 
@@ -135,7 +135,7 @@ describe("auth slice", () => {
       const store = makeStore()
       const mockSession = {
         user: { id: "2", email: "lifecycle@test.com" },
-      } as any
+      } as unknown as Parameters<typeof fetchSession.fulfilled>[0]
       vi.mocked(getSession).mockResolvedValue(mockSession)
 
       await store.dispatch(fetchSession())
@@ -166,7 +166,12 @@ describe("auth slice", () => {
         name: "Test User",
       }
 
-      store.dispatch(fetchUserProfile.fulfilled(profile as any, "req-1"))
+      store.dispatch(
+        fetchUserProfile.fulfilled(
+          profile as unknown as Parameters<typeof fetchUserProfile.fulfilled>[0],
+          "req-1",
+        ),
+      )
 
       const state = store.getState().auth
       expect(state.isLoading).toBe(false)
@@ -192,7 +197,10 @@ describe("auth slice", () => {
         email: "test@test.com",
         name: "Test User",
       }
-      vi.mocked(getUser).mockResolvedValue({ success: true, data: mockProfile } as any)
+      vi.mocked(getUser).mockResolvedValue({
+        success: true,
+        data: mockProfile,
+      } as unknown as Awaited<ReturnType<typeof getUser>>)
 
       await store.dispatch(fetchUserProfile())
 
@@ -219,7 +227,10 @@ describe("auth slice", () => {
 
     it("should handle null data payload", async () => {
       const store = makeStore()
-      vi.mocked(getUser).mockResolvedValue({ success: true, data: null as any })
+      vi.mocked(getUser).mockResolvedValue({
+        success: true,
+        data: null,
+      } as unknown as Awaited<ReturnType<typeof getUser>>)
 
       await store.dispatch(fetchUserProfile())
 

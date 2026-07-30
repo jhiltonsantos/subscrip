@@ -171,7 +171,10 @@ Test user after seed: `test@subscrip.dev`
 * **`.env.example` has blank values**: fill `DATABASE_URL` manually — docker-compose uses `subscrip:subscrip_dev/subscrip` on localhost:5432
 * **React Compiler is enabled**: `next.config.ts` sets `reactCompiler: true`, with `babel-plugin-react-compiler` in devDependencies
 * **Better Auth session cookie cache**: 5-minute cache (`maxAge: 60 * 5`) — auth state changes may lag in the proxy's `getSessionCookie()` check
-* **Test coverage**: ~13 test files under `src/**/*.test.{ts,tsx}`, mostly validation/utility tests; run with `vitest`
+* **Test coverage**: 17 test files under `src/**/*.{test,spec}.{ts,tsx}` — validation schemas, Redux slices/selectors, formatters, and chart helpers; `vitest` with jsdom + `vitest.setup.ts`
+* **Prisma seed and scripts run through ts-node with CommonJS**: `prisma/tsconfig.json` uses `module: "CommonJS"` — ESM-only imports will fail in seed/guard scripts
+* **next.config.ts is wrapped by next-intl**: `withNextIntl` wraps the config — removing the plugin breaks i18n routing
+* **Prisma uses `directUrl` for migrations**: `schema.prisma` has `directUrl = env("DIRECT_URL")` for direct (non-pooled) connection during migrations; needed for Neon and other connection poolers
 
 ## References
 

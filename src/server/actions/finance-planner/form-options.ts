@@ -71,7 +71,7 @@ export async function getFinancePlannerFormOptions(): Promise<
             nickname: true,
             brand: true,
             last4: true,
-            dueDay: true,
+            dueDay: true
           },
         },
       },
