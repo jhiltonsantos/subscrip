@@ -7,7 +7,7 @@ description: Use when validating changes, checking project state, or preparing t
 
 ## Before Changing Code
 
-1. Read the relevant docs under `docs/`, especially `docs/roadmap/v1-readiness-audit.md` and `docs/roadmap/v1-closure-plan.md`
+1. Read the relevant spec in `docs/specs/` and ADRs in `docs/decisions/`
 2. Inspect existing implementation in `src/app`, `src/components`, `src/server/actions`, and `prisma/schema.prisma`
 3. Check whether the task affects user-owned data and identify the required `userId` boundary
 4. Prefer current local patterns over new dependencies

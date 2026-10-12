@@ -179,15 +179,13 @@ Test user after seed: `test@subscrip.dev`
 ## References
 
 * `.agents/` — project-context, engineering-standards, v1-scope, agent-playbook
-* `docs/documentation/architecture.md` — architecture reference (some details may lag)
+* `docs/specs/` — feature specs; `docs/decisions/` — ADRs (Spec-Driven Development)
 * `docs/documentation/local-setup.md` — local setup instructions
-* `docs/roadmap/v1-readiness-audit.md` / `docs/roadmap/v1-closure-plan.md` — current v1 planning baseline
-* `docs/roadmap/development-roadmap.md` — historical roadmap with task status
 
 ## Docs conventions
 
 When saving generated content to the `docs/` directory, follow these rules:
-* **Plans, roadmaps, audits, smoke tests, and task-tracking artifacts** → `docs/roadmap/`
-* **Application documentation** (architecture, setup, schema, features, code structure) → `docs/documentation/`
-* File names in kebab-case (lowercase, hyphens): `v1-closure-plan.md`, `architecture.md`
+* **Feature specs** → `docs/specs/`; **architecture decisions (ADRs)** → `docs/decisions/`
+* **Application documentation** (setup, deploy) → `docs/documentation/`
+* File names in kebab-case (lowercase, hyphens): `local-setup.md`
 * Remove outdated or duplicated files instead of creating variants

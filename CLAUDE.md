@@ -65,4 +65,4 @@ Setup: `cp .env.example .env`, then fill `DATABASE_URL` (docker-compose credenti
 
 ## Docs
 
-Plans, audits, and roadmaps go in `docs/roadmap/`; application documentation in `docs/documentation/` (kebab-case filenames; delete outdated files rather than creating variants). Current v1 baseline: `docs/roadmap/v1-readiness-audit.md` and `v1-closure-plan.md`.
+Specs live in `docs/specs/`, ADRs in `docs/decisions/`, and application documentation in `docs/documentation/` (currently `local-setup.md`). There is no roadmap: scope and status live in specs, decisions in ADRs. Use kebab-case filenames and delete outdated files rather than creating variants.
