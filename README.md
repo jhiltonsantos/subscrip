@@ -4,7 +4,7 @@
 
 **Smart subscription management for your personal and business finances**
 
-[Features](#features) • [Tech Stack](#tech-stack) • [Getting Started](#getting-started) • [Roadmap](#roadmap) • [License](#license)
+[Features](#features) • [Tech Stack](#tech-stack) • [Getting Started](#getting-started) • [License](#license)
 
 ---
 
@@ -185,18 +185,9 @@ After seeding, you can use:
 
 ---
 
-## Roadmap
+## Specs and Decisions
 
-- Project foundation & database schema
-- Authentication system (passwordless)
-- Landing page with GSAP animations
-- Complete dashboard with metrics
-- Subscription CRUD operations
-- Pre-populated service templates
-- Email & push notification reminders
-- Currency conversion API integration
-- Analytics & spending charts
-- User settings & preferences
+Feature specs live in [`docs/specs/`](docs/specs/) and architecture decisions (ADRs) in [`docs/decisions/`](docs/decisions/).
 
 ---
 

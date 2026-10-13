@@ -124,4 +124,4 @@ Configure environment variables in **Vercel Dashboard** for deployment.
 
 ## Reference
 
-Full strategy document: `docs/roadmap/ci-cd-strategy.md`
+Workflow: `.github/workflows/ci.yml`. Decision: `docs/decisions/0008-ci-without-build.md`.
